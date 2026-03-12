@@ -4,31 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аргументы против включения LibreOffice в реестр российского ПО</title>
+    <script src="https://cdn.tailwindcss.com" onerror="document.body.classList.add('tailwind-failed')"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Critical CSS for mobile when Tailwind fails -->
     <style>
-        /* Base styles - no Tailwind dependency */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Only applies when Tailwind CDN fails */
+        .tailwind-failed .hidden { display: none !important; }
+        .tailwind-failed .flex { display: flex; }
+        .tailwind-failed .grid { display: grid; }
+        .tailwind-failed .block { display: block; }
+        .tailwind-failed .w-6 { width: 24px !important; height: 24px !important; }
+        .tailwind-failed .w-12 { width: 48px !important; height: 48px !important; }
+        .tailwind-failed svg { display: inline-block; vertical-align: middle; }
+        @media (max-width: 768px) {
+            .tailwind-failed .md\\:grid-cols-2 { grid-template-columns: 1fr !important; }
+            .tailwind-failed .md\\:grid-cols-4 { grid-template-columns: repeat(2, 1fr) !important; }
+            .tailwind-failed .md\\:text-6xl { font-size: 1.75rem !important; }
+            .tailwind-failed .text-4xl { font-size: 1.5rem !important; }
         }
-        :root {
-            --color-primary: #1a1a2e;
-            --color-accent: #c41e3a;
-            --color-gold: #d4af37;
-            --color-warm: #f5f0e8;
-            --color-dark: #0f0f1a;
+    </style>
+    <style type="text/tailwindcss">
+        @layer base {
+            :root {
+                --color-primary: #1a1a2e;
+                --color-accent: #c41e3a;
+                --color-gold: #d4af37;
+                --color-warm: #f5f0e8;
+                --color-dark: #0f0f1a;
+            }
+            body {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                background: var(--color-dark);
+                color: var(--color-warm);
+            }
+            h1, h2, h3, .display {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                font-weight: 600;
+            }
         }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--color-dark);
-            color: var(--color-warm);
-            min-height: 100vh;
-        }
-        h1, h2, h3, .display {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            font-weight: 600;
-        }
+        @layer components {
             .risk-high { border-left: 4px solid #c41e3a; }
             .risk-medium { border-left: 4px solid #d4af37; }
             .risk-low { border-left: 4px solid #2d5a3d; }
@@ -62,56 +76,6 @@
             }
             .expandable-content.open {
                 max-height: 2000px;
-            }
-            /* Fix hidden class for mobile Safari */
-            .hidden {
-                display: none !important;
-            }
-            
-            /* Mobile fix: show first tab by default */
-            #content-legal {
-                display: block;
-            }
-            #content-legal.hidden {
-                display: none !important;
-            }
-            
-            /* Mobile responsive styles */
-            @media (max-width: 768px) {
-                header h1 {
-                    font-size: 1.75rem !important;
-                    line-height: 1.2 !important;
-                }
-                header h1 br {
-                    display: none;
-                }
-                .grid.md\\:grid-cols-2 {
-                    grid-template-columns: 1fr !important;
-                }
-                .grid.md\\:grid-cols-4 {
-                    grid-template-columns: repeat(2, 1fr) !important;
-                }
-                nav .flex-wrap {
-                    justify-content: center;
-                }
-                nav button {
-                    font-size: 0.75rem;
-                    padding: 0.5rem 0.75rem;
-                }
-                .text-4xl {
-                    font-size: 1.5rem !important;
-                }
-                .text-3xl {
-                    font-size: 1.25rem !important;
-                }
-                .card {
-                    word-wrap: break-word;
-                    overflow-wrap: break-word;
-                }
-                main {
-                    padding-left: 1rem !important;
-                    padding-right: 1rem !important;
-                }
             }
             .metric-value {
                 background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
@@ -178,229 +142,10 @@
             .metric-card:hover {
                 border-color: rgba(212, 175, 55, 0.6);
             }
-            
-            /* ===== TAILWIND UTILITY CLASSES (for mobile compatibility) ===== */
-            .relative { position: relative; }
-            .absolute { position: absolute; }
-            .fixed { position: fixed; }
-            .sticky { position: sticky; }
-            
-            .block { display: block; }
-            .inline-block { display: inline-block; }
-            .inline { display: inline; }
-            .flex { display: flex; }
-            .inline-flex { display: inline-flex; }
-            .grid { display: grid; }
-            .hidden { display: none; }
-            
-            .flex-col { flex-direction: column; }
-            .flex-row { flex-direction: row; }
-            .flex-wrap { flex-wrap: wrap; }
-            .items-start { align-items: flex-start; }
-            .items-center { align-items: center; }
-            .items-end { align-items: flex-end; }
-            .justify-start { justify-content: flex-start; }
-            .justify-center { justify-content: center; }
-            .justify-between { justify-content: space-between; }
-            .justify-end { justify-content: flex-end; }
-            
-            .gap-1 { gap: 4px; }
-            .gap-2 { gap: 8px; }
-            .gap-3 { gap: 12px; }
-            .gap-4 { gap: 16px; }
-            .gap-6 { gap: 24px; }
-            
-            .m-0 { margin: 0; }
-            .m-2 { margin: 8px; }
-            .m-4 { margin: 16px; }
-            .m-6 { margin: 24px; }
-            .m-8 { margin: 32px; }
-            
-            .mx-auto { margin-left: auto; margin-right: auto; }
-            
-            .mt-1 { margin-top: 4px; }
-            .mt-2 { margin-top: 8px; }
-            .mt-4 { margin-top: 16px; }
-            .mt-6 { margin-top: 24px; }
-            .mt-8 { margin-top: 32px; }
-            
-            .mb-1 { margin-bottom: 4px; }
-            .mb-2 { margin-bottom: 8px; }
-            .mb-3 { margin-bottom: 12px; }
-            .mb-4 { margin-bottom: 16px; }
-            .mb-6 { margin-bottom: 24px; }
-            .mb-8 { margin-bottom: 32px; }
-            
-            .ml-2 { margin-left: 8px; }
-            .ml-4 { margin-left: 16px; }
-            .mr-2 { margin-right: 8px; }
-            .mr-4 { margin-right: 16px; }
-            
-            .p-2 { padding: 8px; }
-            .p-3 { padding: 12px; }
-            .p-4 { padding: 16px; }
-            .p-6 { padding: 24px; }
-            .p-8 { padding: 32px; }
-            
-            .px-2 { padding-left: 8px; padding-right: 8px; }
-            .px-4 { padding-left: 16px; padding-right: 16px; }
-            .px-6 { padding-left: 24px; padding-right: 24px; }
-            
-            .py-2 { padding-top: 8px; padding-bottom: 8px; }
-            .py-3 { padding-top: 12px; padding-bottom: 12px; }
-            .py-4 { padding-top: 16px; padding-bottom: 16px; }
-            .py-8 { padding-top: 32px; padding-bottom: 32px; }
-            .py-12 { padding-top: 48px; padding-bottom: 48px; }
-            
-            .pt-4 { padding-top: 16px; }
-            .pb-20 { padding-bottom: 80px; }
-            
-            .w-6 { width: 24px !important; }
-            .w-8 { width: 32px; }
-            .w-10 { width: 40px; }
-            .w-12 { width: 48px; }
-            .w-full { width: 100%; }
-            .w-1\/2 { width: 50%; }
-            
-            .h-6 { height: 24px !important; }
-            
-            /* SVG fix for mobile */
-            svg {
-                display: inline-block;
-                vertical-align: middle;
-                flex-shrink: 0;
-            }
-            .h-8 { height: 32px; }
-            .h-10 { height: 40px; }
-            .h-12 { height: 48px; }
-            .min-h-screen { min-height: 100vh; }
-            
-            .max-w-3xl { max-width: 768px; }
-            .max-w-7xl { max-width: 1280px; }
-            
-            .text-xs { font-size: 12px; }
-            .text-sm { font-size: 14px; }
-            .text-base { font-size: 16px; }
-            .text-lg { font-size: 18px; }
-            .text-xl { font-size: 20px; }
-            .text-2xl { font-size: 24px; }
-            .text-3xl { font-size: 30px; }
-            .text-4xl { font-size: 36px; }
-            .text-6xl { font-size: 60px; }
-            
-            .font-light { font-weight: 300; }
-            .font-normal { font-weight: 400; }
-            .font-medium { font-weight: 500; }
-            .font-semibold { font-weight: 600; }
-            .font-bold { font-weight: 700; }
-            
-            .leading-tight { line-height: 1.25; }
-            .leading-snug { line-height: 1.375; }
-            .leading-normal { line-height: 1.5; }
-            .leading-relaxed { line-height: 1.625; }
-            
-            .text-left { text-align: left; }
-            .text-center { text-align: center; }
-            .text-right { text-align: right; }
-            
-            .uppercase { text-transform: uppercase; }
-            .lowercase { text-transform: lowercase; }
-            .capitalize { text-transform: capitalize; }
-            
-            .tracking-wider { letter-spacing: 0.05em; }
-            .tracking-widest { letter-spacing: 0.1em; }
-            
-            .text-white { color: #ffffff; }
-            .text-gray-300 { color: #d1d5db; }
-            .text-gray-400 { color: #9ca3af; }
-            .text-gray-500 { color: #6b7280; }
-            .text-red-300 { color: #fca5a5; }
-            .text-red-400 { color: #f87171; }
-            .text-red-500 { color: #ef4444; }
-            .text-yellow-300 { color: #fde047; }
-            .text-yellow-400 { color: #facc15; }
-            .text-yellow-500 { color: #eab308; }
-            .text-green-400 { color: #4ade80; }
-            .text-blue-400 { color: #60a5fa; }
-            
-            .bg-white { background-color: #ffffff; }
-            .bg-gray-800 { background-color: #1f2937; }
-            .bg-gray-800\/50 { background-color: rgba(31, 41, 55, 0.5); }
-            .bg-red-600 { background-color: #dc2626; }
-            .bg-red-900\/20 { background-color: rgba(127, 29, 29, 0.2); }
-            .bg-red-900\/30 { background-color: rgba(127, 29, 29, 0.3); }
-            .bg-red-900\/40 { background-color: rgba(127, 29, 29, 0.4); }
-            .bg-red-900\/50 { background-color: rgba(127, 29, 29, 0.5); }
-            .bg-yellow-900\/20 { background-color: rgba(113, 63, 18, 0.2); }
-            .bg-yellow-900\/50 { background-color: rgba(113, 63, 18, 0.5); }
-            .bg-green-900\/20 { background-color: rgba(20, 83, 45, 0.2); }
-            .bg-green-900\/50 { background-color: rgba(20, 83, 45, 0.5); }
-            .bg-blue-900\/20 { background-color: rgba(30, 58, 138, 0.2); }
-            .bg-purple-900\/50 { background-color: rgba(88, 28, 135, 0.5); }
-            
-            .border { border-width: 1px; }
-            .border-0 { border-width: 0; }
-            .border-t { border-top-width: 1px; }
-            .border-b { border-bottom-width: 1px; }
-            .border-l-4 { border-left-width: 4px; }
-            
-            .border-gray-700 { border-color: #374151; }
-            .border-red-600 { border-color: #dc2626; }
-            .border-red-600\/30 { border-color: rgba(220, 38, 38, 0.3); }
-            .border-red-600\/40 { border-color: rgba(220, 38, 38, 0.4); }
-            .border-red-700\/30 { border-color: rgba(185, 28, 28, 0.3); }
-            .border-yellow-600\/20 { border-color: rgba(202, 138, 4, 0.2); }
-            .border-yellow-700\/30 { border-color: rgba(161, 98, 7, 0.3); }
-            .border-green-700\/30 { border-color: rgba(21, 128, 61, 0.3); }
-            
-            .rounded { border-radius: 4px; }
-            .rounded-lg { border-radius: 8px; }
-            .rounded-full { border-radius: 9999px; }
-            
-            .overflow-hidden { overflow: hidden; }
-            
-            .cursor-pointer { cursor: pointer; }
-            .cursor-help { cursor: help; }
-            
-            .list-disc { list-style-type: disc; }
-            .list-decimal { list-style-type: decimal; }
-            
-            .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-            .transition-transform { transition-property: transform; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-            
-            .duration-200 { transition-duration: 200ms; }
-            .duration-300 { transition-duration: 300ms; }
-            
-            .ease-out { transition-timing-function: cubic-bezier(0, 0, 0.2, 1); }
-            
-            .transform { transform: translateX(var(--tw-translate-x, 0)) translateY(var(--tw-translate-y, 0)) rotate(var(--tw-rotate, 0)) skewX(var(--tw-skew-x, 0)) skewY(var(--tw-skew-y, 0)) scaleX(var(--tw-scale-x, 1)) scaleY(var(--tw-scale-y, 1)); }
-            
-            .rotate-0 { --tw-rotate: 0deg; }
-            .rotate-180 { --tw-rotate: 180deg; }
-            
-            .hover\\:text-yellow-500:hover { color: #eab308; }
-            
-            .hover\\:border-yellow-500:hover { border-color: #eab308; }
-            
-            .focus\\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; }
-            
-            .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            
-            .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .md\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-            .md\\:text-6xl { font-size: 60px; }
-            
-            /* Mobile responsive */
-            @media (max-width: 768px) {
-                .md\\:grid-cols-2 { grid-template-columns: 1fr; }
-                .md\\:grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
-                .md\\:text-6xl { font-size: 36px; }
-                .text-4xl { font-size: 28px; }
-                .text-3xl { font-size: 24px; }
-            }
+        }
     </style>
 </head>
-<body style="min-height: 100vh; background: #0f0f1a; color: #f5f0e8;">
+<body class="min-h-screen grid-pattern">
     <!-- Header -->
     <header class="relative overflow-hidden py-12 px-6 border-b border-yellow-600/20">
         <div class="diagonal-line top-20 -left-20"></div>
@@ -2213,13 +1958,10 @@
             // Hide all content
             document.querySelectorAll('.tab-content').forEach(el => {
                 el.classList.add('hidden');
-                el.style.display = 'none'; // Mobile fix
             });
             
             // Show selected content
-            const selected = document.getElementById('content-' + tabName);
-            selected.classList.remove('hidden');
-            selected.style.display = 'block'; // Mobile fix
+            document.getElementById('content-' + tabName).classList.remove('hidden');
             
             // Update tab styles
             document.querySelectorAll('[id^="tab-"]').forEach(el => {
@@ -2245,16 +1987,8 @@
             }
         }
 
-        // Initialize first tab after DOM is ready
-        function initTabs() {
-            showTab('legal');
-        }
-        
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initTabs);
-        } else {
-            initTabs();
-        }
+        // Initialize first tab
+        showTab('legal');
     </script>
 </body>
 </html>
