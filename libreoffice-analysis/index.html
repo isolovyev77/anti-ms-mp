@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аргументы против включения LibreOffice в реестр российского ПО</title>
-    <script src="https://cdn.tailwindcss.com" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style type="text/tailwindcss">
         @layer base {
@@ -60,9 +60,55 @@
             .expandable-content.open {
                 max-height: 2000px;
             }
+            /* Fix hidden class for mobile Safari */
+            .hidden {
+                display: none !important;
+            }
+            
             /* Mobile fix: show first tab by default */
             #content-legal {
-                display: block !important;
+                display: block;
+            }
+            #content-legal.hidden {
+                display: none !important;
+            }
+            
+            /* Mobile responsive styles */
+            @media (max-width: 768px) {
+                header h1 {
+                    font-size: 1.75rem !important;
+                    line-height: 1.2 !important;
+                }
+                header h1 br {
+                    display: none;
+                }
+                .grid.md\\:grid-cols-2 {
+                    grid-template-columns: 1fr !important;
+                }
+                .grid.md\\:grid-cols-4 {
+                    grid-template-columns: repeat(2, 1fr) !important;
+                }
+                nav .flex-wrap {
+                    justify-content: center;
+                }
+                nav button {
+                    font-size: 0.75rem;
+                    padding: 0.5rem 0.75rem;
+                }
+                .text-4xl {
+                    font-size: 1.5rem !important;
+                }
+                .text-3xl {
+                    font-size: 1.25rem !important;
+                }
+                .card {
+                    word-wrap: break-word;
+                    overflow-wrap: break-word;
+                }
+                main {
+                    padding-left: 1rem !important;
+                    padding-right: 1rem !important;
+                }
             }
             .metric-value {
                 background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
@@ -1978,13 +2024,14 @@
         }
 
         // Initialize first tab after DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
+        function initTabs() {
             showTab('legal');
-        });
-
-        // Fallback for older browsers
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            showTab('legal');
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTabs);
+        } else {
+            initTabs();
         }
     </script>
 </body>
