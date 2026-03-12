@@ -4,28 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аргументы против включения LibreOffice в реестр российского ПО</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style type="text/tailwindcss">
-        @layer base {
-            :root {
-                --color-primary: #1a1a2e;
-                --color-accent: #c41e3a;
-                --color-gold: #d4af37;
-                --color-warm: #f5f0e8;
-                --color-dark: #0f0f1a;
-            }
-            body {
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                background: var(--color-dark);
-                color: var(--color-warm);
-            }
-            h1, h2, h3, .display {
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                font-weight: 600;
-            }
+    <style>
+        /* Base styles - no Tailwind dependency */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        @layer components {
+        :root {
+            --color-primary: #1a1a2e;
+            --color-accent: #c41e3a;
+            --color-gold: #d4af37;
+            --color-warm: #f5f0e8;
+            --color-dark: #0f0f1a;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--color-dark);
+            color: var(--color-warm);
+            min-height: 100vh;
+        }
+        h1, h2, h3, .display {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 600;
+        }
             .risk-high { border-left: 4px solid #c41e3a; }
             .risk-medium { border-left: 4px solid #d4af37; }
             .risk-low { border-left: 4px solid #2d5a3d; }
@@ -175,10 +178,20 @@
             .metric-card:hover {
                 border-color: rgba(212, 175, 55, 0.6);
             }
-        }
     </style>
+    <!-- Tailwind with fallback -->
+    <script src="https://cdn.tailwindcss.com" onerror="console.log('Tailwind failed to load')"></script>
+    <noscript>
+        <style>
+            /* Fallback styles when JS is disabled */
+            .hidden { display: none; }
+            .flex { display: flex; }
+            .grid { display: grid; }
+            .block { display: block; }
+        </style>
+    </noscript>
 </head>
-<body class="min-h-screen grid-pattern">
+<body style="min-height: 100vh; background: #0f0f1a; color: #f5f0e8;">
     <!-- Header -->
     <header class="relative overflow-hidden py-12 px-6 border-b border-yellow-600/20">
         <div class="diagonal-line top-20 -left-20"></div>
