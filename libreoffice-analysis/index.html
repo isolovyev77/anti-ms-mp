@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аргументы против включения LibreOffice в реестр российского ПО</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style type="text/tailwindcss">
         @layer base {
@@ -59,6 +59,10 @@
             }
             .expandable-content.open {
                 max-height: 2000px;
+            }
+            /* Mobile fix: show first tab by default */
+            #content-legal {
+                display: block !important;
             }
             .metric-value {
                 background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
@@ -1941,10 +1945,13 @@
             // Hide all content
             document.querySelectorAll('.tab-content').forEach(el => {
                 el.classList.add('hidden');
+                el.style.display = 'none'; // Mobile fix
             });
             
             // Show selected content
-            document.getElementById('content-' + tabName).classList.remove('hidden');
+            const selected = document.getElementById('content-' + tabName);
+            selected.classList.remove('hidden');
+            selected.style.display = 'block'; // Mobile fix
             
             // Update tab styles
             document.querySelectorAll('[id^="tab-"]').forEach(el => {
@@ -1970,8 +1977,15 @@
             }
         }
 
-        // Initialize first tab
-        showTab('legal');
+        // Initialize first tab after DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            showTab('legal');
+        });
+
+        // Fallback for older browsers
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            showTab('legal');
+        }
     </script>
 </body>
 </html>
