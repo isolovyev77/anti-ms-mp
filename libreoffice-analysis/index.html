@@ -261,7 +261,7 @@
                                         <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm mt-2">
                                             <li>Отсутствует надлежащее оформление прав на собственные доработки</li>
                                             <li>Коллизии с вкладом внешних контрибьюторов</li>
-                                            <li>Реальный объём оригинального кода не позволяет квалифицировать продукт как самостоятельный объект</li>
+                                            <li>Реальный объём оригинального кода не позволяет квалифицировать продукт как самостоятельный объект <span class="text-yellow-500">[довод политики, не правовой нормы: закон не устанавливает порогового % кода; юридически значимо только отсутствие исключительных прав на весь продукт по п.5(а) № 1236]</span></li>
                                         </ul>
                                     </div>
                                     <div>
@@ -485,8 +485,7 @@
                     <h3 class="text-lg font-bold text-white mb-3">Актуальная практика регулятора (2024-2025)</h3>
                     <p class="text-gray-300 mb-3">
                         Позиция 2016 года подтверждается текущей практикой Минцифры и АНО ЦКИТ. 
-                        Дело <strong class="text-white">AlterOffice</strong> (2024) стало прецедентом, когда продукт на основе LibreOffice 
-                        был исключён из реестра за нарушение прав третьих лиц и несоответствие требованиям постановления № 1236.
+                        Дело <strong class="text-white">AlterOffice</strong> (2019-2020) показало готовность регулятора исключать LibreOffice-based продукты за нарушение условий MPL 2.0 и несоответствие Постановлению № 1236. Важная оговорка: продукт был возвращён в реестр по решению суда — на <em>процедурных</em> основаниях (Минкомсвязи нарушило срок предоставления ответа заявителю), а не потому что был признан соответствующим требованиям по существу.
                     </p>
                     <ul class="list-disc pl-5 space-y-2 text-gray-400 text-sm">
                         <li>Экспертный совет продолжает требовать прозрачности об использовании open-source компонентов</li>
@@ -514,18 +513,17 @@
                 </div>
 
                 <!-- CVE Alert Banner -->
-                <div class="mb-6 p-4 bg-red-900/30 rounded-lg border border-red-600/40">
+                <div class="mb-6 p-4 bg-yellow-900/30 rounded-lg border border-yellow-600/40">
                     <div class="flex items-center gap-3">
-                        <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                         </svg>
                         <div>
-                            <p class="text-red-300 font-semibold">Критические уязвимости 2024-2025</p>
+                            <p class="text-yellow-300 font-semibold">Структурная зависимость от upstream для закрытия CVE</p>
                             <p class="text-gray-400 text-sm">
-                                <a href="https://www.libreoffice.org/about-us/security/advisories/cve-2024-12425/" target="_blank" class="external-link">CVE-2024-12425<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>, 
-                                <a href="https://www.libreoffice.org/about-us/security/advisories/cve-2024-12426/" target="_blank" class="external-link">CVE-2024-12426<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>, 
-                                <a href="https://www.libreoffice.org/about-us/security/advisories/cve-2025-1080/" target="_blank" class="external-link">CVE-2025-1080<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — 
-                                позволяют удалённое выполнение кода и обход защиты
+                                Примеры уязвимостей 2024-2025 (<a href="https://www.libreoffice.org/about-us/security/advisories/cve-2024-12425/" target="_blank" class="external-link">CVE-2024-12425<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>,
+                                <a href="https://www.libreoffice.org/about-us/security/advisories/cve-2024-12426/" target="_blank" class="external-link">CVE-2024-12426<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>,
+                                <a href="https://www.libreoffice.org/about-us/security/advisories/cve-2025-1080/" target="_blank" class="external-link">CVE-2025-1080<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>) закрыты upstream в версиях 24.8.4.2/25.2.1 (фев-март 2025) — и в заявляемой версии 25.8.3.2 уже исправлены. Однако поток новых CVE непрерывен: Базальт не контролирует ядро и зависит от TDF для каждого патча.
                             </p>
                         </div>
                     </div>
@@ -548,7 +546,7 @@
                         </p>
                         <div id="expand-sec-1" class="expandable-content">
                             <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">Актуальные уязвимости:</p>
+                                <p class="text-gray-300 mb-3">Примеры уязвимостей (закрыты upstream в версиях 24.8.4.2/25.2.1):</p>
                                 <ul class="list-disc pl-5 space-y-2 text-gray-400">
                                     <li><a href="https://www.libreoffice.org/about-us/security/advisories/cve-2024-12425/" target="_blank" class="external-link">CVE-2024-12425<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — Arbitrary .ttf file writes via path traversal</li>
                                     <li><a href="https://www.libreoffice.org/about-us/security/advisories/cve-2024-12426/" target="_blank" class="external-link">CVE-2024-12426<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — Environment variables/INI files leak</li>
@@ -556,14 +554,13 @@
                                     <li>Переполнения буфера в парсерах документов</li>
                                     <li>Уязвимости обработки макросов</li>
                                 </ul>
-                                <div class="mt-4 p-3 bg-red-900/20 rounded border border-red-700/30">
-                                    <p class="text-sm text-red-300">
-                                        <a href="https://codeanlabs.com/2025/02/exploiting-libreoffice-cve-2024-12425-and-cve-2024-12426/" target="_blank" class="external-link">Подробный анализ эксплуатации<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — 
-                                        Codean Labs, февраль 2025
+                                <div class="mt-4 p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
+                                    <p class="text-sm text-yellow-300">
+                                        ⚠️ Уточнение: перечисленные CVE закрыты в версии 25.8.3.2 (заявка 346971). <a href="https://codeanlabs.com/2025/02/exploiting-libreoffice-cve-2024-12425-and-cve-2024-12426/" target="_blank" class="external-link">Подробный анализ эксплуатации<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> (Codean Labs, фев. 2025) иллюстрирует тип угрозы — но не текущий статус.
                                     </p>
                                 </div>
                                 <p class="mt-3 text-red-300">
-                                    Если используется ядро LibreOffice — продукт автоматически наследует эти дыры.
+                                    Ключевой риск не в конкретных CVE, а в структурной зависимости: Базальт не контролирует ядро и полностью зависит от TDF для каждого патча. При геополитической изоляции этот канал может быть прерван.
                                 </p>
                             </div>
                         </div>
@@ -1219,10 +1216,10 @@
                                 <span class="text-white text-xs font-bold">5</span>
                             </div>
                             <div class="card rounded-lg p-5 flex-1 border-green-500/50">
-                                <h4 class="font-bold text-green-400 mb-2">Повторное включение</h4>
-                                <p class="text-gray-400 text-sm">AlterOffice внесён в реестр после доработки</p>
-                                <div class="mt-3 p-3 bg-green-900/20 rounded text-xs text-green-300">
-                                    Полное соблюдение условий OSS + прозрачность использования заимствованного кода
+                                <h4 class="font-bold text-yellow-400 mb-2">Возврат в реестр</h4>
+                                <p class="text-gray-400 text-sm">Суд восстановил AlterOffice в реестре</p>
+                                <div class="mt-3 p-3 bg-yellow-900/20 rounded text-xs text-yellow-300">
+                                    ⚠️ На процедурных основаниях: Минкомсвязи нарушило срок ответа заявителю. Суд не признал продукт соответствующим требованиям по существу.
                                 </div>
                             </div>
                         </div>
@@ -1919,10 +1916,15 @@
                                     <div class="p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
                                         <p class="text-yellow-300 text-sm font-semibold mb-1">Уточнение:</p>
                                         <p class="text-gray-400 text-sm">
-                                            <a href="https://packages.altlinux.org/ru/sisyphus/srpms/LibreOffice-still/" target="_blank" class="external-link text-blue-400">Репозиторий «Сизиф»<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> 
-                                            — это дистрибутивный репозиторий ALT Linux, а не разработческий репозиторий LibreOffice. 
+                                            <a href="https://packages.altlinux.org/ru/sisyphus/srpms/LibreOffice-still/" target="_blank" class="external-link text-blue-400">Репозиторий «Сизиф»<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
+                                            — это дистрибутивный репозиторий ALT Linux, а не разработческий репозиторий LibreOffice.
                                             Исходный код по-прежнему формируется за границей РФ.
                                         </p>
+                                    </div>
+                                    <div class="p-3 bg-red-900/20 rounded border border-red-700/30">
+                                        <p class="text-red-300 text-sm font-semibold mb-2">Базальт сам признаёт: LibreOffice - «международный проект» (<a href="https://www.basealt.ru/repository" target="_blank" style="color:#f87171;font-size:12px;text-decoration:none;border-bottom:1px dotted #f87171;">basealt.ru/repository</a>):</p>
+                                        <p class="text-gray-400 text-sm mb-2">На странице «Проект Сизиф» на сайте Базальт СПО в инфографике явно указано: «В репозиторий проекта входят: собственные разработки ALT Linux Team + <strong class="text-white">разработки международных проектов</strong> свободного ПО». В списке международных проектов на схеме прямо изображён <strong class="text-white">LibreOffice</strong> — наряду с Linux Kernel, Wine, glibc и другими.</p>
+                                        <p class="text-red-300 text-sm font-semibold">Это означает: сам Базальт публично признаёт, что LibreOffice - это международный проект, а не собственная разработка. Утверждение в форме реестра о «собственной разработке» всего продукта противоречит собственному сайту заявителя.</p>
                                     </div>
                                 </div>
                             </div>
@@ -1965,6 +1967,52 @@
                                         <p class="text-orange-300 text-sm font-semibold mb-1">Нарушение п. 5з (дополнительно):</p>
                                         <p class="text-gray-400 text-sm">«Модификация исходного кода осуществляется сообществом LibreOffice, которое не имеет статуса российской коммерческой или некоммерческой организации без преобладающего иностранного участия. Куратором является немецкая НКО The Document Foundation.»</p>
                                     </div>
+                                    <div class="p-3 bg-blue-900/20 rounded border border-blue-700/30">
+                                        <p class="text-blue-300 text-sm font-semibold mb-1">Обновление по заявке 346971 (Инструкция по установке, 2025):</p>
+                                        <p class="text-gray-400 text-sm mb-2">freeoffice-installer теперь - графическая GUI-утилита, которая запускает системный менеджер пакетов. Диалог аутентификации раскрывает реальную команду:</p>
+                                        <div style="background:#1e1e2e;border:1px solid #374151;border-radius:6px;padding:8px;font-family:monospace;font-size:12px;color:#a5f3fc;">
+                                            /usr/bin/sh -c <span style="color:#fde68a;">apt-get -y update && apt-get -y install freeoffice</span>
+                                        </div>
+                                        <p class="text-gray-400 text-sm mt-2">Это устраняет явное скачивание с TDF на уровне установщика - пакет теперь берётся из Сизифа. Однако LibreOffice в Сизифе <strong class="text-white">собирается из исходников TDF</strong> - зависимость переместилась на уровень сборки пакета, но не исчезла.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Claim 346971-License: License Agreement self-incrimination -->
+                    <div class="card rounded-lg p-6 border-l-4 border-red-400" style="margin-top:16px;">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-red-900/60 flex items-center justify-center flex-shrink-0">
+                                <svg style="width:18px;height:18px;" fill="none" stroke="#f87171" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <h3 class="text-lg font-semibold text-white">Лицензионное соглашение Базальт СПО: ключевые признания</h3>
+                                    <span style="padding:2px 8px;background:rgba(239,68,68,0.25);border:1px solid rgba(239,68,68,0.5);border-radius:12px;font-size:11px;color:#fca5a5;white-space:nowrap;">Собственный документ заявителя</span>
+                                </div>
+                                <p class="text-gray-400 text-sm mb-4">Лицензионное соглашение на «Свободный офис» (<a href="https://www.basealt.ru/alt-office" target="_blank" class="external-link text-blue-400">basealt.ru/alt-office</a>) содержит признания, существенные для оценки правовой позиции:</p>
+                                <div class="space-y-3">
+                                    <div style="border:1px solid rgba(239,68,68,0.4);border-radius:8px;overflow:hidden;">
+                                        <div style="padding:8px 14px;background:rgba(239,68,68,0.12);">
+                                            <p style="color:#fca5a5;font-size:13px;font-weight:700;">П. 2.1 — самоквалификация в юридически обязывающем документе: <span style="color:white;">«авторские права на ДИСТРИБУТИВ как составное произведение»</span></p>
+                                        </div>
+                                        <div style="padding:10px 14px;">
+                                            <p style="color:#9ca3af;font-size:13px;">Базальт квалифицирует продукт как «составное произведение» не только в форме реестра, но и в собственном EULA — публичном договоре с каждым пользователем. Это закрепляет применение <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" style="color:#60a5fa;font-size:12px;text-decoration:none;border-bottom:1px dotted #60a5fa;">ст. 1260 ГК РФ</a>: авторские права Базальт распространяются только на подбор и расположение компонентов, но не на LibreOffice как таковой.</p>
+                                        </div>
+                                    </div>
+                                    <div style="border:1px solid rgba(239,68,68,0.4);border-radius:8px;overflow:hidden;">
+                                        <div style="padding:8px 14px;background:rgba(239,68,68,0.12);">
+                                            <p style="color:#fca5a5;font-size:13px;font-weight:700;">П. 2.1 — разрешения, а не приобретение прав: <span style="color:white;">«получены разрешения правообладателей»</span></p>
+                                        </div>
+                                        <div style="padding:10px 14px;">
+                                            <p style="color:#9ca3af;font-size:13px;">Применительно к несвободным компонентам EULA признаёт: Базальт лишь <em>получил разрешение</em> на распространение от правообладателей — но не приобрёл сами исключительные права. Для LibreOffice и других свободных компонентов «разрешением» является открытая лицензия (MPL 2.0, LGPL), которая также не передаёт исключительных прав. Это означает, что Базальт физически не может предъявить исключительные права на LibreOffice — их просто не существует у него как у субъекта.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-red-900/20 rounded border border-red-700/30 mt-3">
+                                    <p class="text-red-300 text-sm font-semibold mb-1">Итог:</p>
+                                    <p class="text-gray-400 text-sm">Собственный EULA Базальт СПО подтверждает: Базальт имеет права только на составительство (ст. 1260 ГК РФ), на LibreOffice — лишь разрешение от MPL 2.0, но не исключительные права. <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" style="color:#60a5fa;font-size:12px;text-decoration:none;border-bottom:1px dotted #60a5fa;">П. 5(а) Постановления № 1236</a> требует именно исключительных прав на продукт в целом.</p>
                                 </div>
                             </div>
                         </div>
@@ -2039,8 +2087,8 @@
                                                 <p style="color:#9ca3af;">freeoffice-installer.tar.xz с прямыми ссылками на download.documentfoundation.org в spec-файле</p>
                                             </div>
                                             <div style="padding:8px;background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.3);border-radius:6px;">
-                                                <p style="color:#fde68a;font-weight:600;margin-bottom:4px;">Заявка 346971</p>
-                                                <p style="color:#9ca3af;">Изменённый дистрибутив, скрывающий прямую связь с исходниками TDF</p>
+                                                <p style="color:#fde68a;font-weight:600;margin-bottom:4px;">Заявка 346971 (14.12.2025)</p>
+                                                <p style="color:#9ca3af;">freeoffice-installer переписан как полноценный RPM-пакет (v1.0.0-1.1.0, сентябрь 2025, 11+ итераций). LibreOffice переименован из «LibreOffice-still» в «libreoffice» (строчные). Прямая ссылка на TDF скрыта на уровне установщика, но SOURCE-зависимость SRPM-spec от download.documentfoundation.org сохраняется.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -2048,6 +2096,92 @@
                                         <p class="text-red-300 text-sm font-semibold mb-1">Почему это не устраняет нарушение:</p>
                                         <p class="text-gray-400 text-sm">Скрытие прямой ссылки в установщике не меняет факта: исходный код LibreOffice по-прежнему разрабатывается и хранится на серверах TDF в Германии. Обфускация цепочки зависимости - это сокрытие нарушения, а не его устранение. Именно поэтому заявка 346971 также получила отрицательную оценку по большинству пунктов п. 5 Правил.</p>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Claim 346971-A: Self-contradiction in the application -->
+                    <div class="card rounded-lg p-6 border-l-4 border-red-500" style="margin-top:16px;">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-red-900/60 flex items-center justify-center flex-shrink-0">
+                                <svg style="width:18px;height:18px;" fill="none" stroke="#f87171" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <h3 class="text-lg font-semibold text-white">Юридическое противоречие внутри заявки 346971</h3>
+                                    <span style="padding:2px 8px;background:rgba(239,68,68,0.25);border:1px solid rgba(239,68,68,0.5);border-radius:12px;font-size:11px;color:#fca5a5;white-space:nowrap;">Reestr 346971 · Внутреннее противоречие</span>
+                                </div>
+                                <p class="text-gray-400 text-sm mb-4">В одной и той же заявке заявитель одновременно указывает два взаимоисключающих правовых основания:</p>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                                    <div style="padding:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.4);border-radius:8px;">
+                                        <p style="color:#fca5a5;font-size:12px;font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Краткое описание ПО:</p>
+                                        <p style="color:#e5e7eb;font-size:13px;font-style:italic;">«программный комплекс<br><strong style="color:white;">(составное произведение)</strong>»</p>
+                                        <p style="color:#9ca3af;font-size:11px;margin-top:6px;">→ ст. 1260 ГК РФ: права только на подбор/расположение, не на LibreOffice</p>
+                                    </div>
+                                    <div style="padding:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.4);border-radius:8px;">
+                                        <p style="color:#fca5a5;font-size:12px;font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Основания прав правообладателя:</p>
+                                        <p style="color:#e5e7eb;font-size:13px;font-style:italic;">«<strong style="color:white;">Собственная разработка</strong>»</p>
+                                        <p style="color:#9ca3af;font-size:11px;margin-top:6px;">→ ст. 1295 ГК РФ: создано силами и средствами самого заявителя</p>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-red-900/20 rounded border border-red-700/30">
+                                    <p class="text-red-300 text-sm font-semibold mb-1">Правовая несовместимость:</p>
+                                    <p class="text-gray-400 text-sm">«Составное произведение» (ст. 1260 ГК РФ) означает, что продукт создан из чужих компонентов - это прямо исключает квалификацию всего продукта как «собственной разработки». Применительно к LibreOffice - исходный код которого создан тысячами разработчиков по всему миру под управлением немецкой НКО TDF - заявление о «собственной разработке» ложно. Это не просто правовая коллизия, а факт, подлежащий проверке регулятором.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Claim 346971-B: Verification methodology -->
+                    <div class="card rounded-lg p-6 border-l-4 border-blue-500" style="margin-top:16px;">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-900/50 flex items-center justify-center flex-shrink-0">
+                                <svg style="width:18px;height:18px;" fill="none" stroke="#60a5fa" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <h3 class="text-lg font-semibold text-white">Как проверить: убрали ли реально зависимость от TDF?</h3>
+                                    <span style="padding:2px 8px;background:rgba(59,130,246,0.2);border:1px solid rgba(59,130,246,0.4);border-radius:12px;font-size:11px;color:#93c5fd;white-space:nowrap;">Методология верификации</span>
+                                </div>
+                                <p class="text-gray-400 text-sm mb-4">Базальт СПО утверждает, что убрала явное скачивание кода с серверов TDF. Существуют три уровня зависимости, каждый из которых проверяется независимо:</p>
+                                <div class="space-y-3">
+                                    <div style="border:1px solid rgba(59,130,246,0.3);border-radius:8px;overflow:hidden;">
+                                        <div style="padding:8px 14px;background:rgba(59,130,246,0.1);display:flex;align-items:center;gap:8px;">
+                                            <span style="color:#60a5fa;font-weight:700;font-size:13px;">Уровень 1 - Пользовательский (Runtime)</span>
+                                            <span style="padding:2px 6px;background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.4);border-radius:8px;font-size:11px;color:#86efac;">ВЕРОЯТНО УСТРАНЁН</span>
+                                        </div>
+                                        <div style="padding:10px 14px;">
+                                            <p style="color:#9ca3af;font-size:13px;"><strong style="color:#e5e7eb;">Что было:</strong> freeoffice-installer.tar.xz (1.47 МБ) - shell-скрипт, скачивавший пакеты при установке.</p>
+                                            <p style="color:#9ca3af;font-size:13px;margin-top:4px;"><strong style="color:#e5e7eb;">Что сейчас:</strong> freeoffice-installer v1.1.0-alt1 - полноценный RPM-пакет в Сизифе. Конечный пользователь больше не видит прямого скачивания с TDF.</p>
+                                            <p style="color:#86efac;font-size:12px;margin-top:4px;"><strong>Проверка:</strong> Установить freeoffice-installer на ALT Linux и проследить сетевые соединения через tcpdump/ss.</p>
+                                        </div>
+                                    </div>
+                                    <div style="border:1px solid rgba(239,68,68,0.3);border-radius:8px;overflow:hidden;">
+                                        <div style="padding:8px 14px;background:rgba(239,68,68,0.1);display:flex;align-items:center;gap:8px;">
+                                            <span style="color:#f87171;font-weight:700;font-size:13px;">Уровень 2 - Сборочный (Build-time)</span>
+                                            <span style="padding:2px 6px;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);border-radius:8px;font-size:11px;color:#fca5a5;">НЕ УСТРАНЁН</span>
+                                        </div>
+                                        <div style="padding:10px 14px;">
+                                            <p style="color:#9ca3af;font-size:13px;"><strong style="color:#e5e7eb;">Что проверять:</strong> SRPM-spec libreoffice (libreoffice-25.8.3.2-alt2.src.rpm) - директивы Source0/Source1 указывают откуда берётся исходный код LibreOffice при сборке.</p>
+                                            <p style="color:#9ca3af;font-size:13px;margin-top:4px;"><strong style="color:#e5e7eb;">Признак нарушения:</strong> Наличие строк <code style="background:#1e293b;padding:1px 4px;border-radius:3px;font-size:11px;">download.documentfoundation.org</code> или <code style="background:#1e293b;padding:1px 4px;border-radius:3px;font-size:11px;">dev-www.libreoffice.org</code> в Source-директивах SRPM-spec.</p>
+                                            <p style="color:#fca5a5;font-size:12px;margin-top:4px;"><strong>Проверка:</strong> <code style="background:#1e293b;padding:1px 4px;border-radius:3px;">rpm -qp --queryformat "%{SOURCE}" libreoffice-*.src.rpm</code> или смотреть git.altlinux.org/gears/l/libreoffice.git → libreoffice.spec.</p>
+                                        </div>
+                                    </div>
+                                    <div style="border:1px solid rgba(239,68,68,0.3);border-radius:8px;overflow:hidden;">
+                                        <div style="padding:8px 14px;background:rgba(239,68,68,0.1);display:flex;align-items:center;gap:8px;">
+                                            <span style="color:#f87171;font-weight:700;font-size:13px;">Уровень 3 - Правообладание (Copyright)</span>
+                                            <span style="padding:2px 6px;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);border-radius:8px;font-size:11px;color:#fca5a5;">НЕУСТРАНИМО</span>
+                                        </div>
+                                        <div style="padding:10px 14px;">
+                                            <p style="color:#9ca3af;font-size:13px;">Даже если Базальт СПО поднимет собственное зеркало исходников TDF - исключительные права на код LibreOffice принадлежат TDF и тысячам контрибьюторов. Зеркало не меняет авторство. <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" style="color:#60a5fa;text-decoration:none;border-bottom:1px dotted #60a5fa;">Ст. 1260 ГК РФ</a> это прямо подтверждает.</p>
+                                            <p style="color:#fca5a5;font-size:12px;margin-top:4px;"><strong>Проверка:</strong> Поиск на <a href="https://gerrit.libreoffice.org" target="_blank" style="color:#60a5fa;font-size:12px;text-decoration:none;">gerrit.libreoffice.org</a> коммитов от @altlinux.org / @basealt.ru - если они продолжают коммитить в upstream, развитие продукта зависит от иностранной инфраструктуры.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-blue-900/20 rounded border border-blue-700/30 mt-3">
+                                    <p class="text-blue-300 text-sm font-semibold mb-1">Вывод по верификации:</p>
+                                    <p class="text-gray-400 text-sm">Устранение видимого симптома (runtime-скачивание) не устраняет ни build-time зависимость от TDF-серверов как источника исходного кода, ни правообладание TDF на LibreOffice. П. 5(а) <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" style="color:#93c5fd;text-decoration:none;border-bottom:1px dotted #93c5fd;">Постановления № 1236</a> требует исключительных прав на весь продукт - этого у заявителя нет и быть не может при MPL 2.0.</p>
                                 </div>
                             </div>
                         </div>
