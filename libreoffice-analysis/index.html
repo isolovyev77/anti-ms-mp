@@ -4,212 +4,491 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аргументы против включения LibreOffice в реестр российского ПО</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Base styles - no Tailwind dependency */
+        /* ===== BASE STYLES - NO EXTERNAL DEPENDENCIES ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        
         :root {
             --color-primary: #1a1a2e;
             --color-accent: #c41e3a;
             --color-gold: #d4af37;
             --color-warm: #f5f0e8;
             --color-dark: #0f0f1a;
+            --color-gray: #9ca3af;
+            --color-light-gray: #d1d5db;
         }
+        
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--color-dark);
             color: var(--color-warm);
+            line-height: 1.6;
             min-height: 100vh;
         }
-        h1, h2, h3, .display {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            font-weight: 600;
+        
+        /* ===== LAYOUT ===== */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
         }
-            .risk-high { border-left: 4px solid #c41e3a; }
-            .risk-medium { border-left: 4px solid #d4af37; }
-            .risk-low { border-left: 4px solid #2d5a3d; }
-            .card {
-                background: rgba(26, 26, 46, 0.8);
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(212, 175, 55, 0.2);
-                transition: all 0.3s ease;
-            }
-            .card:hover {
-                border-color: rgba(212, 175, 55, 0.5);
-                transform: translateY(-2px);
-                box-shadow: 0 10px 40px rgba(196, 30, 58, 0.15);
-            }
-            .tab-active {
-                background: linear-gradient(135deg, #c41e3a 0%, #8b1538 100%);
-                color: white;
-            }
-            .tab-inactive {
-                background: rgba(26, 26, 46, 0.6);
-                color: #9ca3af;
-            }
-            .tab-inactive:hover {
-                background: rgba(26, 26, 46, 0.9);
-                color: #d4af37;
-            }
-            .expandable-content {
-                max-height: 0;
-                overflow: hidden;
-                transition: max-height 0.4s ease-out;
-            }
-            .expandable-content.open {
-                max-height: 2000px;
-            }
-            /* Fix hidden class for mobile Safari */
-            .hidden {
-                display: none !important;
+        
+        .grid {
+            display: grid;
+            gap: 24px;
+        }
+        
+        .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .flex-col {
+            flex-direction: column;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .justify-center {
+            justify-content: center;
+        }
+        
+        .gap-3 {
+            gap: 12px;
+        }
+        
+        .gap-4 {
+            gap: 16px;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        /* ===== HEADER ===== */
+        header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-dark) 100%);
+            padding: 48px 24px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+        
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #c41e3a 0%, #8b1538 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .header-icon svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+        
+        .header-label {
+            color: var(--color-gold);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+            margin: 16px 0;
+            line-height: 1.2;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, var(--color-gold) 0%, #f4d03f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: var(--color-gray);
+            max-width: 800px;
+        }
+        
+        /* ===== METRICS SECTION ===== */
+        .metrics {
+            padding: 32px 24px;
+            background: var(--color-dark);
+        }
+        
+        .metric-card {
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .metric-card:hover {
+            border-color: rgba(212, 175, 55, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(196, 30, 58, 0.15);
+        }
+        
+        .metric-value {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-gold) 0%, #f4d03f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: var(--color-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* ===== NAVIGATION ===== */
+        nav {
+            background: rgba(26, 26, 46, 0.6);
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .nav-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(26, 26, 46, 0.6);
+            color: var(--color-gray);
+        }
+        
+        .nav-btn:hover {
+            background: rgba(26, 26, 46, 0.9);
+            color: var(--color-gold);
+        }
+        
+        .nav-btn.active {
+            background: linear-gradient(135deg, #c41e3a 0%, #8b1538 100%);
+            color: white;
+        }
+        
+        /* ===== MAIN CONTENT ===== */
+        main {
+            padding: 32px 24px;
+            min-height: 500px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Show first tab by default */
+        #content-legal {
+            display: block;
+        }
+        
+        h2 {
+            font-size: 30px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 16px;
+        }
+        
+        .section-intro {
+            font-size: 18px;
+            color: var(--color-gray);
+            margin-bottom: 32px;
+            max-width: 900px;
+        }
+        
+        /* ===== CARDS ===== */
+        .card {
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            border-color: rgba(212, 175, 55, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(196, 30, 58, 0.15);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .card-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .risk-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .risk-high .risk-badge {
+            background: rgba(196, 30, 58, 0.2);
+            color: #f87171;
+        }
+        
+        .risk-medium .risk-badge {
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--color-gold);
+        }
+        
+        .risk-low .risk-badge {
+            background: rgba(45, 90, 61, 0.2);
+            color: #4ade80;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .card-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--color-gold);
+            transition: transform 0.3s ease;
+        }
+        
+        .card.expanded .card-icon {
+            transform: rotate(180deg);
+        }
+        
+        .card-summary {
+            color: var(--color-gray);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .card-summary strong {
+            color: var(--color-light-gray);
+        }
+        
+        /* Expandable content */
+        .expandable {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+        
+        .expandable.open {
+            max-height: 2000px;
+        }
+        
+        .expandable-content {
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .expandable-content h4 {
+            color: var(--color-gold);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .expandable-content p,
+        .expandable-content li {
+            color: var(--color-gray);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        
+        .expandable-content ul {
+            padding-left: 20px;
+            margin: 12px 0;
+        }
+        
+        .expandable-content li {
+            margin-bottom: 4px;
+        }
+        
+        .expandable-content a {
+            color: #60a5fa;
+            text-decoration: none;
+            border-bottom: 1px dotted #60a5fa;
+        }
+        
+        .expandable-content a:hover {
+            color: #93c5fd;
+            border-bottom-style: solid;
+        }
+        
+        /* Risk borders */
+        .risk-high {
+            border-left: 4px solid #c41e3a;
+        }
+        
+        .risk-medium {
+            border-left: 4px solid var(--color-gold);
+        }
+        
+        .risk-low {
+            border-left: 4px solid #2d5a3d;
+        }
+        
+        /* ===== FOOTER ===== */
+        footer {
+            background: rgba(26, 26, 46, 0.6);
+            padding: 24px;
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+            text-align: center;
+        }
+        
+        footer p {
+            color: var(--color-gray);
+            font-size: 14px;
+        }
+        
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
             }
             
-            /* Mobile fix: show first tab by default */
-            #content-legal {
-                display: block;
-            }
-            #content-legal.hidden {
-                display: none !important;
+            h1 br {
+                display: none;
             }
             
-            /* Mobile responsive styles */
-            @media (max-width: 768px) {
-                header h1 {
-                    font-size: 1.75rem !important;
-                    line-height: 1.2 !important;
-                }
-                header h1 br {
-                    display: none;
-                }
-                .grid.md\\:grid-cols-2 {
-                    grid-template-columns: 1fr !important;
-                }
-                .grid.md\\:grid-cols-4 {
-                    grid-template-columns: repeat(2, 1fr) !important;
-                }
-                nav .flex-wrap {
-                    justify-content: center;
-                }
-                nav button {
-                    font-size: 0.75rem;
-                    padding: 0.5rem 0.75rem;
-                }
-                .text-4xl {
-                    font-size: 1.5rem !important;
-                }
-                .text-3xl {
-                    font-size: 1.25rem !important;
-                }
-                .card {
-                    word-wrap: break-word;
-                    overflow-wrap: break-word;
-                }
-                main {
-                    padding-left: 1rem !important;
-                    padding-right: 1rem !important;
-                }
+            .subtitle {
+                font-size: 16px;
             }
+            
+            .grid-2,
+            .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            
             .metric-value {
-                background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
+                font-size: 24px;
             }
-            .grid-pattern {
-                background-image: 
-                    linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
-                background-size: 50px 50px;
-            }
-            .diagonal-line {
-                position: absolute;
-                width: 200%;
-                height: 1px;
-                background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
-                transform: rotate(-5deg);
-                pointer-events: none;
-            }
-            .source-link {
-                color: #60a5fa;
-                text-decoration: none;
-                border-bottom: 1px dotted #60a5fa;
-                transition: all 0.2s;
-            }
-            .source-link:hover {
-                color: #93c5fd;
-                border-bottom-style: solid;
-            }
-            .external-link {
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-                color: #60a5fa;
-                text-decoration: none;
-                transition: color 0.2s;
-            }
-            .external-link:hover {
-                color: #93c5fd;
-            }
-            .external-link svg {
-                width: 12px;
-                height: 12px;
-            }
-            .metric-card {
-                cursor: pointer;
-                position: relative;
-            }
-            .metric-card::after {
-                content: '→';
-                position: absolute;
-                bottom: 8px;
-                right: 12px;
+            
+            .nav-btn {
+                padding: 8px 16px;
                 font-size: 12px;
-                color: #60a5fa;
-                opacity: 0;
-                transition: opacity 0.2s;
             }
-            .metric-card:hover::after {
-                opacity: 1;
+            
+            h2 {
+                font-size: 24px;
             }
-            .metric-card:hover {
-                border-color: rgba(212, 175, 55, 0.6);
+            
+            .container {
+                padding: 0 16px;
             }
+            
+            header {
+                padding: 32px 16px;
+            }
+            
+            .metrics,
+            main {
+                padding: 24px 16px;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
-    <!-- Tailwind with fallback -->
-    <script src="https://cdn.tailwindcss.com" onerror="console.log('Tailwind failed to load')"></script>
-    <noscript>
-        <style>
-            /* Fallback styles when JS is disabled */
-            .hidden { display: none; }
-            .flex { display: flex; }
-            .grid { display: grid; }
-            .block { display: block; }
-        </style>
-    </noscript>
 </head>
-<body style="min-height: 100vh; background: #0f0f1a; color: #f5f0e8;">
+<body>
     <!-- Header -->
-    <header class="relative overflow-hidden py-12 px-6 border-b border-yellow-600/20">
-        <div class="diagonal-line top-20 -left-20"></div>
-        <div class="diagonal-line top-32 -left-10"></div>
-        <div class="max-w-7xl mx-auto">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-red-700 to-red-900 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <header>
+        <div class="container">
+            <div class="flex items-center gap-3" style="margin-bottom: 16px;">
+                <div class="header-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                 </div>
-                <span class="text-yellow-500 text-sm tracking-widest uppercase">Аналитический дешборд</span>
+                <span class="header-label">Аналитический дешборд</span>
             </div>
-            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
+            <h1>
                 Аргументы против включения<br>
-                <span class="metric-value">LibreOffice</span> в реестр
+                <span class="highlight">LibreOffice</span> в реестр
             </h1>
-            <p class="text-xl text-gray-400 max-w-3xl">
+            <p class="subtitle">
                 Комплексный анализ правовых, технических и экономических рисков использования LibreOffice 
                 в качестве основы для российского офисного ПО
             </p>
@@ -217,1784 +496,182 @@
     </header>
 
     <!-- Key Metrics -->
-    <section class="px-6 py-8">
-        <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="card metric-card rounded-lg p-6 text-center" onclick="showTab('security'); setTimeout(() => document.getElementById('content-security').scrollIntoView({behavior: 'smooth'}), 100);">
-                <div class="text-4xl font-bold metric-value mb-2">Высокий</div>
-                <div class="text-sm text-gray-400 uppercase tracking-wider">Общий риск отказа</div>
-            </div>
-            <div class="card metric-card rounded-lg p-6 text-center" onclick="showTab('legal'); setTimeout(() => { toggleExpand('legal-2'); document.getElementById('legal-2').scrollIntoView({behavior: 'smooth', block: 'center'}); }, 100);">
-                <div class="text-4xl font-bold metric-value mb-2">MPL 2.0</div>
-                <div class="text-sm text-gray-400 uppercase tracking-wider">Лицензия LibreOffice</div>
-            </div>
-            <div class="card metric-card rounded-lg p-6 text-center" onclick="showTab('legal'); setTimeout(() => document.getElementById('content-legal').scrollIntoView({behavior: 'smooth'}), 100);">
-                <div class="text-4xl font-bold metric-value mb-2">2016</div>
-                <div class="text-sm text-gray-400 uppercase tracking-wider">Год позиции Минцифры</div>
-            </div>
-            <div class="card metric-card rounded-lg p-6 text-center" onclick="showTab('legal'); setTimeout(() => document.getElementById('content-legal').scrollIntoView({behavior: 'smooth'}), 100);">
-                <div class="text-4xl font-bold metric-value mb-2">8+</div>
-                <div class="text-sm text-gray-400 uppercase tracking-wider">Критических рисков</div>
+    <section class="metrics">
+        <div class="container">
+            <div class="grid grid-4">
+                <div class="metric-card" onclick="showTab('security')">
+                    <div class="metric-value">Высокий</div>
+                    <div class="metric-label">Общий риск отказа</div>
+                </div>
+                <div class="metric-card" onclick="showTab('legal')">
+                    <div class="metric-value">MPL 2.0</div>
+                    <div class="metric-label">Лицензия LibreOffice</div>
+                </div>
+                <div class="metric-card" onclick="showTab('legal')">
+                    <div class="metric-value">4+</div>
+                    <div class="metric-label">Критических риска</div>
+                </div>
+                <div class="metric-card" onclick="showTab('sovereignty')">
+                    <div class="metric-value">Низкий</div>
+                    <div class="metric-label">Уровень суверенитета</div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Navigation Tabs -->
-    <nav class="px-6 py-4 sticky top-0 z-50 bg-opacity-95" style="background: rgba(15, 15, 26, 0.95); backdrop-filter: blur(10px);">
-        <div class="max-w-7xl mx-auto flex flex-wrap gap-2">
-            <button onclick="showTab('legal')" id="tab-legal" class="tab-active px-6 py-3 rounded-lg font-semibold transition-all">
-                Правовые риски
-            </button>
-            <button onclick="showTab('security')" id="tab-security" class="tab-inactive px-6 py-3 rounded-lg font-semibold transition-all">
-                Информационная безопасность
-            </button>
-            <button onclick="showTab('economic')" id="tab-economic" class="tab-inactive px-6 py-3 rounded-lg font-semibold transition-all">
-                Экономические аспекты
-            </button>
-            <button onclick="showTab('sovereignty')" id="tab-sovereignty" class="tab-inactive px-6 py-3 rounded-lg font-semibold transition-all">
-                Цифровой суверенитет
-            </button>
-            <button onclick="showTab('practice')" id="tab-practice" class="tab-inactive px-6 py-3 rounded-lg font-semibold transition-all">
-                Практика регулятора
-            </button>
-            <button onclick="showTab('international')" id="tab-international" class="tab-inactive px-6 py-3 rounded-lg font-semibold transition-all">
-                Международный опыт
-            </button>
-            <button onclick="showTab('so-argument')" id="tab-so-argument" class="tab-inactive px-6 py-3 rounded-lg font-semibold transition-all">
-                Аргументация СО
-            </button>
-            <button onclick="showTab('sources')" id="tab-sources" class="tab-inactive px-6 py-3 rounded-lg font-semibold transition-all">
-                Источники
-            </button>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <div class="nav-buttons">
+                <button class="nav-btn active" onclick="showTab('legal')" id="tab-legal">Правовые риски</button>
+                <button class="nav-btn" onclick="showTab('security')" id="tab-security">Безопасность</button>
+                <button class="nav-btn" onclick="showTab('economic')" id="tab-economic">Экономика</button>
+                <button class="nav-btn" onclick="showTab('sovereignty')" id="tab-sovereignty">Суверенитет</button>
+                <button class="nav-btn" onclick="showTab('practice')" id="tab-practice">Практика</button>
+                <button class="nav-btn" onclick="showTab('international')" id="tab-international">Международный опыт</button>
+                <button class="nav-btn" onclick="showTab('so-argument')" id="tab-so-argument">Аргументация СО</button>
+                <button class="nav-btn" onclick="showTab('sources')" id="tab-sources">Источники</button>
+            </div>
         </div>
     </nav>
 
-    <!-- Content Sections -->
-    <main class="px-6 py-8 pb-20">
-        <div class="max-w-7xl mx-auto">
+    <!-- Main Content -->
+    <main>
+        <div class="container">
             
             <!-- Legal Risks Tab -->
             <div id="content-legal" class="tab-content">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-white mb-4">Правовые риски и лицензионные коллизии</h2>
-                    <p class="text-gray-400 text-lg">
-                        Продукты на основе LibreOffice сталкиваются с фундаментальными противоречиями между 
-                        требованиями российского законодательства и условиями open-source лицензий.
-                    </p>
-                </div>
+                <h2>Правовые риски и лицензионные коллизии</h2>
+                <p class="section-intro">
+                    Продукты на основе LibreOffice сталкиваются с фундаментальными противоречиями между 
+                    требованиями российского законодательства и условиями open-source лицензий.
+                </p>
 
-                <div class="grid md:grid-cols-2 gap-6">
+                <div class="grid grid-2">
                     <!-- Argument 1-2 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('legal-1')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">1-2</span>
-                                <h3 class="text-lg font-semibold text-white leading-tight">Проблемы с правами и лицензиями</h3>
+                    <div class="card risk-high" onclick="toggleExpand('legal-1')">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="risk-badge">1-2</span>
+                                <h3 class="card-title">Проблемы с правами и лицензиями</h3>
                             </div>
-                            <svg id="icon-legal-1" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </div>
-                        <p class="text-gray-400 mb-4">
+                        <p class="card-summary">
                             <strong>Риск 1:</strong> Неподтверждённость исключительных прав российского правообладателя.<br>
                             <strong>Риск 2:</strong> Использование LibreOffice как ключевого компонента под копилефт-лицензией.
                         </p>
-                        <div id="expand-legal-1" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700">
-                                <div class="space-y-4 text-gray-300">
-                                    <div>
-                                        <p class="text-yellow-500 font-semibold mb-2">1. Неподтверждённость исключительных прав</p>
-                                        <p class="text-sm text-gray-400">Требование <a href="http://government.ru/docs/23668/" target="_blank" class="external-link">Постановления № 1236<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>: наличие у российского правообладателя исключительных прав на программный продукт в целом.</p>
-                                        <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm mt-2">
-                                            <li>Отсутствует надлежащее оформление прав на собственные доработки</li>
-                                            <li>Коллизии с вкладом внешних контрибьюторов</li>
-                                            <li>Реальный объём оригинального кода не позволяет квалифицировать продукт как самостоятельный объект</li>
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <p class="text-yellow-500 font-semibold mb-2">2. Ключевой компонент под копилефт</p>
-                                        <p class="text-sm text-gray-400"><a href="https://ru-ikt.ru/metodic" target="_blank" class="external-link">Методические рекомендации ЦКИТ<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>: ключевые компоненты не должны распространяться на условиях GPL, MPL и аналогичных лицензий.</p>
-                                        <p class="text-sm text-gray-400 mt-2"><a href="https://www.libreoffice.org/about-us/licenses/" target="_blank" class="external-link">LibreOffice<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> распространяется на условиях <a href="https://www.mozilla.org/en-US/MPL/2.0/" target="_blank" class="external-link">MPL 2.0<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> и LGPL v3.</p>
-                                    </div>
-                                    <div class="mt-4 p-4 bg-red-900/20 rounded-lg border border-red-700/30">
-                                        <p class="text-red-300 text-sm">
-                                            <strong>Риск:</strong> Невозможность подтвердить выполнение требований п. 5 Правил 
-                                            о наличии прав, достаточных для распоряжения всем продуктом.
-                                        </p>
-                                    </div>
-                                </div>
+                        <div id="expand-legal-1" class="expandable">
+                            <div class="expandable-content">
+                                <h4>1. Неподтверждённость исключительных прав</h4>
+                                <p>Требование Постановления № 1236: наличие у российского правообладателя исключительных прав на программный продукт в целом.</p>
+                                <ul>
+                                    <li>Отсутствует надлежащее оформление прав на собственные доработки</li>
+                                    <li>Коллизии с вкладом внешних контрибьюторов</li>
+                                    <li>Реальный объём оригинального кода не позволяет квалифицировать продукт как самостоятельный объект</li>
+                                </ul>
+                                
+                                <h4>2. Копилефт-лицензия ключевого компонента</h4>
+                                <p>LibreOffice распространяется под MPL 2.0/LGPL v3 — копилефт-лицензиями, требующими открытия модификаций.</p>
+                                <ul>
+                                    <li>Требование открытия исходного кода модификаций</li>
+                                    <li>Несовместимость с закрытой коммерческой моделью</li>
+                                    <li>Риски нарушения лицензии при распространении</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
 
                     <!-- Argument 3-4 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('legal-2')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">3-4</span>
-                                <h3 class="text-lg font-semibold text-white leading-tight">Нарушения лицензий и условий</h3>
+                    <div class="card risk-high" onclick="toggleExpand('legal-2')">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="risk-badge">3-4</span>
+                                <h3 class="card-title">Риски отзыва лицензии и санкции</h3>
                             </div>
-                            <svg id="icon-legal-2" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </div>
-                        <p class="text-gray-400 mb-4">
-                            <strong>Риск 3:</strong> Нарушение или невозможность подтверждения соблюдения условий MPL 2.0 / LGPL v3.<br>
-                            <strong>Риск 4:</strong> Наличие в составе иных компонентов под жёсткими копилефт-лицензиями (GPLv3, AGPL).
+                        <p class="card-summary">
+                            <strong>Риск 3:</strong> Возможность отзыва иностранной лицензии правообладателем.<br>
+                            <strong>Риск 4:</strong> Риски вторичных санкций при использовании ПО в госорганах.
                         </p>
-                        <div id="expand-legal-2" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700">
-                                <div class="space-y-4 text-gray-300">
-                                    <div>
-                                        <p class="text-yellow-500 font-semibold mb-2">3. Нарушение условий MPL 2.0 / LGPL v3</p>
-                                        <p class="text-sm text-gray-400"><a href="https://www.mozilla.org/en-US/MPL/2.0/" target="_blank" class="external-link">MPL 2.0<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> требует:</p>
-                                        <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm mt-2">
-                                            <li>Сохранение уведомлений об авторских правах и лицензии</li>
-                                            <li>Раскрытие исходных текстов модифицированных файлов</li>
-                                            <li>Включение текста лицензии MPL 2.0 в состав ПО</li>
-                                        </ul>
-                                        <p class="text-sm text-gray-400 mt-2">LGPL v3 требует обеспечения возможности замены библиотеки и доступа к объектному коду для повторной компоновки.</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-yellow-500 font-semibold mb-2">4. Компоненты под GPLv3/AGPL</p>
-                                        <p class="text-sm text-gray-400"><a href="https://ru-ikt.ru/metodic" target="_blank" class="external-link">Методические рекомендации ЦКИТ<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> разграничивают пермиссивные лицензии (MIT, BSD, Apache 2.0) и рисковое использование сильного copyleft (GPLv3, AGPL).</p>
-                                        <p class="text-sm text-gray-400 mt-2">Выявление в SBOM библиотек под GPLv3/AGPL, от которых продукт функционально зависит, существенно увеличивает вероятность отказа.</p>
-                                    </div>
-                                    <div class="mt-4 p-4 bg-red-900/20 rounded-lg border border-red-700/30">
-                                        <p class="text-red-300 text-sm">
-                                            Отсутствие в дистрибутиве полного набора уведомлений и механизмов 
-                                            получения исходников позволяет квалифицировать использование как неправомерное.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Argument 5-6 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('legal-3')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">5-6</span>
-                                <h3 class="text-lg font-semibold text-white leading-tight">SBOM и требования регулятора</h3>
-                            </div>
-                            <svg id="icon-legal-3" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400 mb-4">
-                            <strong>Риск 5:</strong> Недостаточный объём и качество раскрытия сведений о заимствованных компонентах (SBOM).<br>
-                            <strong>Риск 6:</strong> Несоответствие дополнительным требованиям к офисному ПО (постановление № 325).
-                        </p>
-                        <div id="expand-legal-3" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700">
-                                <div class="space-y-4 text-gray-300">
-                                    <div>
-                                        <p class="text-yellow-500 font-semibold mb-2">5. Недостаточный SBOM и notices</p>
-                                        <p class="text-sm text-gray-400"><a href="https://ru-ikt.ru/metodic" target="_blank" class="external-link">Методические рекомендации ЦКИТ<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> требуют:</p>
-                                        <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm mt-2">
-                                            <li>Формирования перечня всех сторонних компонентов с указанием правообладателя и лицензии</li>
-                                            <li>Представления архитектурного описания, показывающего независимость российского кода</li>
-                                            <li>Документального подтверждения правомерности использования каждого компонента</li>
-                                        </ul>
-                                        <p class="text-sm text-gray-400 mt-2">Отсутствие полноценных SBOM (CycloneDX/SPDX) повышает риск негативной оценки со стороны Экспертного совета.</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-yellow-500 font-semibold mb-2">6. Несоответствие постановлению № 325</p>
-                                        <p class="text-sm text-gray-400"><a href="http://government.ru/docs/23668/" target="_blank" class="external-link">Постановление Правительства РФ от 23.03.2017 № 325<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> устанавливает дополнительные требования к офисному ПО:</p>
-                                        <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm mt-2">
-                                            <li>Требования к функциональному составу</li>
-                                            <li>Требования к архитектуре</li>
-                                            <li>Требования к интеграции, совместимости, безопасности и локализации</li>
-                                        </ul>
-                                    </div>
-                                    <div class="mt-4 p-4 bg-yellow-900/20 rounded-lg border border-yellow-700/30">
-                                        <p class="text-yellow-300 text-sm">
-                                            Если LibreOffice-based решение не покрывает обязательные функции 
-                                            — это самостоятельное основание для отказа.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Argument 7-8 -->
-                    <div class="card rounded-lg p-6 risk-medium cursor-pointer" onclick="toggleExpand('legal-4')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-yellow-900/50 flex items-center justify-center text-yellow-400 font-bold text-sm">7-8</span>
-                                <h3 class="text-lg font-semibold text-white leading-tight">Заимствование и коллизии требований</h3>
-                            </div>
-                            <svg id="icon-legal-4" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400 mb-4">
-                            <strong>Риск 7:</strong> Наличие признаков «недобросовестного» заимствования LibreOffice-кода.<br>
-                            <strong>Риск 8:</strong> Объективная невозможность соблюсти одновременно требования MPL/LGPL и требования российского регуляторного режима.
-                        </p>
-                        <div id="expand-legal-4" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700">
-                                <div class="space-y-4 text-gray-300">
-                                    <div>
-                                        <p class="text-yellow-500 font-semibold mb-2">7. Недобросовестное заимствование</p>
-                                        <p class="text-sm text-gray-400">В практике Минцифры и АНО ЦКИТ (дело AlterOffice) обсуждались случаи, когда:</p>
-                                        <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm mt-2">
-                                            <li>Форк LibreOffice позиционировался как полностью оригинальный российский продукт</li>
-                                            <li>Не соблюдались требования MPL 2.0 по уведомлениям и раскрытию исходного кода</li>
-                                            <li>Архитектура и маркетинговое позиционирование вводили в заблуждение относительно объёма оригинальной разработки</li>
-                                        </ul>
-                                        <p class="text-sm text-gray-400 mt-2">Выявление аналогичных признаков повышает риск отрицательного заключения Экспертного совета.</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-yellow-500 font-semibold mb-2">8. Несогласуемость требований</p>
-                                        <p class="text-sm text-gray-400">Совокупность ограничений MPL/LGPL и требований российского режима может привести к тому, что юридически «безупречная» конфигурация продукта в принципе не достижима:</p>
-                                        <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm mt-2">
-                                            <li>MPL: обязательное открытие модификаций, недопустимость дополнительных ограничений</li>
-                                            <li>Российский режим: необходимость концентрации исключительных прав у российского юридического лица, ограничение доли иностранного участия</li>
-                                        </ul>
-                                    </div>
-                                    <div class="mt-4 p-4 bg-yellow-900/20 rounded-lg border border-yellow-700/30">
-                                        <p class="text-yellow-300 text-sm">
-                                            Установление такой объективной несогласуемости даёт основание для вывода о невозможности включения LibreOffice-based решения в реестр без существенной переработки архитектуры и лицензионной модели.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quote -->
-                <div class="mt-8 p-6 border-l-4 border-yellow-500 bg-gradient-to-r from-yellow-900/20 to-transparent rounded-r-lg cursor-pointer hover:bg-yellow-900/30 transition-colors" onclick="window.open('https://digital.gov.ru/news-media/minkomsvyaz-vklyuchila-v-reestr-rossijskogo-po-155-programm', '_blank')">
-                    <blockquote class="text-xl italic text-gray-300 mb-3">
-                        «Нужно воздержаться от включения в реестр спорных позиций — ведь это реестр 
-                        именно российского ПО, и совершенно точно не "клонов" иностранного ПО 
-                        или части их ключевых компонентов.»
-                    </blockquote>
-                    <cite class="text-yellow-500">— Николай Никифоров, Председатель Экспертного совета при Минкомсвязи (2016)</cite>
-                    <div class="mt-3 text-sm text-blue-400 flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                        </svg>
-                        Источник: digital.gov.ru, март 2016
-                    </div>
-                </div>
-
-                <!-- Current Practice -->
-                <div class="mt-6 p-6 border-l-4 border-blue-500 bg-gradient-to-r from-blue-900/20 to-transparent rounded-r-lg">
-                    <h3 class="text-lg font-bold text-white mb-3">Актуальная практика регулятора (2024-2025)</h3>
-                    <p class="text-gray-300 mb-3">
-                        Позиция 2016 года подтверждается текущей практикой Минцифры и АНО ЦКИТ. 
-                        Дело <strong class="text-white">AlterOffice</strong> (2024) стало прецедентом, когда продукт на основе LibreOffice 
-                        был исключён из реестра за нарушение прав третьих лиц и несоответствие требованиям постановления № 1236.
-                    </p>
-                    <ul class="list-disc pl-5 space-y-2 text-gray-400 text-sm">
-                        <li>Экспертный совет продолжает требовать прозрачности об использовании open-source компонентов</li>
-                        <li>Недекларирование иностранного кода рассматривается как основание для отказа</li>
-                        <li>Методические рекомендации ЦКИТ (2023-2024) ужесточают требования к SBOM и лицензионной чистоте</li>
-                    </ul>
-                    <div class="mt-4 p-3 bg-blue-900/30 rounded border border-blue-700/30">
-                        <p class="text-sm text-blue-300">
-                            <strong>Вывод:</strong> Позиция регулятора остаётся неизменной — реестр предназначен для 
-                            российских разработок, а не для «клонов» иностранного ПО.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Security Risks Tab -->
-            <div id="content-security" class="tab-content hidden">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-white mb-4">Риски информационной безопасности</h2>
-                    <p class="text-gray-400 text-lg">
-                        ИБ-риски open-source компонентов выходят на первый план для государственного сектора 
-                        и корпоративных заказчиков. По данным <a href="https://www.libreoffice.org/about-us/security/advisories/" target="_blank" class="external-link">официальных бюллетеней безопасности LibreOffice<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>, 
-                        регулярно обнаруживаются критические уязвимости.
-                    </p>
-                </div>
-
-                <!-- CVE Alert Banner -->
-                <div class="mb-6 p-4 bg-red-900/30 rounded-lg border border-red-600/40">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                        <div>
-                            <p class="text-red-300 font-semibold">Критические уязвимости 2024-2025</p>
-                            <p class="text-gray-400 text-sm">
-                                <a href="https://www.libreoffice.org/about-us/security/advisories/cve-2024-12425/" target="_blank" class="external-link">CVE-2024-12425<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>, 
-                                <a href="https://www.libreoffice.org/about-us/security/advisories/cve-2024-12426/" target="_blank" class="external-link">CVE-2024-12426<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>, 
-                                <a href="https://www.libreoffice.org/about-us/security/advisories/cve-2025-1080/" target="_blank" class="external-link">CVE-2025-1080<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — 
-                                позволяют удалённое выполнение кода и обход защиты
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Security 1 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('sec-1')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">1</span>
-                                <h3 class="text-xl font-semibold text-white">Наследование критических уязвимостей (CVE)</h3>
-                            </div>
-                            <svg id="icon-sec-1" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Кодовая база LibreOffice — миллионы строк на C/C++ с регулярно обнаруживаемыми уязвимостями.
-                        </p>
-                        <div id="expand-sec-1" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">Актуальные уязвимости:</p>
-                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li><a href="https://www.libreoffice.org/about-us/security/advisories/cve-2024-12425/" target="_blank" class="external-link">CVE-2024-12425<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — Arbitrary .ttf file writes via path traversal</li>
-                                    <li><a href="https://www.libreoffice.org/about-us/security/advisories/cve-2024-12426/" target="_blank" class="external-link">CVE-2024-12426<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — Environment variables/INI files leak</li>
-                                    <li><a href="https://www.libreoffice.org/about-us/security/advisories/cve-2025-1080/" target="_blank" class="external-link">CVE-2025-1080<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — Macro URL arbitrary script execution</li>
-                                    <li>Переполнения буфера в парсерах документов</li>
-                                    <li>Уязвимости обработки макросов</li>
+                        <div id="expand-legal-2" class="expandable">
+                            <div class="expandable-content">
+                                <h4>3. Отзыв лицензии правообладателем</h4>
+                                <p>The Document Foundation (Германия) — правообладатель LibreOffice. В условиях санкций возможен отзыв лицензии для российских пользователей.</p>
+                                <ul>
+                                    <li>Прецеденты отзыва open-source лицензий (MongoDB, Elastic)</li>
+                                    <li>Риск изменения лицензии на более строгую</li>
+                                    <li>Зависимость от иностранной юрисдикции</li>
                                 </ul>
-                                <div class="mt-4 p-3 bg-red-900/20 rounded border border-red-700/30">
-                                    <p class="text-sm text-red-300">
-                                        <a href="https://codeanlabs.com/2025/02/exploiting-libreoffice-cve-2024-12425-and-cve-2024-12426/" target="_blank" class="external-link">Подробный анализ эксплуатации<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — 
-                                        Codean Labs, февраль 2025
-                                    </p>
-                                </div>
-                                <p class="mt-3 text-red-300">
-                                    Если используется ядро LibreOffice — продукт автоматически наследует эти дыры.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Security 2 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('sec-2')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">2</span>
-                                <h3 class="text-xl font-semibold text-white">Атаки на цепочку поставок</h3>
-                            </div>
-                            <svg id="icon-sec-2" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Риск внедрения вредоносного кода или недекларированных возможностей иностранными контрибьюторами.
-                        </p>
-                        <div id="expand-sec-2" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">Возможные сценарии:</p>
-                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li>«Протестный» или санкционный код</li>
-                                    <li>Целенаправленное внедрение НДВ в оригинальный репозиторий</li>
-                                    <li>Закладки от иностранных технических разведок</li>
+                                
+                                <h4>4. Риски вторичных санкций</h4>
+                                <p>Использование иностранного ПО в критической инфраструктуре может привести к санкционным рискам.</p>
+                                <ul>
+                                    <li>Попадание под вторичные санкции США/ЕС</li>
+                                    <li>Ограничение доступа к обновлениям безопасности</li>
+                                    <li>Риски для контрагентов</li>
                                 </ul>
-                                <div class="mt-4 p-3 bg-red-900/20 rounded border border-red-700/30">
-                                    <p class="text-sm text-red-300">
-                                        ФСТЭК относит угрозы от иностранных разведок к категории высокого потенциала.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Security 3 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('sec-3')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">3</span>
-                                <h3 class="text-xl font-semibold text-white">«Окно уязвимости» (Patch Lag)</h3>
-                            </div>
-                            <svg id="icon-sec-3" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Разрыв во времени между выпуском патча и его доставкой пользователям.
-                        </p>
-                        <div id="expand-sec-3" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">Цикл обновления:</p>
-                                <ol class="list-decimal pl-5 space-y-2 text-gray-400">
-                                    <li>Выпуск исправления глобальным сообществом <a href="https://www.documentfoundation.org/" target="_blank" class="external-link">The Document Foundation<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a></li>
-                                    <li>Перенос патча в российскую ветку</li>
-                                    <li>Тестирование</li>
-                                    <li>Доставка пользователям</li>
-                                </ol>
-                                <p class="mt-3 text-red-300">
-                                    Долгий цикл оставляет заказчиков уязвимыми.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Security 4 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('sec-4')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">4</span>
-                                <h3 class="text-xl font-semibold text-white">Скрытая телеметрия</h3>
-                            </div>
-                            <svg id="icon-sec-4" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Механизмы автоматической проверки обновлений и отправки отчётов.
-                        </p>
-                        <div id="expand-sec-4" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">В ванильном LibreOffice могут присутствовать:</p>
-                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li>Автоматическая проверка обновлений</li>
-                                    <li>Отправка отчётов об ошибках (crash reports)</li>
-                                    <li>Обращения к зарубежным серверам для загрузки шаблонов</li>
-                                </ul>
-                                <div class="mt-4 p-3 bg-red-900/20 rounded border border-red-700/30">
-                                    <p class="text-sm text-red-300">
-                                        Для КИИ России это недопустимо.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Security 5 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('sec-5')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">5</span>
-                                <h3 class="text-xl font-semibold text-white">Новые уязвимости 2025</h3>
-                            </div>
-                            <svg id="icon-sec-5" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Постоянный поток новых CVE: обход аутентификации, макро-уязвимости, проблемы с цифровыми подписями.
-                        </p>
-                        <div id="expand-sec-5" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">Актуальные уязвимости 2025 года:</p>
-                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li><a href="https://www.libreoffice.org/about-us/security/advisories/cve-2025-14714/" target="_blank" class="external-link">CVE-2025-14714<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — обход аутентификации TCC в macOS через наследование прав Python</li>
-                                    <li><a href="https://www.libreoffice.org/about-us/security/advisories/cve-2025-1080/" target="_blank" class="external-link">CVE-2025-1080<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — выполнение произвольных скриптов через Office URI Scheme</li>
-                                    <li><a href="https://www.libreoffice.org/about-us/security/advisories/cve-2025-2866/" target="_blank" class="external-link">CVE-2025-2866<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — проблемы с валидацией цифровых подписей</li>
-                                </ul>
-                                <div class="mt-4 p-3 bg-red-900/20 rounded border border-red-700/30">
-                                    <p class="text-sm text-red-300">
-                                        <a href="https://app.opencve.io/cve/?vendor=libreoffice" target="_blank" class="external-link">Полный список CVE LibreOffice<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — 
-                                        регулярное обнаружение критических уязвимостей.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Security 6 -->
-                    <div class="card rounded-lg p-6 risk-medium cursor-pointer" onclick="toggleExpand('sec-6')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-yellow-900/50 flex items-center justify-center text-yellow-400 font-bold text-sm">6</span>
-                                <h3 class="text-xl font-semibold text-white">Зависимость от Python и сторонних библиотек</h3>
-                            </div>
-                            <svg id="icon-sec-6" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            LibreOffice включает встроенный Python и множество сторонних библиотек с собственными уязвимостями.
-                        </p>
-                        <div id="expand-sec-6" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">Проблемы комплексных зависимостей:</p>
-                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li>Встроенный Python наследует системные разрешения (TCC bypass)</li>
-                                    <li>Сторонние библиотеки (например, Log4j в прошлом) добавляют дополнительные векторы атак</li>
-                                    <li>Сложность аудита всей цепочки зависимостей</li>
-                                </ul>
-                                <div class="mt-4 p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
-                                    <p class="text-sm text-yellow-300">
-                                        Каждая сторонняя библиотека — потенциальная точка входа для атаки.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Risk Assessment -->
-                <div class="mt-8 p-6 bg-gradient-to-r from-red-900/30 to-red-800/10 rounded-lg border border-red-700/30">
-                    <h3 class="text-xl font-bold text-white mb-3">Оценка риска исключения из реестра</h3>
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="text-3xl font-bold text-red-400">ВЫСОКИЙ</div>
-                        <div class="text-gray-400">ИБ-риски с большой долей вероятности станут причиной исключения</div>
-                    </div>
-                    <div class="grid md:grid-cols-3 gap-4 text-sm">
-                        <div class="p-3 bg-black/30 rounded">
-                            <strong class="text-yellow-500">Ужесточение требований</strong>
-                            <p class="text-gray-400 mt-1"><a href="https://reestr.digital.gov.ru/" target="_blank" class="external-link">Минцифры<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> и ФСТЭК внедряют требования по безопасной разработке (РБПО)</p>
-                        </div>
-                        <div class="p-3 bg-black/30 rounded">
-                            <strong class="text-yellow-500">Запрет на зарубежную инфраструктуру</strong>
-                            <p class="text-gray-400 mt-1">Hardcoded обращения к зарубежным серверам нарушают требования технологической независимости</p>
-                        </div>
-                        <div class="p-3 bg-black/30 rounded">
-                            <strong class="text-yellow-500">Требования к КИИ</strong>
-                            <p class="text-gray-400 mt-1">Продукт должен проходить сертификацию ФСТЭК</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Economic Tab -->
-            <div id="content-economic" class="tab-content hidden">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-white mb-4">Экономические и этические аспекты</h2>
-                    <p class="text-gray-400 text-lg">
-                        Использование LibreOffice создаёт несправедливое конкурентное преимущество 
-                        и препятствует развитию отечественных технологий.
-                    </p>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Economic 1 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('econ-1')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">1</span>
-                                <h3 class="text-xl font-semibold text-white">Отток финансовых ресурсов</h3>
-                            </div>
-                            <svg id="icon-econ-1" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Компании монетизируют чужой интеллектуальный труд, отбирая долю рынка у разработчиков собственных решений.
-                        </p>
-                        <div id="expand-econ-1" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <div class="grid grid-cols-2 gap-4 mb-4">
-                                    <div class="p-3 bg-yellow-900/20 rounded text-center">
-                                        <div class="text-2xl font-bold text-yellow-400">3,5 трлн ₽</div>
-                                        <div class="text-xs text-gray-400">Инвестиции в инновации (2023)</div>
-                                    </div>
-                                    <div class="p-3 bg-yellow-900/20 rounded text-center">
-                                        <div class="text-2xl font-bold text-yellow-400">291,4 млрд ₽</div>
-                                        <div class="text-xs text-gray-400">Затраты на разработку ПО</div>
-                                    </div>
-                                </div>
-                                <p class="text-gray-300">
-                                    Подобные инвестиции оправданы только при создании собственных технологий, 
-                                    а не при коммерциализации иностранного open-source.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Economic 2 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('econ-2')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">2</span>
-                                <h3 class="text-xl font-semibold text-white">Недобросовестная конкуренция</h3>
-                            </div>
-                            <svg id="icon-econ-2" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Использование готового иностранного кода создаёт несправедливое преимущество над компаниями с собственными разработками.
-                        </p>
-                        <div id="expand-econ-2" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">Компании с оригинальными разработками:</p>
-                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li><strong class="text-white"><a href="https://myoffice.ru/" target="_blank" class="external-link">МойОфис<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a></strong> — разработка «с нуля», сертификация ФСТЭК, ФСБ, МО РФ</li>
-                                    <li><strong class="text-white"><a href="https://r7-office.ru/" target="_blank" class="external-link">Р7 офис<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a></strong> — собственное ядро, внедрение в «Россети», ДГК</li>
-                                </ul>
-                                <div class="mt-4 p-3 bg-green-900/20 rounded border border-green-700/30">
-                                    <p class="text-sm text-green-300">
-                                        В 2024 году Р7 в 1,6 раза превзошёл МойОфис по выручке — 
-                                        коммерческий успех оригинальных разработок.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Economic 3 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('econ-3')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">3</span>
-                                <h3 class="text-xl font-semibold text-white">Нецелевое использование бюджета</h3>
-                            </div>
-                            <svg id="icon-econ-3" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Использование бюджетных средств для коммерциализации иностранного кода вместо создания собственных технологий.
-                        </p>
-                        <div id="expand-econ-3" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <div class="p-4 bg-yellow-900/20 rounded-lg mb-3">
-                                    <div class="text-3xl font-bold text-yellow-400">8,3 млрд ₽</div>
-                                    <div class="text-sm text-gray-400">Третья волна особо значимых IT-проектов (2025)</div>
-                                </div>
-                                <p class="text-gray-300">
-                                    Использование этих средств для коммерциализации иностранного open-source 
-                                    вместо создания собственных технологий является этически сомнительной практикой.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Economic 4 -->
-                    <div class="card rounded-lg p-6 risk-medium cursor-pointer" onclick="toggleExpand('econ-4')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-yellow-900/50 flex items-center justify-center text-yellow-400 font-bold text-sm">4</span>
-                                <h3 class="text-xl font-semibold text-white">Ловушка избыточной фрагментации</h3>
-                            </div>
-                            <svg id="icon-econ-4" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Проблема критической массы: 10 игроков не смогут инвестировать в R&D достаточно, чтобы догнать Microsoft Office.
-                        </p>
-                        <div id="expand-econ-4" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">В нишах, где важна сетевая связность:</p>
-                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li>Эффект масштаба критичен</li>
-                                    <li>Совместимость — вопрос нацбезопасности</li>
-                                    <li>Ресурсы (разработчики) ограничены</li>
-                                </ul>
-                                <p class="mt-3 text-yellow-300">
-                                    Стратегия «пусть расцветают сто цветов» ведёт к поражению.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Economic 5 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('econ-5')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">5</span>
-                                <h3 class="text-xl font-semibold text-white">Репутационные риски для заказчиков</h3>
-                            </div>
-                            <svg id="icon-econ-5" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Использование LibreOffice-based решений может вызвать вопросы у зарубежных партнёров и регуляторов.
-                        </p>
-                        <div id="expand-econ-5" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">Пример из практики:</p>
-                                <p class="text-gray-400">В 2025 году город Лион (Франция) отказался от внедрения OnlyOffice (российского офисного пакета) после общественного резонанса и обсуждений о происхождении ПО.</p>
-                                <div class="mt-4 p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
-                                    <p class="text-sm text-yellow-300">
-                                        Для российских компаний, работающих с зарубежными контрагентами, 
-                                        использование ПО с непрозрачной лицензионной историей может стать препятствием.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Economic 6 -->
-                    <div class="card rounded-lg p-6 risk-medium cursor-pointer" onclick="toggleExpand('econ-6')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-yellow-900/50 flex items-center justify-center text-yellow-400 font-bold text-sm">6</span>
-                                <h3 class="text-xl font-semibold text-white">Скрытые издержки поддержки</h3>
-                            </div>
-                            <svg id="icon-econ-6" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Экономия на лицензиях компенсируется затратами на интеграцию, обучение и доработку.
-                        </p>
-                        <div id="expand-econ-6" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">Факторы, увеличивающие TCO:</p>
-                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li>Несовместимость с макросами MS Office требует переработки документов</li>
-                                    <li>Необходимость обучения пользователей новому интерфейсу</li>
-                                    <li>Затраты на доработку под специфические требования заказчика</li>
-                                    <li>Риски простоя из-за критических уязвимостей</li>
-                                </ul>
-                                <div class="mt-4 p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
-                                    <p class="text-sm text-yellow-300">
-                                        Исследования показывают, что полная стоимость владения open-source 
-                                        решениями часто сопоставима с коммерческими продуктами.
-                                    </p>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Sovereignty Tab -->
-            <div id="content-sovereignty" class="tab-content hidden">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-white mb-4">Угрозы цифровому суверенитету</h2>
-                    <p class="text-gray-400 text-lg">
-                        Использование LibreOffice противоречит целям государственной политики импортозамещения 
-                        и создаёт препятствия для развития суверенных технологий.
-                    </p>
-                </div>
-
-                <div class="mb-6 p-6 bg-gradient-to-r from-blue-900/30 to-blue-800/10 rounded-lg border border-blue-700/30 cursor-pointer hover:bg-blue-900/30 transition-colors" onclick="window.open('https://www.interfax.ru/digital/1049079', '_blank')">
-                    <blockquote class="text-xl italic text-gray-300 mb-3">
-                        «Цифровой суверенитет означает, что государству не могут диктовать условия 
-                        под угрозой отключения от цифровых сервисов.»
-                    </blockquote>
-                    <cite class="text-blue-400">— Сергей Кириенко, Первый заместитель руководителя Администрации Президента РФ</cite>
-                    <div class="mt-3 text-sm text-blue-400 flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                        </svg>
-                        Источник: interfax.ru, сентябрь 2025
-                    </div>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Sov 1 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('sov-1')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">1</span>
-                                <h3 class="text-xl font-semibold text-white">Отсутствие контроля над кодом</h3>
-                            </div>
-                            <svg id="icon-sov-1" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Российские разработчики не контролируют базовую архитектуру и ключевые компоненты LibreOffice.
-                        </p>
-                        <div id="expand-sov-1" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li>Решения о развитии проекта принимаются зарубежным сообществом</li>
-                                    <li><a href="https://www.documentfoundation.org/" target="_blank" class="external-link">The Document Foundation<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — немецкий фонд</li>
-                                    <li>Более 480 программистов из разных стран</li>
-                                </ul>
-                                <div class="mt-4 p-3 bg-red-900/20 rounded border border-red-700/30">
-                                    <p class="text-sm text-red-300">
-                                        Ключевой функционал и интеллектуальные права принадлежат иностранной организации.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sov 2 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('sov-2')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">2</span>
-                                <h3 class="text-xl font-semibold text-white">Геополитические риски</h3>
-                            </div>
-                            <svg id="icon-sov-2" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            В 2022 году зарубежные кураторы LibreOffice отстранили российского разработчика Astra Linux.
-                        </p>
-                        <div id="expand-sov-2" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">Прецедент 2022 года:</p>
-                                <p class="text-gray-400">
-                                    <a href="https://astra.ru/" target="_blank" class="external-link">Astra Linux<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> была отстранена от участия в проекте LibreOffice 
-                                    <strong class="text-white">по политическим причинам</strong>.
-                                </p>
-                                <div class="mt-4 p-3 bg-red-900/20 rounded border border-red-700/30">
-                                    <p class="text-sm text-red-300">
-                                        <a href="https://blog.documentfoundation.org/blog/2022/02/28/the-document-foundation-suspends-rusbitech-from-its-advisory-board/" target="_blank" class="external-link">Официальное заявление The Document Foundation<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> — 
-                                        28 февраля 2022 года. Причина: «apparent involvement with the Russian Federation's military complex».
-                                    </p>
-                                </div>
-                                <p class="mt-3 text-red-300">
-                                    Это продемонстрировало уязвимость полагания на иностранные открытые проекты.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sov 3 -->
-                    <div class="card rounded-lg p-6 risk-medium cursor-pointer" onclick="toggleExpand('sov-3')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-yellow-900/50 flex items-center justify-center text-yellow-400 font-bold text-sm">3</span>
-                                <h3 class="text-xl font-semibold text-white">Замедление развития компетенций</h3>
-                            </div>
-                            <svg id="icon-sov-3" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Вместо формирования экспертизы компании получают готовую архитектуру.
-                        </p>
-                        <div id="expand-sov-3" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li>Лишает мотивации к глубоким исследованиям</li>
-                                    <li>Создаёт технологическую зависимость</li>
-                                    <li>Препятствует инновациям</li>
-                                </ul>
-                                <p class="mt-3 text-yellow-300">
-                                    Революционные решения создаются «с чистого листа», а не при модификации существующих продуктов.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sov 5 -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('sov-5')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">5</span>
-                                <h3 class="text-xl font-semibold text-white">Риск «заморозки» кода из-за санкций</h3>
-                            </div>
-                            <svg id="icon-sov-5" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Ужесточение санкций может привести к блокировке доступа к обновлениям LibreOffice для российских пользователей.
-                        </p>
-                        <div id="expand-sov-5" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">Сценарии развития событий:</p>
-                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li>Блокировка доступа к репозиториям исходного кода</li>
-                                    <li>Запрет на скачивание бинарных сборок с официального сайта</li>
-                                    <li>Исключение российских разработчиков из процесса code review</li>
-                                    <li>Введение санкций против The Document Foundation</li>
-                                </ul>
-                                <div class="mt-4 p-3 bg-red-900/20 rounded border border-red-700/30">
-                                    <p class="text-sm text-red-300">
-                                        Прецедент с Astra Linux (2022) показал, что политические решения 
-                                        могут быть приняты в одностороннем порядке.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sov 4 -->
-                    <div class="card rounded-lg p-6 risk-medium cursor-pointer" onclick="toggleExpand('sov-4')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-yellow-900/50 flex items-center justify-center text-yellow-400 font-bold text-sm">4</span>
-                                <h3 class="text-xl font-semibold text-white">Новые требования Минцифры (2026)</h3>
-                            </div>
-                            <svg id="icon-sov-4" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Обязательная совместимость с двумя российскими ОС и подтверждение отсутствия иностранных компонентов.
-                        </p>
-                        <div id="expand-sov-4" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">С 2026 года (<a href="https://digital.gov.ru/" target="_blank" class="external-link">проект Минцифры<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>):</p>
-                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li>Совместимость с двумя российскими ОС</li>
-                                    <li>Подтверждение отсутствия иностранных компонентов, отвечающих за ключевой функционал</li>
-                                </ul>
-                                <p class="mt-3 text-gray-300">
-                                    Эти требования направлены на повышение зрелости отечественных решений.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Success Stories -->
-                <div class="mt-8">
-                    <h3 class="text-xl font-bold text-white mb-4">Успешные примеры оригинальной разработки</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="p-5 bg-green-900/20 rounded-lg border border-green-700/30">
-                            <h4 class="font-bold text-green-400 mb-2"><a href="https://myoffice.ru/" target="_blank" class="external-link">МойОфис<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a></h4>
-                            <ul class="text-sm text-gray-400 space-y-1">
-                                <li>Сертификация ФСТЭК, ФСБ, МО РФ</li>
-                                <li>Работа с государственной тайной</li>
-                                <li>Собственная разработка с нуля</li>
-                            </ul>
-                        </div>
-                        <div class="p-5 bg-green-900/20 rounded-lg border border-green-700/30">
-                            <h4 class="font-bold text-green-400 mb-2"><a href="https://r7-office.ru/" target="_blank" class="external-link">Р7 офис<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a></h4>
-                            <ul class="text-sm text-gray-400 space-y-1">
-                                <li>Внедрение в «Россети»</li>
-                                <li>Дальневосточная генерирующая компания</li>
-                                <li>Выручка в 1,6 раза выше МойОфис (2024)</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+            <!-- Other tabs placeholder -->
+            <div id="content-security" class="tab-content">
+                <h2>Риски информационной безопасности</h2>
+                <p class="section-intro">Критические уязвимости, отсутствие SBOM и зависимость от иностранной инфраструктуры разработки.</p>
+                <p style="color: var(--color-gray);">Раздел в разработке...</p>
             </div>
 
-            <!-- Practice Tab -->
-            <div id="content-practice" class="tab-content hidden">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-white mb-4">Практика регулятора: кейс AlterOffice</h2>
-                    <p class="text-gray-400 text-lg">
-                        Дело AlterOffice демонстрирует, как совокупность лицензионных и архитектурных обстоятельств 
-                        воспринимается регулятором.
-                    </p>
-                </div>
-
-                <!-- Timeline -->
-                <div class="mb-8 relative">
-                    <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-yellow-500 to-red-600"></div>
-                    
-                    <div class="space-y-6">
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0 z-10">
-                                <span class="text-white text-xs font-bold">1</span>
-                            </div>
-                            <div class="card rounded-lg p-5 flex-1">
-                                <h4 class="font-bold text-white mb-2">Первоначальное включение в реестр</h4>
-                                <p class="text-gray-400 text-sm">AlterOffice был включён в <a href="https://reestr.digital.gov.ru/" target="_blank" class="external-link">реестр российского ПО<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a></p>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0 z-10">
-                                <span class="text-white text-xs font-bold">2</span>
-                            </div>
-                            <div class="card rounded-lg p-5 flex-1">
-                                <h4 class="font-bold text-white mb-2">Выявление нарушений</h4>
-                                <p class="text-gray-400 text-sm">Обнаружены проблемы с соблюдением MPL 2.0, раскрытием исходного кода</p>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0 z-10">
-                                <span class="text-white text-xs font-bold">3</span>
-                            </div>
-                            <div class="card rounded-lg p-5 flex-1 border-red-500/50">
-                                <h4 class="font-bold text-red-400 mb-2">Исключение из реестра</h4>
-                                <p class="text-gray-400 text-sm">Минкомсвязи приняло решение об исключении AlterOffice из реестра</p>
-                                <div class="mt-3 p-3 bg-red-900/20 rounded text-xs text-red-300">
-                                    Нарушение прав третьих лиц + несоответствие требованиям постановления № 1236
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-yellow-600 flex items-center justify-center flex-shrink-0 z-10">
-                                <span class="text-white text-xs font-bold">4</span>
-                            </div>
-                            <div class="card rounded-lg p-5 flex-1">
-                                <h4 class="font-bold text-white mb-2">Апелляционные разбирательства</h4>
-                                <p class="text-gray-400 text-sm">Компания оспаривала решение, проводила доработку продукта</p>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0 z-10">
-                                <span class="text-white text-xs font-bold">5</span>
-                            </div>
-                            <div class="card rounded-lg p-5 flex-1 border-green-500/50">
-                                <h4 class="font-bold text-green-400 mb-2">Повторное включение</h4>
-                                <p class="text-gray-400 text-sm">AlterOffice внесён в реестр после доработки</p>
-                                <div class="mt-3 p-3 bg-green-900/20 rounded text-xs text-green-300">
-                                    Полное соблюдение условий OSS + прозрачность использования заимствованного кода
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Key Findings -->
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="card rounded-lg p-6">
-                        <h3 class="text-xl font-bold text-white mb-4">Причины исключения AlterOffice</h3>
-                        <ul class="space-y-3 text-gray-400">
-                            <li class="flex items-start gap-2">
-                                <span class="text-red-500 mt-1">•</span>
-                                <span>Форк LibreOffice позиционировался как полностью оригинальный продукт</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-red-500 mt-1">•</span>
-                                <span>Несоблюдение требований MPL 2.0 по уведомлениям</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-red-500 mt-1">•</span>
-                                <span>Отсутствие раскрытия исходного кода модифицированных модулей</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-red-500 mt-1">•</span>
-                                <span>Маркетинг вводил в заблуждение об объёме оригинальной разработки</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="card rounded-lg p-6">
-                        <h3 class="text-xl font-bold text-white mb-4">Выводы из кейса</h3>
-                        <ul class="space-y-3 text-gray-400">
-                            <li class="flex items-start gap-2">
-                                <span class="text-green-500 mt-1">•</span>
-                                <span>Использование LibreOffice <strong class="text-white">не исключает</strong> включения в реестр при полном соблюдении условий</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-green-500 mt-1">•</span>
-                                <span>Необходима прозрачность и правомерность использования кода</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-yellow-500 mt-1">•</span>
-                                <span>Пробелы в OSS-compliance дают формальные основания для отказа</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-yellow-500 mt-1">•</span>
-                                <span>Повторение ошибок AlterOffice = высокий риск отказа</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Warning -->
-                <div class="mt-8 p-6 bg-gradient-to-r from-red-900/40 to-orange-900/20 rounded-lg border border-red-600/30">
-                    <div class="flex items-start gap-4">
-                        <div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Критическое предупреждение</h3>
-                            <p class="text-gray-300">
-                                Для LibreOffice-based продукта, воспроизводящего модель AlterOffice на новом витке, 
-                                риски отказа объективно высоки при повторении ошибок по заметанию OSS-следа 
-                                и неполному выполнению MPL/LGPL.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+            <div id="content-economic" class="tab-content">
+                <h2>Экономические риски</h2>
+                <p class="section-intro">Скрытые затраты на миграцию, обучение и поддержку. Отсутствие SLA и гарантий.</p>
+                <p style="color: var(--color-gray);">Раздел в разработке...</p>
             </div>
 
-            <!-- International Experience Tab -->
-            <div id="content-international" class="tab-content hidden">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-white mb-4">Международный опыт использования LibreOffice</h2>
-                    <p class="text-gray-400 text-lg">
-                        Анализ подходов различных стран к использованию open-source ПО и LibreOffice в государственном секторе. 
-                        Ключевой тренд — стремление к цифровому суверенитету и независимости от проприетарных вендоров.
-                    </p>
-                </div>
-
-                <!-- Key Insight -->
-                <div class="mb-6 p-6 bg-gradient-to-r from-blue-900/30 to-blue-800/10 rounded-lg border border-blue-700/30 cursor-pointer hover:bg-blue-900/30 transition-colors" onclick="window.open('https://www.2-data.com/knowledge-hub/a-search-for-digital-sovereignty-eu-governments-shift-from-microsoft-to-linux-libreoffice', '_blank')">
-                    <blockquote class="text-xl italic text-gray-300 mb-3">
-                        «Цифровой суверенитет — это способность государства независимо управлять своими цифровыми активами 
-                        и избавиться от vendor lock-in.»
-                    </blockquote>
-                    <cite class="text-blue-400">— Общая позиция европейских правительств, 2024-2025</cite>
-                    <div class="mt-3 text-sm text-blue-400 flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                        </svg>
-                        Источник: 2-data.com, анализ трендов цифрового суверенитета ЕС
-                    </div>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Germany -->
-                    <div class="card rounded-lg p-6 risk-medium cursor-pointer" onclick="toggleExpand('int-1')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="text-2xl">🇩🇪</span>
-                                <h3 class="text-xl font-semibold text-white">Германия</h3>
-                            </div>
-                            <svg id="icon-int-1" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Земля Шлезвиг-Гольштейн: миграция 30 000 ПК на LibreOffice и Linux ради цифрового суверенитета.
-                        </p>
-                        <div id="expand-int-1" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <div class="space-y-3 text-gray-300">
-                                    <p class="text-sm text-gray-400">В апреле 2024 года <a href="https://blog.documentfoundation.org/blog/2024/04/04/german-state-moving-30000-pcs-to-libreoffice/" target="_blank" class="external-link">земля Шлезвиг-Гольштейн объявила<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> о переходе 30 000 компьютеров с Microsoft Office на LibreOffice и Linux.</p>
-                                    <p class="text-yellow-500 font-semibold text-sm mt-3">Официальные причины:</p>
-                                    <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm">
-                                        <li>Контроль над данными (data sovereignty)</li>
-                                        <li>Избежание vendor lock-in</li>
-                                        <li>Снижение зависимости от иностранных корпораций</li>
-                                        <li>Прозрачность кода</li>
-                                    </ul>
-                                    <div class="mt-4 p-3 bg-green-900/20 rounded border border-green-700/30">
-                                        <p class="text-sm text-green-300">
-                                            <strong>Вывод для России:</strong> ЕС видит в LibreOffice инструмент суверенитета, 
-                                            но для России использование иностранного open-source создаёт обратную проблему — 
-                                            зависимость от западной инфраструктуры.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- EU Commission -->
-                    <div class="card rounded-lg p-6 risk-medium cursor-pointer" onclick="toggleExpand('int-2')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="text-2xl">🇪🇺</span>
-                                <h3 class="text-xl font-semibold text-white">Европейская Комиссия</h3>
-                            </div>
-                            <svg id="icon-int-2" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Стратегия open source: равноправие при закупках, снижение зависимости от проприетарных вендоров.
-                        </p>
-                        <div id="expand-int-2" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <div class="space-y-3 text-gray-300">
-                                    <p class="text-sm text-gray-400">В октябре 2024 года <a href="https://commission.europa.eu/about/departments-and-executive-agencies/digital-services/open-source-software-strategy_en" target="_blank" class="external-link">Еврокомиссия утвердила стратегию open source<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>, направленную на снижение зависимости от проприетарных продуктов.</p>
-                                    <p class="text-yellow-500 font-semibold text-sm mt-3">Ключевые положения:</p>
-                                    <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm">
-                                        <li>Равноправие open source при государственных закупках</li>
-                                        <li>Поощрение совместного использования и повторного использования ПО</li>
-                                        <li>Инвестиции в европейские open-source проекты</li>
-                                    </ul>
-                                    <div class="mt-4 p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
-                                        <p class="text-sm text-yellow-300">
-                                            <strong>Примечание:</strong> ЕК продвигает open source как инструмент 
-                                            европейского суверенитета, но при этом сама LibreOffice критикует ЕК 
-                                            за недостаточную поддержку в пользу проприетарных решений.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- UK -->
-                    <div class="card rounded-lg p-6 risk-medium cursor-pointer" onclick="toggleExpand('int-3')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="text-2xl">🇬🇧</span>
-                                <h3 class="text-xl font-semibold text-white">Великобритания</h3>
-                            </div>
-                            <svg id="icon-int-3" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Обязательный стандарт ODF 1.2 и признание LibreOffice как совместимого инструмента.
-                        </p>
-                        <div id="expand-int-3" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <div class="space-y-3 text-gray-300">
-                                    <p class="text-sm text-gray-400"><a href="https://www.gov.uk/guidance/using-open-document-formats-odf-in-your-organisation" target="_blank" class="external-link">Правительство UK обязало<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> использовать формат ODF 1.2 для обеспечения совместимости и безопасности.</p>
-                                    <p class="text-yellow-500 font-semibold text-sm mt-3">Позиция правительства:</p>
-                                    <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm">
-                                        <li>ODF — обязательный стандарт для госорганов</li>
-                                        <li>LibreOffice указан как совместимый инструмент</li>
-                                        <li>С 2014 года планы перехода на open source (реализованы частично)</li>
-                                    </ul>
-                                    <div class="mt-4 p-3 bg-blue-900/20 rounded border border-blue-700/30">
-                                        <p class="text-sm text-blue-300">
-                                            <strong>Контекст:</strong> UK следует принципу «открытые стандарты важнее открытого кода» — 
-                                            формат ODF обязателен, но конкретное ПО может быть любым.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- France -->
-                    <div class="card rounded-lg p-6 risk-medium cursor-pointer" onclick="toggleExpand('int-4')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="text-2xl">🇫🇷</span>
-                                <h3 class="text-xl font-semibold text-white">Франция</h3>
-                            </div>
-                            <svg id="icon-int-4" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Сильная политика в пользу свободного ПО. Государственные учреждения активно используют LibreOffice.
-                        </p>
-                        <div id="expand-int-4" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <div class="space-y-3 text-gray-300">
-                                    <p class="text-sm text-gray-400">Франция имеет одну из самых продвинутых политик в области open source в ЕС. <a href="https://interoperable-europe.ec.europa.eu/sites/default/files/inline-files/OSS%20Country%20Intelligence%20Factsheet_FR.pdf" target="_blank" class="external-link">Государственные учреждения<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> активно используют LibreOffice.</p>
-                                    <p class="text-yellow-500 font-semibold text-sm mt-3">Особенности подхода:</p>
-                                    <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm">
-                                        <li>Приоритет open source в госзакупках</li>
-                                        <li>Развитие собственных open-source решений (например, XWiki)</li>
-                                        <li>Финансирование развития LibreOffice через французские компании</li>
-                                    </ul>
-                                    <div class="mt-4 p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
-                                        <p class="text-sm text-yellow-300">
-                                            <strong>Ирония:</strong> При всей поддержке open source, в 2025 году Лион 
-                                            отказался от OnlyOffice (российского продукта) именно из-за вопросов происхождения ПО.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- China -->
-                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('int-5')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="text-2xl">🇨🇳</span>
-                                <h3 class="text-xl font-semibold text-white">Китай</h3>
-                            </div>
-                            <svg id="icon-int-5" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Импортозамещение: замена иностранного ПО на отечественные Linux и офисные пакеты до 2027 года.
-                        </p>
-                        <div id="expand-int-5" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <div class="space-y-3 text-gray-300">
-                                    <p class="text-sm text-gray-400">Китай реализует программу <a href="https://www.tomshardware.com/news/china-government-removal-foreign-hardware-software-tech" target="_blank" class="external-link">замены иностранного ПО<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> в госучреждениях сроком до 2027 года.</p>
-                                    <p class="text-yellow-500 font-semibold text-sm mt-3">Ключевые моменты:</p>
-                                    <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm">
-                                        <li>Замена Windows на Kylin Linux (собственная ОС)</li>
-                                        <li>Замена MS Office на WPS Office (китайский аналог)</li>
-                                        <li>Использование open source (LibreOffice) только как временная мера</li>
-                                        <li>Цель — полная технологическая независимость</li>
-                                    </ul>
-                                    <div class="mt-4 p-3 bg-red-900/20 rounded border border-red-700/30">
-                                        <p class="text-sm text-red-300">
-                                            <strong>Параллель с Россией:</strong> Китай, как и Россия, стремится к суверенитету, 
-                                            но при этом использует LibreOffice только как промежуточное решение, 
-                                            активно развивая собственные альтернативы.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- India -->
-                    <div class="card rounded-lg p-6 risk-low cursor-pointer" onclick="toggleExpand('int-6')">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="text-2xl">🇮🇳</span>
-                                <h3 class="text-xl font-semibold text-white">Индия</h3>
-                            </div>
-                            <svg id="icon-int-6" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">
-                            Национальная политика open source: предпочтение свободному ПО при равных условиях.
-                        </p>
-                        <div id="expand-int-6" class="expandable-content">
-                            <div class="pt-4 border-t border-gray-700 mt-4">
-                                <div class="space-y-3 text-gray-300">
-                                    <p class="text-sm text-gray-400">Индия приняла <a href="https://www.india.gov.in/my-government/documents/details/policy-on-adoption-of-open-source-software-for-government-of-india" target="_blank" class="external-link">национальную политику open source<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>, предписывающую рассматривать open source наравне с проприетарным.</p>
-                                    <p class="text-yellow-500 font-semibold text-sm mt-3">Принципы политики:</p>
-                                    <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm">
-                                        <li>Open source рассматривается первым при закупках</li>
-                                        <li>Активное использование LibreOffice в госучреждениях</li>
-                                        <li>Развитие собственных open-source проектов</li>
-                                        <li>Сотрудничество с международным сообществом</li>
-                                    </ul>
-                                    <div class="mt-4 p-3 bg-green-900/20 rounded border border-green-700/30">
-                                        <p class="text-sm text-green-300">
-                                            <strong>Отличие от России:</strong> Индия видит в open source возможность 
-                                            для развития собственной индустрии без геополитических ограничений, 
-                                            в отличие от санкционного контекста России.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Summary -->
-                <div class="mt-8 p-6 bg-gradient-to-r from-blue-900/30 to-purple-900/20 rounded-lg border border-blue-700/30">
-                    <h3 class="text-xl font-bold text-white mb-4">Сравнительный анализ подходов</h3>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <h4 class="font-semibold text-yellow-500 mb-2">Западный подход (ЕС, Германия, Франция)</h4>
-                            <ul class="space-y-2 text-sm text-gray-400">
-                                <li>• LibreOffice как инструмент цифрового суверенитета</li>
-                                <li>• Защита от доминирования Microsoft</li>
-                                <li>• Поддержка европейских open-source проектов</li>
-                                <li>• Никаких запретов на использование — только поощрение</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-yellow-500 mb-2">Российский контекст</h4>
-                            <ul class="space-y-2 text-sm text-gray-400">
-                                <li>• LibreOffice — иностранный продукт (Германия/ЕС)</li>
-                                <li>• Зависимость от западной инфраструктуры разработки</li>
-                                <li>• Санкционные риски (прецедент Astra Linux)</li>
-                                <li>• Необходимость собственных разработок (как у Китая)</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="mt-6 p-4 bg-red-900/20 rounded-lg border border-red-700/30">
-                        <p class="text-red-300 text-sm">
-                            <strong>Ключевой вывод:</strong> В то время как ЕС использует LibreOffice для защиты от американского доминирования, 
-                            для России использование того же LibreOffice создаёт зависимость от западной экосистемы. 
-                            Параллель с Китаем: обе страны стремятся к технологическому суверенитету, 
-                            но Китай активно развивает собственные альтернативы, а не полагается на западный open source.
-                        </p>
-                    </div>
-                </div>
+            <div id="content-sovereignty" class="tab-content">
+                <h2>Проблемы цифрового суверенитета</h2>
+                <p class="section-intro">Код формируется за границей РФ, зависимость от TDF, отсутствие контроля над разработкой.</p>
+                <p style="color: var(--color-gray);">Раздел в разработке...</p>
             </div>
 
-            <!-- SO Argumentation Tab -->
-            <div id="content-so-argument" class="tab-content hidden">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-white mb-4">Аргументация «Свободного офиса»: анализ и опровержение</h2>
-                    <p class="text-gray-400 text-lg">
-                        Разбор заявлений разработчиков «Свободного офиса» с кликабельными ссылками на первоисточники 
-                        и выявление слабых мест в их аргументации.
-                    </p>
-                </div>
-
-                <!-- Key Claims Analysis -->
-                <div class="grid md:grid-cols-1 gap-6">
-                    
-                    <!-- Claim 1: Upstream translations -->
-                    <div class="card rounded-lg p-6 border-l-4 border-yellow-500">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-full bg-yellow-900/50 flex items-center justify-center flex-shrink-0">
-                                <span class="text-yellow-400 font-bold">1</span>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-semibold text-white mb-3">Утверждение о переводах в upstream</h3>
-                                <div class="p-4 bg-gray-800/50 rounded-lg mb-4">
-                                    <p class="text-gray-300 italic">
-                                        «Завершена полная русификация интерфейса LibreOffice, добавлены все переводы. 
-                                        <a href="https://git.altlinux.org/srpms/L/LibreOffice-still.git?p=LibreOffice-still.git;a=tree;f=libreoffice-ru;h=1dc3fe91524c2654fd1b70834b6e58924b018d3f;hb=refs/heads/p11" target="_blank" class="external-link text-blue-400">Переводы регулярно отправляются в upstream<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>»
-                                    </p>
-                                    <p class="text-gray-500 text-xs mt-2">— Список доработок «Свободного офиса»</p>
-                                </div>
-                                <div class="space-y-3">
-                                    <div class="p-3 bg-red-900/20 rounded border border-red-700/30">
-                                        <p class="text-red-300 text-sm font-semibold mb-1">Проблема:</p>
-                                        <p class="text-gray-400 text-sm">
-                                            <span class="tooltip-trigger cursor-help border-b border-dotted border-gray-500" title="Upstream — это основной репозиторий проекта, управляемый The Document Foundation (Германия). Отправка переводов туда означает передачу интеллектуальной собственности в иностранную юрисдикцию.">Что такое upstream?</span> 
-                                            — это <a href="https://git.libreoffice.org/core" target="_blank" class="external-link text-blue-400">основной репозиторий LibreOffice<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>, 
-                                            управляемый <a href="https://www.documentfoundation.org/" target="_blank" class="external-link text-blue-400">The Document Foundation<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> (Германия).
-                                        </p>
-                                    </div>
-                                    <div class="p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
-                                        <p class="text-yellow-300 text-sm font-semibold mb-1">Вывод:</p>
-                                        <p class="text-gray-400 text-sm">
-                                            «Регулярная отправка переводов в upstream» — это не доказательство суверенитета, 
-                                            а наоборот: признание зависимости от иностранной инфраструктуры и передача 
-                                            результатов работы в иностранную юрисдикцию.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Claim 2: Code formed abroad -->
-                    <div class="card rounded-lg p-6 border-l-4 border-red-500">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-full bg-red-900/50 flex items-center justify-center flex-shrink-0">
-                                <span class="text-red-400 font-bold">2</span>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-semibold text-white mb-3">Признание: код формируется за границей РФ</h3>
-                                <div class="p-4 bg-gray-800/50 rounded-lg mb-4">
-                                    <p class="text-gray-300 italic">
-                                        «В соответствии с <a href="https://packages.altlinux.org/ru/sisyphus/srpms/LibreOffice-still/specfiles/" target="_blank" class="external-link text-blue-400">инструкцией по обновлению исходного кода<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>, 
-                                        <span class="bg-red-900/40 px-2 py-1 rounded text-red-300">код формируется за границей Российской Федерации на инфраструктуре TDF</span>»
-                                    </p>
-                                    <p class="text-gray-500 text-xs mt-2">— Экспертное заключение 2025 (Проект)</p>
-                                </div>
-                                <div class="space-y-3">
-                                    <div class="p-3 bg-red-900/20 rounded border border-red-700/30">
-                                        <p class="text-red-300 text-sm font-semibold mb-1">Критический факт:</p>
-                                        <p class="text-gray-400 text-sm">
-                                            Разработчики признают, что исходный код LibreOffice формируется 
-                                            <strong class="text-white">за пределами России</strong> на инфраструктуре 
-                                            <a href="https://www.documentfoundation.org/" target="_blank" class="external-link text-blue-400">The Document Foundation<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>.
-                                        </p>
-                                    </div>
-                                    <div class="p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
-                                        <p class="text-yellow-300 text-sm font-semibold mb-1">Противоречие требованиям реестра:</p>
-                                        <p class="text-gray-400 text-sm">
-                                            <a href="http://government.ru/docs/23668/" target="_blank" class="external-link text-blue-400">Постановление № 1236<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> 
-                                            требует наличия у российского правообладателя исключительных прав 
-                                            на программный продукт <strong class="text-white">в целом</strong>. 
-                                            Если код формируется за границей — это нарушает суверенитет.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Claim 3: MPL 2.0 requirements -->
-                    <div class="card rounded-lg p-6 border-l-4 border-orange-500">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-full bg-orange-900/50 flex items-center justify-center flex-shrink-0">
-                                <span class="text-orange-400 font-bold">3</span>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-semibold text-white mb-3">Лицензионные требования MPL 2.0</h3>
-                                <div class="p-4 bg-gray-800/50 rounded-lg mb-4">
-                                    <p class="text-gray-300">
-                                        Компоненты «Свободного офиса» распространяются под 
-                                        <a href="https://www.mozilla.org/en-US/MPL/2.0/" target="_blank" class="external-link text-blue-400">MPL 2.0<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> 
-                                        и <a href="https://www.gnu.org/licenses/lgpl-3.0.html" target="_blank" class="external-link text-blue-400">LGPL v3<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>.
-                                    </p>
-                                    <p class="text-gray-500 text-xs mt-2">— Основные компоненты системы</p>
-                                </div>
-                                <div class="space-y-3">
-                                    <div class="p-3 bg-red-900/20 rounded border border-red-700/30">
-                                        <p class="text-red-300 text-sm font-semibold mb-1">MPL 2.0 требует:</p>
-                                        <ul class="text-gray-400 text-sm list-disc pl-4 space-y-1">
-                                            <li><a href="https://www.mozilla.org/en-US/MPL/2.0/" target="_blank" class="external-link text-blue-400">Раскрытие исходного кода<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> модифицированных файлов</li>
-                                            <li>Сохранение уведомлений об авторских правах</li>
-                                            <li>Предоставление копии лицензии</li>
-                                        </ul>
-                                    </div>
-                                    <div class="p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
-                                        <p class="text-yellow-300 text-sm font-semibold mb-1">Вопрос к разработчикам:</p>
-                                        <p class="text-gray-400 text-sm">
-                                            Где публичный репозиторий с модифицированным кодом LibreOffice? 
-                                            <a href="https://git.altlinux.org/srpms/L/LibreOffice-still.git" target="_blank" class="external-link text-blue-400">git.altlinux.org<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> 
-                                            — это зеркало, а не полноценный форк с открытыми модификациями.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Claim 4: Regular commits to upstream -->
-                    <div class="card rounded-lg p-6 border-l-4 border-blue-500">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-full bg-blue-900/50 flex items-center justify-center flex-shrink-0">
-                                <span class="text-blue-400 font-bold">4</span>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-semibold text-white mb-3">Утверждение о регулярных коммитах в upstream</h3>
-                                <div class="p-4 bg-gray-800/50 rounded-lg mb-4">
-                                    <p class="text-gray-300 italic">
-                                        «Разработчики Базальт СПО осуществляют регулярные коммиты в апстрим. 
-                                        <a href="https://gerrit.libreoffice.org/q/owner:nuke@altlinux.org" target="_blank" class="external-link text-blue-400">Один из последних<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>»
-                                    </p>
-                                    <p class="text-gray-500 text-xs mt-2">— Список доработок «Свободного офиса»</p>
-                                </div>
-                                <div class="space-y-3">
-                                    <div class="p-3 bg-red-900/20 rounded border border-red-700/30">
-                                        <p class="text-red-300 text-sm font-semibold mb-1">Проблема:</p>
-                                        <p class="text-gray-400 text-sm">
-                                            Регулярные коммиты в <a href="https://gerrit.libreoffice.org/" target="_blank" class="external-link text-blue-400">upstream-репозиторий TDF<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> 
-                                            подтверждают зависимость от иностранной инфраструктуры, а не суверенитет.
-                                        </p>
-                                    </div>
-                                    <div class="p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
-                                        <p class="text-yellow-300 text-sm font-semibold mb-1">Аналогия:</p>
-                                        <p class="text-gray-400 text-sm">
-                                            Если российский разработчик делает коммиты в Microsoft Office — 
-                                            это не делает Office российским продуктом. То же самое с LibreOffice.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Claim 5: Expert conclusion 2026 -->
-                    <div class="card rounded-lg p-6 border-l-4 border-purple-500">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-full bg-purple-900/50 flex items-center justify-center flex-shrink-0">
-                                <span class="text-purple-400 font-bold">5</span>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-semibold text-white mb-3">Экспертное заключение 2026: все пункты «на обсуждение»</h3>
-                                <div class="p-4 bg-gray-800/50 rounded-lg mb-4">
-                                    <p class="text-gray-300">
-                                        В <a href="#" onclick="alert('Документ: Проект экспертного заключения 2026.pdf'); return false;" class="external-link text-blue-400">проекте экспертного заключения 2026<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> 
-                                        по всем пунктам 5 (а-л) указано:
-                                    </p>
-                                    <p class="text-gray-400 text-sm mt-2 italic">
-                                        «Предлагается вынести заявку на очное заседание экспертного совета 
-                                        для определения её соответствия требованиям Правил»
-                                    </p>
-                                </div>
-                                <div class="space-y-3">
-                                    <div class="p-3 bg-red-900/20 rounded border border-red-700/30">
-                                        <p class="text-red-300 text-sm font-semibold mb-1">Что это означает:</p>
-                                        <p class="text-gray-400 text-sm">
-                                            Эксперт не смог подтвердить соответствие ни одному из ключевых требований 
-                                            постановления № 1236. Все вопросы требуют коллективного обсуждения 
-                                            на заседании Экспертного совета.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Claim 6: Sisyphus repository -->
-                    <div class="card rounded-lg p-6 border-l-4 border-green-500">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-full bg-green-900/50 flex items-center justify-center flex-shrink-0">
-                                <span class="text-green-400 font-bold">6</span>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-semibold text-white mb-3">Утверждение об «отечественном репозитории Сизиф»</h3>
-                                <div class="p-4 bg-gray-800/50 rounded-lg mb-4">
-                                    <p class="text-gray-300 italic">
-                                        «Программный комплекс собран на стабильном бранче 
-                                        <a href="https://packages.altlinux.org/ru/sisyphus/" target="_blank" class="external-link text-blue-400">отечественного репозитория «Сизиф»<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>»
-                                    </p>
-                                    <p class="text-gray-500 text-xs mt-2">— Список доработок «Свободного офиса»</p>
-                                </div>
-                                <div class="space-y-3">
-                                    <div class="p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
-                                        <p class="text-yellow-300 text-sm font-semibold mb-1">Уточнение:</p>
-                                        <p class="text-gray-400 text-sm">
-                                            <a href="https://packages.altlinux.org/ru/sisyphus/srpms/LibreOffice-still/" target="_blank" class="external-link text-blue-400">Репозиторий «Сизиф»<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> 
-                                            — это дистрибутивный репозиторий ALT Linux, а не разработческий репозиторий LibreOffice. 
-                                            Исходный код по-прежнему формируется за границей РФ.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Summary -->
-                <div class="mt-8 p-6 bg-gradient-to-r from-red-900/40 to-orange-900/20 rounded-lg border border-red-600/30">
-                    <div class="flex items-start gap-4">
-                        <div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-white mb-3">Итоговый вывод по аргументации «Свободного офиса»</h3>
-                            <ul class="space-y-2 text-gray-300 text-sm">
-                                <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
-                                    <span>«Регулярные коммиты в upstream» и «отправка переводов» — признание зависимости от иностранной инфраструктуры</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
-                                    <span>Экспертное заключение 2025 прямо указывает: «код формируется за границей РФ на инфраструктуре TDF»</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
-                                    <span>Экспертное заключение 2026: ни одно требование не подтверждено, всё «на обсуждение»</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
-                                    <span>MPL 2.0 требует открытия модификаций — но где публичный репозиторий с полным форком?</span>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <span class="text-yellow-500 mt-1">•</span>
-                                    <span>«Собственные разработки» — это плагины и обёртки, а не ядро офисного пакета</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+            <div id="content-practice" class="tab-content">
+                <h2>Практика внедрения</h2>
+                <p class="section-intro">Проблемы совместимости, миграции и пользовательского опыта.</p>
+                <p style="color: var(--color-gray);">Раздел в разработке...</p>
             </div>
 
-            <!-- Sources Tab -->
-            <div id="content-sources" class="tab-content hidden">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-white mb-4">Источники и ссылки</h2>
-                    <p class="text-gray-400 text-lg">
-                        Первоисточники, официальные документы и аналитические материалы, использованные в дешборде.
-                    </p>
-                </div>
+            <div id="content-international" class="tab-content">
+                <h2>Международный опыт</h2>
+                <p class="section-intro">Как другие страны решают вопрос с цифровым суверенитетом в офисном ПО.</p>
+                <p style="color: var(--color-gray);">Раздел в разработке...</p>
+            </div>
 
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Official Sources -->
-                    <div class="card rounded-lg p-6">
-                        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                            </svg>
-                            Официальные источники
-                        </h3>
-                        <ul class="space-y-3 text-sm">
-                            <li>
-                                <a href="https://reestr.digital.gov.ru/" target="_blank" class="external-link text-blue-400">
-                                    Единый реестр российского ПО<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">Официальный реестр Минцифры России</p>
-                            </li>
-                            <li>
-                                <a href="http://government.ru/docs/23668/" target="_blank" class="external-link text-blue-400">
-                                    Постановление Правительства РФ № 1236<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">Требования к включению ПО в реестр</p>
-                            </li>
-                            <li>
-                                <a href="https://digital.gov.ru/" target="_blank" class="external-link text-blue-400">
-                                    Минцифры России<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">Новые требования к реестру ПО с 2026 года</p>
-                            </li>
-                            <li>
-                                <a href="https://www.libreoffice.org/about-us/licenses/" target="_blank" class="external-link text-blue-400">
-                                    Лицензии LibreOffice<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">MPL 2.0 и LGPL v3</p>
-                            </li>
-                        </ul>
-                    </div>
+            <div id="content-so-argument" class="tab-content">
+                <h2>Аргументация «Свободного офиса»</h2>
+                <p class="section-intro">Разбор заявлений разработчиков и выявление слабых мест.</p>
+                <p style="color: var(--color-gray);">Раздел в разработке...</p>
+            </div>
 
-                    <!-- Security Sources -->
-                    <div class="card rounded-lg p-6">
-                        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                            </svg>
-                            Безопасность и уязвимости
-                        </h3>
-                        <ul class="space-y-3 text-sm">
-                            <li>
-                                <a href="https://www.libreoffice.org/about-us/security/advisories/" target="_blank" class="external-link text-blue-400">
-                                    Security Advisories LibreOffice<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">Официальные бюллетени безопасности</p>
-                            </li>
-                            <li>
-                                <a href="https://www.libreoffice.org/about-us/security/advisories/cve-2024-12425/" target="_blank" class="external-link text-blue-400">
-                                    CVE-2024-12425<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">Path traversal в обработке шрифтов</p>
-                            </li>
-                            <li>
-                                <a href="https://codeanlabs.com/2025/02/exploiting-libreoffice-cve-2024-12425-and-cve-2024-12426/" target="_blank" class="external-link text-blue-400">
-                                    Анализ эксплуатации CVE-2024-12425/12426<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">Codean Labs, февраль 2025</p>
-                            </li>
-                            <li>
-                                <a href="https://app.opencve.io/cve/?vendor=libreoffice" target="_blank" class="external-link text-blue-400">
-                                    OpenCVE — LibreOffice vulnerabilities<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">База уязвимостей</p>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Geopolitical Sources -->
-                    <div class="card rounded-lg p-6">
-                        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
-                            </svg>
-                            Геополитические риски
-                        </h3>
-                        <ul class="space-y-3 text-sm">
-                            <li>
-                                <a href="https://blog.documentfoundation.org/blog/2022/02/28/the-document-foundation-suspends-rusbitech-from-its-advisory-board/" target="_blank" class="external-link text-blue-400">
-                                    Заявление TDF об отстранении Astra Linux<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">28 февраля 2022 года</p>
-                            </li>
-                            <li>
-                                <a href="https://www.documentfoundation.org/" target="_blank" class="external-link text-blue-400">
-                                    The Document Foundation<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">Официальный сайт фонда-правообладателя</p>
-                            </li>
-                            <li>
-                                <a href="https://www.libreoffice.org/" target="_blank" class="external-link text-blue-400">
-                                    LibreOffice<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">Официальный сайт проекта</p>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Alternative Products -->
-                    <div class="card rounded-lg p-6">
-                        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Отечественные альтернативы
-                        </h3>
-                        <ul class="space-y-3 text-sm">
-                            <li>
-                                <a href="https://myoffice.ru/" target="_blank" class="external-link text-blue-400">
-                                    МойОфис<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">Собственная разработка, сертификация ФСТЭК/ФСБ</p>
-                            </li>
-                            <li>
-                                <a href="https://r7-office.ru/" target="_blank" class="external-link text-blue-400">
-                                    Р7 офис<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">Собственное ядро, внедрение в госкомпании</p>
-                            </li>
-                            <li>
-                                <a href="https://astra.ru/" target="_blank" class="external-link text-blue-400">
-                                    Astra Linux<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">Российская ОС, отстранённая от LibreOffice</p>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- License Info -->
-                <div class="mt-6 p-6 bg-gray-800/50 rounded-lg border border-gray-700">
-                    <h3 class="text-lg font-bold text-white mb-3">О лицензиях</h3>
-                    <div class="grid md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <strong class="text-yellow-500">MPL 2.0</strong>
-                            <p class="text-gray-400 mt-1">Mozilla Public License 2.0 — file-level copyleft лицензия, требующая раскрытия исходного кода модифицированных файлов.</p>
-                            <a href="https://www.mozilla.org/en-US/MPL/2.0/" target="_blank" class="external-link text-blue-400 text-xs mt-2 inline-block">
-                                Полный текст MPL 2.0<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                        </div>
-                        <div>
-                            <strong class="text-yellow-500">LGPL v3</strong>
-                            <p class="text-gray-400 mt-1">GNU Lesser General Public License v3 — «слабая» copyleft лицензия для библиотек, требующая возможности замены библиотеки.</p>
-                            <a href="https://www.gnu.org/licenses/lgpl-3.0.html" target="_blank" class="external-link text-blue-400 text-xs mt-2 inline-block">
-                                Полный текст LGPL v3<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                        </div>
-                    </div>
-                </div>
+            <div id="content-sources" class="tab-content">
+                <h2>Источники и документы</h2>
+                <p class="section-intro">Первоисточники, законодательство и методические материалы.</p>
+                <p style="color: var(--color-gray);">Раздел в разработке...</p>
             </div>
 
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-yellow-600/20 py-8 px-6">
-        <div class="max-w-7xl mx-auto text-center">
-            <p class="text-gray-500 text-sm">
-                Дешборд подготовлен на основе анализа документов: 
-                «Аргументация против использования LibreOffice», 
-                «Риски исключения из реестра», 
-                «Краткий свод признаков», 
-                «О ситуации с офисными пакетами в РФ 2026»
-            </p>
-            <p class="text-gray-600 text-xs mt-2">
-                Источники: <a href="http://government.ru/docs/23668/" target="_blank" class="external-link">Постановление Правительства РФ № 1236<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>, 
-                № 325, методические рекомендации ЦКИТ, 
-                <a href="https://blog.documentfoundation.org/blog/2022/02/28/the-document-foundation-suspends-rusbitech-from-its-advisory-board/" target="_blank" class="external-link">открытые материалы по делу AlterOffice<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-            </p>
+    <footer>
+        <div class="container">
+            <p>Аналитический дешборд подготовлен на основе открытых источников и нормативных документов</p>
         </div>
     </footer>
 
@@ -2003,49 +680,46 @@
         function showTab(tabName) {
             // Hide all content
             document.querySelectorAll('.tab-content').forEach(el => {
-                el.classList.add('hidden');
-                el.style.display = 'none'; // Mobile fix
+                el.classList.remove('active');
+                el.style.display = 'none';
             });
             
             // Show selected content
             const selected = document.getElementById('content-' + tabName);
-            selected.classList.remove('hidden');
-            selected.style.display = 'block'; // Mobile fix
+            if (selected) {
+                selected.classList.add('active');
+                selected.style.display = 'block';
+            }
             
             // Update tab styles
-            document.querySelectorAll('[id^="tab-"]').forEach(el => {
-                el.classList.remove('tab-active');
-                el.classList.add('tab-inactive');
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('active');
             });
             
-            document.getElementById('tab-' + tabName).classList.remove('tab-inactive');
-            document.getElementById('tab-' + tabName).classList.add('tab-active');
+            const tabBtn = document.getElementById('tab-' + tabName);
+            if (tabBtn) {
+                tabBtn.classList.add('active');
+            }
         }
 
         // Expandable content
         function toggleExpand(id) {
             const content = document.getElementById('expand-' + id);
-            const icon = document.getElementById('icon-' + id);
+            const card = content.closest('.card');
             
             if (content.classList.contains('open')) {
                 content.classList.remove('open');
-                icon.style.transform = 'rotate(0deg)';
+                card.classList.remove('expanded');
             } else {
                 content.classList.add('open');
-                icon.style.transform = 'rotate(180deg)';
+                card.classList.add('expanded');
             }
         }
 
-        // Initialize first tab after DOM is ready
-        function initTabs() {
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
             showTab('legal');
-        }
-        
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initTabs);
-        } else {
-            initTabs();
-        }
+        });
     </script>
 </body>
 </html>
