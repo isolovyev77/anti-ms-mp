@@ -464,11 +464,108 @@
                     </div>
                 </div>
 
+                <!-- Legal argument 10: ГОСТ-квалификация + Ankey SIEM -->
+                <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('legal-6')" style="margin-top:8px;">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">10</span>
+                            <h3 class="text-lg font-semibold text-white leading-tight">ГОСТ 19.101-2024: «комплекс программ» - п.5(а) применяется к каждому компоненту</h3>
+                        </div>
+                        <svg id="icon-legal-6" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                    <p class="text-gray-400 mb-2">
+                        <strong class="text-red-400">Новый аргумент (эксперт Журавлев, 2025):</strong> Базальт квалифицирует продукт как «программный комплекс» - но по ГОСТ 19.101-2024 «Свободный офис» является <em>«комплексом программ»</em>. Различие фундаментальное: <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" class="external-link">п. 5(а) Постановления № 1236<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> применяется к каждому компоненту по отдельности.
+                    </p>
+                    <div id="expand-legal-6" class="expandable-content">
+                        <div class="pt-4 border-t border-gray-700">
+                            <div class="space-y-4 text-gray-300">
+                                <div class="p-4 bg-blue-900/20 rounded-lg border border-blue-700/30">
+                                    <p class="text-blue-300 font-semibold mb-2">ГОСТ 19.101-2024 (вступил в силу 30.01.2025 - актуален для заявки 346971):</p>
+                                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">
+                                        <div style="padding:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:6px;">
+                                            <p style="color:#fca5a5;font-weight:600;margin-bottom:4px;">«Программный комплекс»</p>
+                                            <p style="color:#9ca3af;">Единая программа с взаимосвязанными компонентами, совместно выполняющими <em>одну задачу</em>. Права на весь комплекс - достаточное основание.</p>
+                                        </div>
+                                        <div style="padding:10px;background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.3);border-radius:6px;">
+                                            <p style="color:#fde68a;font-weight:600;margin-bottom:4px;">«Комплекс программ»</p>
+                                            <p style="color:#9ca3af;">Набор самостоятельных программ, решающих <em>разные задачи</em>. Права необходимы на <strong style="color:white;">каждый компонент отдельно</strong>.</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-sm mt-3">DavMail (Exchange-шлюз), Zenity (UI-диалоги), LibreOffice (офис), Surguch (PDF/ЭП), Thunderbird (почта), Chromium (браузер) - самостоятельные программы с разными функциями. По ГОСТ - это «комплекс программ».</p>
+                                </div>
+                                <div>
+                                    <p class="text-yellow-500 font-semibold mb-2">Следствие для п. 5(а) Постановления № 1236:</p>
+                                    <p class="text-sm text-gray-400">Если продукт - «комплекс программ», то <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" class="external-link">п. 5(а)<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> требует исключительных прав на каждый из компонентов. У заявителя нет прав на:</p>
+                                    <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm mt-2">
+                                        <li>LibreOffice - права у TDF (Германия)</li>
+                                        <li>Thunderbird - права у Mozilla Foundation (США)</li>
+                                        <li>Chromium - права у Google (США)</li>
+                                        <li>DavMail - права у сообщества (Франция, GPL-2.0+)</li>
+                                        <li>Zenity - права у GNOME Project</li>
+                                    </ul>
+                                    <p class="text-sm text-gray-400 mt-2">Отсутствие прав хотя бы на один компонент - нарушение условия для всего «комплекса программ».</p>
+                                </div>
+                                <div class="p-4 bg-red-900/20 rounded-lg border border-red-700/30">
+                                    <p class="text-red-300 font-semibold mb-2">Прецедент: Ankey SIEM (Постановление АС Московского округа от 20.09.2018 № Ф05-15194/2018 по делу № А40-233720/17)</p>
+                                    <p class="text-sm text-gray-400">Арбитражный суд Московского округа применил <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" class="external-link" style="color:#fca5a5;">п. 5(а) Постановления № 1236<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> к составному произведению и отказал в регистрации продукта, в состав которого входил иностранный компонент без надлежащих прав. Суд прямо указал: наличие хотя бы одного такого компонента - самостоятельное основание для отказа.</p>
+                                    <p class="text-sm text-yellow-300 mt-2">⚠️ Применимость к «Свободному офису»: прецедент касается составных произведений - именно такую квалификацию сам Базальт дал продукту в EULA п.2.1 и в заявке 346971.</p>
+                                    <p class="text-sm text-yellow-300 mt-1">⚠️ Степень уверенности в аргументе через ГОСТ: умеренная - прецедентов применения ГОСТ 19.101 экспертным советом реестра пока не зафиксировано. Прецедент Ankey SIEM через ст. 1260 ГК РФ - более твёрдая опора.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legal argument 11: DavMail runtime github.com (п.5ж, п.5и) -->
+                <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('legal-7')" style="margin-top:8px;">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">11</span>
+                            <h3 class="text-lg font-semibold text-white leading-tight">DavMail: обязательные обращения к github.com при работе - нарушение пп. 5(ж) и 5(и)</h3>
+                        </div>
+                        <svg id="icon-legal-7" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                    <p class="text-gray-400 mb-2">
+                        DavMail (компонент «Свободного офиса», шлюз Exchange) при запуске <strong class="text-white">автоматически обращается к github.com</strong> - отображает актуальную версию и предлагает скачать обновление с иностранного ресурса. Два независимых эксперта (Закоржевский и Щеглов) зафиксировали это поведение. Нарушения: <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" class="external-link">пп. 5(ж) и 5(и) Постановления № 1236.<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
+                    </p>
+                    <div id="expand-legal-7" class="expandable-content">
+                        <div class="pt-4 border-t border-gray-700">
+                            <div class="space-y-4 text-gray-300">
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">
+                                    <div style="padding:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:6px;">
+                                        <p style="color:#fca5a5;font-weight:600;margin-bottom:4px;"><a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" style="color:#fca5a5;text-decoration:none;border-bottom:1px dotted #fca5a5;">П. 5(ж) № 1236</a></p>
+                                        <p style="color:#9ca3af;">ПО не должно обновляться принудительно только с зарубежного ресурса. DavMail при запуске показывает кнопку обновления, ведущую на github.com.</p>
+                                    </div>
+                                    <div style="padding:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:6px;">
+                                        <p style="color:#fca5a5;font-weight:600;margin-bottom:4px;"><a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" style="color:#fca5a5;text-decoration:none;border-bottom:1px dotted #fca5a5;">П. 5(и) № 1236</a></p>
+                                        <p style="color:#9ca3af;">Обязательные обращения к зарубежным серверам при нормальной работе ПО не допускаются. Проверка версии на github.com при каждом запуске - именно такое обращение.</p>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
+                                    <p class="text-yellow-300 text-sm font-semibold mb-1">Источник: два независимых эксперта</p>
+                                    <p class="text-gray-400 text-sm">Закоржевский (2025): «DavMail при запуске обращается к github.com для отображения актуальной версии и предлагает скачать обновление». Щеглов (заявка 346971): «DavMail получает обновления с GitHub» (со ссылкой на п. 5(и)). Независимое совпадение показаний двух экспертов.</p>
+                                </div>
+                                <div class="p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
+                                    <p class="text-yellow-300 text-sm font-semibold mb-1">⚠️ Требует верификации логом</p>
+                                    <p class="text-gray-400 text-sm">Для максимальной убедительности - скриншот UI DavMail с запросом обновления или захват сетевого трафика (<code class="bg-gray-700 px-1 rounded text-xs">tcpdump host api.github.com</code>) при запуске. В текущем виде аргумент опирается на показания экспертов.</p>
+                                </div>
+                                <div class="p-3 bg-red-900/20 rounded border border-red-700/30">
+                                    <p class="text-red-300 text-sm"><strong>Вывод:</strong> DavMail - компонент, поставляемый в составе «Свободного офиса», - при нормальной работе устанавливает соединение с иностранным сервером (github.com). Это нарушает <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" class="external-link" style="color:#fca5a5;">п. 5(и)<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> (обязательные обращения к зарубежным ресурсам) и <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" class="external-link" style="color:#fca5a5;">п. 5(ж)<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> (обновления только с зарубежного источника).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Quote -->
                 <div class="mt-8 p-6 border-l-4 border-yellow-500 bg-gradient-to-r from-yellow-900/20 to-transparent rounded-r-lg cursor-pointer hover:bg-yellow-900/30 transition-colors" onclick="window.open('https://digital.gov.ru/news-media/minkomsvyaz-vklyuchila-v-reestr-rossijskogo-po-155-programm', '_blank')">
                     <blockquote class="text-xl italic text-gray-300 mb-3">
-                        «Нужно воздержаться от включения в реестр спорных позиций — ведь это реестр 
-                        именно российского ПО, и совершенно точно не "клонов" иностранного ПО 
+                        «Нужно воздержаться от включения в реестр спорных позиций — ведь это реестр
+                        именно российского ПО, и совершенно точно не "клонов" иностранного ПО
                         или части их ключевых компонентов.»
                     </blockquote>
                     <cite class="text-yellow-500">— Николай Никифоров, Председатель Экспертного совета при Минкомсвязи (2016)</cite>
@@ -2189,6 +2286,40 @@
                         </div>
                     </div>
 
+                    <!-- Claim: ОС Эльбрус precedent refutation -->
+                    <div class="card rounded-lg p-6 border-l-4 border-orange-500" style="margin-top:16px;">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-orange-900/50 flex items-center justify-center flex-shrink-0">
+                                <svg style="width:18px;height:18px;" fill="none" stroke="#fb923c" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <h3 class="text-lg font-semibold text-white">Опровержение: «ОС Эльбрус уже в реестре с офисными приложениями»</h3>
+                                    <span style="padding:2px 8px;background:rgba(249,115,22,0.2);border:1px solid rgba(249,115,22,0.4);border-radius:12px;font-size:11px;color:#fdba74;white-space:nowrap;">Аргумент Базальт СПО</span>
+                                </div>
+                                <div class="p-4 bg-gray-800/50 rounded-lg mb-4">
+                                    <p class="text-gray-300 text-sm italic">Позиция Базальт СПО (предполагаемая):</p>
+                                    <p class="text-orange-200 text-sm mt-2">«ОС Эльбрус уже включена в реестр с классом "Офисные приложения", в её состав входит LibreOffice - значит, аналогичный подход должен быть применён и к "Свободному офису"».</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-red-900/20 rounded border border-red-700/30">
+                                        <p class="text-red-300 text-sm font-semibold mb-2">Факт: класс удалён из реестровой записи (эксперт Закоржевский, 2025)</p>
+                                        <p class="text-gray-400 text-sm">Реестровая запись ОС Эльбрус <strong class="text-white">№ 3199</strong>: класс <strong class="text-white">04.03 «Офисные приложения»</strong> удалён из записи <strong class="text-white">05.09.2022</strong>. Таким образом, на момент рассмотрения заявки «Свободного офиса» (2025-2026) ОС Эльбрус уже не числится в реестре с классом офисных приложений.</p>
+                                        <p class="text-gray-400 text-sm mt-2">Проверка: <a href="https://reestr.digital.gov.ru/reestr/3199/" target="_blank" class="external-link text-blue-400">reestr.digital.gov.ru/reestr/3199/<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a></p>
+                                    </div>
+                                    <div class="p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
+                                        <p class="text-yellow-300 text-sm font-semibold mb-1">Дополнительный контраргумент</p>
+                                        <p class="text-gray-400 text-sm">Включение ОС (операционной системы) в реестр с офисными приложениями в составе не является прецедентом для отдельного офисного пакета: ОС подаётся как системное ПО (класс 02.xx), а «Свободный офис» претендует именно на класс офисного ПО (05.02 или 06.03), где требования к исключительным правам на ядро применяются напрямую.</p>
+                                    </div>
+                                    <div class="p-3 bg-orange-900/20 rounded border border-orange-700/30">
+                                        <p class="text-orange-300 text-sm font-semibold mb-1">⚠️ Степень уверенности</p>
+                                        <p class="text-gray-400 text-sm">Факт удаления класса 04.03 из записи № 3199 указан экспертом Закоржевским с конкретными датой и номером. Проверяется напрямую на сайте реестра. До независимой верификации - маркировать как «требует проверки в реестре».</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 <!-- Summary -->
                 <div class="mt-8 p-6 bg-gradient-to-r from-red-900/40 to-orange-900/20 rounded-lg border border-red-600/30">
                     <div class="flex items-start gap-4">
@@ -2243,6 +2374,14 @@
                                 <li class="flex items-start gap-2">
                                     <span class="text-gray-500 mt-1">•</span>
                                     <span><strong class="text-white">Контекст: Ростелеком (конец 2025)</strong>: приобрёл 25% Базальт СПО — Ростелеком российская государственная компания, поэтому п.5(б) об иностранном участии не затрагивается. Фактически это означает усиление государственного участия в структуре, что для целей реестра нейтрально или положительно. <span style="color:#6b7280;font-size:12px;">[Фактический контекст, не правовой аргумент против заявки]</span></span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-red-500 mt-1">•</span>
+                                    <span><strong class="text-white">Состав дистрибутива 346971:</strong> Chromium и Thunderbird фактически не входят в дистрибутив - они устанавливаются отдельно после freeoffice-installer. Установщик также удаляет LibreOffice из ALT OS 11 при запуске (эксперт Щеглов П.Е.). Таким образом, декларируемый в заявке состав продукта расходится с фактическим содержимым дистрибутива.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-yellow-500 mt-1">•</span>
+                                    <span><strong class="text-white">«LibreOffice Community» маркировка:</strong> TDF ввела это обозначение специально для отказа от обязательств по enterprise-поддержке. Базальт использует именно эту маркировку - тем самым признавая, что сборка не имеет статуса поддерживаемого enterprise-дистрибутива TDF. Это усиливает аргумент о структурной зависимости: без enterprise-статуса TDF Базальт лишён гарантированного SLA на патчи CVE.</span>
                                 </li>
                             </ul>
                         </div>
