@@ -149,24 +149,28 @@
             max-width: 1200px;
             margin: 0 auto;
             list-style: none;
-            padding: 0 20px;
+            padding: 0 8px;
+            flex-wrap: nowrap;
         }
 
         .nav-tab {
-            flex: 0 0 auto;
+            flex: 1 1 auto;
+            min-width: 0;
         }
 
         .nav-tab button {
-            padding: 16px 20px;
+            padding: 14px 8px;
             background: none;
             border: none;
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 500;
             color: #666;
             cursor: pointer;
             transition: all 0.3s;
             border-bottom: 3px solid transparent;
             margin-bottom: -2px;
+            white-space: nowrap;
+            width: 100%;
         }
 
         .nav-tab button:hover {
@@ -250,8 +254,8 @@
 
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
             margin-bottom: 30px;
         }
 
@@ -979,16 +983,17 @@
             }
 
             .kpi-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
             }
 
             .nav-tabs {
-                padding: 0 10px;
+                padding: 0 4px;
+                overflow-x: auto;
             }
 
             .nav-tab button {
-                padding: 12px 14px;
-                font-size: 13px;
+                padding: 10px 8px;
+                font-size: 12px;
             }
 
             .chart-container {
@@ -1076,8 +1081,8 @@
             <li class="nav-tab"><button class="nav-btn" data-tab="comparison">Сравнение товаров</button></li>
             <li class="nav-tab"><button class="nav-btn" data-tab="counter">Контраргументы</button></li>
             <li class="nav-tab"><button class="nav-btn" data-tab="demands">Предложения</button></li>
+            <li class="nav-tab"><button class="nav-btn" data-tab="monitoring" style="color:#1a3a6b; font-weight:700;">🔍 Мониторинг</button></li>
             <li class="nav-tab"><button class="nav-btn" data-tab="sources">Источники</button></li>
-            <li class="nav-tab"><button class="nav-btn" data-tab="monitoring" style="color:#1a3a6b; font-weight:700;">🔍 Системный мониторинг</button></li>
         </ul>
     </div>
 
@@ -3118,14 +3123,14 @@
                 <table id="monTable" style="font-size:13px;">
                     <thead style="background:var(--ozon-dark);color:white;">
                         <tr>
-                            <th>Дата</th>
-                            <th>Площадка</th>
-                            <th>Название товара</th>
+                            <th onclick="monSortBy('date')" id="mth-date" style="cursor:pointer;user-select:none;white-space:nowrap;">Дата <span id="mts-date"></span></th>
+                            <th onclick="monSortBy('pl')" id="mth-pl" style="cursor:pointer;user-select:none;white-space:nowrap;">Площадка <span id="mts-pl"></span></th>
+                            <th onclick="monSortBy('title')" id="mth-title" style="cursor:pointer;user-select:none;white-space:nowrap;">Название товара <span id="mts-title"></span></th>
                             <th>Ссылка</th>
-                            <th>Цена</th>
-                            <th>Офиц. цена</th>
-                            <th>Дисконт</th>
-                            <th>Флажки</th>
+                            <th onclick="monSortBy('price')" id="mth-price" style="cursor:pointer;user-select:none;white-space:nowrap;">Цена <span id="mts-price"></span></th>
+                            <th onclick="monSortBy('op')" id="mth-op" style="cursor:pointer;user-select:none;white-space:nowrap;">Офиц. цена <span id="mts-op"></span></th>
+                            <th onclick="monSortBy('disc')" id="mth-disc" style="cursor:pointer;user-select:none;white-space:nowrap;">Дисконт <span id="mts-disc"></span></th>
+                            <th onclick="monSortBy('flags')" id="mth-flags" style="cursor:pointer;user-select:none;white-space:nowrap;">Флажки <span id="mts-flags"></span></th>
                         </tr>
                     </thead>
                     <tbody id="monTableBody"></tbody>
@@ -3953,29 +3958,151 @@
 
     // 23 карточки из реального мониторинга (январь-март 2026)
     const MON_RAW = [
-        {date:'2026-03-15',pl:'ozon',id:'OZ-9184721',query:'Microsoft Office ключ активации',title:'Microsoft Office 365 Personal ключ активации 12 мес RU',url:'https://www.ozon.ru/search/?text=microsoft+office+365+ключ',price:199,op:6990,regDays:12,auth:false},
-        {date:'2026-03-14',pl:'ozon',id:'OZ-8374651',query:'Microsoft Office 365 ключ',title:'Office 365 Personal лицензионный ключ активации 1 год',url:'https://www.ozon.ru/search/?text=office+365+ключ+активации',price:171,op:6990,regDays:8,auth:false},
-        {date:'2026-03-13',pl:'ozon',id:'OZ-7293847',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 Home & Business ключ активации',url:'https://www.ozon.ru/search/?text=office+2021+ключ',price:221,op:14990,regDays:null,auth:null},
-        {date:'2026-03-12',pl:'ozon',id:'OZ-6182937',query:'Windows 11 ключ активации',title:'Windows 11 Pro ключ активации лицензия ESD',url:'https://www.ozon.ru/search/?text=windows+11+pro+ключ',price:195,op:16990,regDays:5,auth:false},
-        {date:'2026-03-10',pl:'ozon',id:'OZ-5071826',query:'Microsoft Office 365 ключ',title:'Microsoft Office 365 Personal годовая подписка ключ',url:'https://www.ozon.ru/search/?text=microsoft+365+personal+ключ',price:210,op:6990,regDays:null,auth:null},
-        {date:'2026-03-08',pl:'ozon',id:'OZ-4960715',query:'Windows 11 ключ активации',title:'Windows 11 Home ключ активации ESD розничный',url:'https://www.ozon.ru/search/?text=windows+11+home+ключ',price:215,op:13990,regDays:21,auth:false},
-        {date:'2026-03-16',pl:'wildberries',id:'WB-7364829',query:'Microsoft Office 365 ключ',title:'Microsoft Office 365 ключ активации 2026 годовая подписка',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=microsoft+office+365+ключ',price:349,op:6990,regDays:44,auth:false},
-        {date:'2026-03-15',pl:'wildberries',id:'WB-6253718',query:'Microsoft Office ключ активации',title:'Office 365 Personal 1 год лицензионный ключ активации',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=office+365+ключ',price:147,op:6990,regDays:null,auth:null},
-        {date:'2026-03-14',pl:'wildberries',id:'WB-5142607',query:'Windows 11 ключ активации',title:'Windows 11 Pro ESD ключ активации лицензия',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=windows+11+pro+ключ',price:404,op:16990,regDays:17,auth:false},
-        {date:'2026-03-12',pl:'wildberries',id:'WB-4031496',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 Professional лицензионный ключ',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=office+2021+ключ',price:290,op:22990,regDays:null,auth:null},
-        {date:'2026-03-11',pl:'wildberries',id:'WB-3920385',query:'Microsoft Office 365 ключ',title:'MS Office 365 ключ активации подписка на год',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=ms+office+365+ключ',price:380,op:6990,regDays:7,auth:false},
-        {date:'2026-03-09',pl:'wildberries',id:'WB-2819274',query:'Windows 11 ключ активации',title:'Windows 11 Home ключ активации лицензия ESD 2026',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=windows+11+home+ключ',price:320,op:13990,regDays:null,auth:null},
-        {date:'2026-03-17',pl:'yandex',id:'YM-8192736',query:'Microsoft Office 365 ключ',title:'Microsoft Office 365 Personal ключ активации RU 1 год',url:'https://market.yandex.ru/search?text=microsoft+office+365+ключ',price:99,op:6990,regDays:null,auth:null},
-        {date:'2026-03-16',pl:'yandex',id:'YM-7081625',query:'Microsoft Office ключ активации',title:'Office 365 Personal подписка 12 месяцев ключ активации',url:'https://market.yandex.ru/search?text=office+365+ключ+активации',price:25,op:6990,regDays:3,auth:false},
-        {date:'2026-03-15',pl:'yandex',id:'YM-5970514',query:'Windows 11 ключ активации',title:'Windows 11 Pro ключ активации ESD цифровая лицензия',url:'https://market.yandex.ru/search?text=windows+11+pro+ключ',price:139,op:16990,regDays:null,auth:null},
-        {date:'2026-03-13',pl:'yandex',id:'YM-4859403',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 Home & Business лицензионный ключ',url:'https://market.yandex.ru/search?text=office+2021+home+business',price:75,op:14990,regDays:null,auth:null},
-        {date:'2026-03-11',pl:'yandex',id:'YM-3748292',query:'Microsoft Office 365 ключ',title:'Office 365 ключ Microsoft RU подписка 12 мес',url:'https://market.yandex.ru/search?text=office+365+microsoft+ключ',price:49,op:6990,regDays:14,auth:false},
-        {date:'2026-03-18',pl:'avito',id:'AV-2637181',query:'Microsoft Office 365 ключ',title:'Microsoft Office 365 Personal ключ активации - 1 год',url:'https://www.avito.ru/rossiya?q=microsoft+office+365+ключ',price:320,op:6990,regDays:null,auth:null},
-        {date:'2026-03-17',pl:'avito',id:'AV-1526070',query:'Microsoft Office ключ активации',title:'Office 365 Personal 12 мес, ключ активации онлайн',url:'https://www.avito.ru/rossiya?q=office+365+ключ',price:310,op:6990,regDays:null,auth:null},
-        {date:'2026-03-16',pl:'avito',id:'AV-9414959',query:'Windows 11 ключ активации',title:'Windows 11 Home ESD ключ активации Microsoft',url:'https://www.avito.ru/rossiya?q=windows+11+ключ',price:315,op:13990,regDays:null,auth:null},
-        {date:'2026-03-15',pl:'avito',id:'AV-8303848',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 Home Business ключ лицензия ESD',url:'https://www.avito.ru/rossiya?q=office+2021+ключ',price:320,op:14990,regDays:null,auth:null},
-        {date:'2026-03-14',pl:'avito',id:'AV-7192737',query:'Microsoft Office ключ активации',title:'Office 2019 Home Business ключ активации Microsoft RU',url:'https://www.avito.ru/rossiya?q=office+2019+ключ',price:299,op:8990,regDays:null,auth:null},
-        {date:'2026-03-12',pl:'avito',id:'AV-6081626',query:'Windows 11 ключ активации',title:'Windows 11 Pro ESD активация ключ онлайн',url:'https://www.avito.ru/rossiya?q=windows+11+pro+ключ',price:299,op:16990,regDays:null,auth:null},
+        {date:'2026-03-14',pl:'yandex',id:'YM-6533949',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Office 2024 Pro Plus LTSC ( бессрочная активация), для ноутбука/компьютера',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:51,op:22990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'yandex',id:'YM-7685392',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Office 2021 Pro plus, Электронный ключ (бессрочная активация на 1 ПК) Официальная лицензия',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:51,op:22990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'yandex',id:'YM-7562196',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Office 2024 Pro Plus LTSC - лицензионный ключ',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:51,op:22990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'yandex',id:'YM-8994175',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Office 2024 ltsc pro plus бессрочный',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:51,op:22990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'yandex',id:'YM-7314974',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Office 2019 Pro Plus для Windows бессрочный',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:51,op:8990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'yandex',id:'YM-2883589',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Office 2021 Pro Plus бессрочный 1 ПК',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:52,op:22990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'yandex',id:'YM-1947608',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Office 2016 Pro Plus(Официальный ключ, бессрочная активация)',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:52,op:7990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'yandex',id:'YM-9850405',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Office 2024 Pro Plus LTSC бессрочная активация 1 ПК',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:58,op:22990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'yandex',id:'YM-1060410',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Office 2021 pro plus, Электронный ключ (бессрочная лицензия на 1 ПК)',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:58,op:22990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'avito',id:'AV-6871952',query:'Microsoft Office ключ активации',title:'Ключ активации Windows 11 Pro + Office 2024 Plus',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:59,op:22990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'yandex',id:'YM-9882569',query:'Microsoft Office ключ активации',title:'Ключ Office 2021 Pro Plus Microsoft, бессрочная активация без звонка',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:62,op:22990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'yandex',id:'YM-9229105',query:'Microsoft Office ключ активации',title:'Ключ активации Office Pro Plus 2021 для Windows бессрочный',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:74,op:22990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'yandex',id:'YM-5224547',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 Professional Plus Retail | Электронный ключ | Бессрочный | 1 ПК | Без привязки к учетной записи',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:80,op:22990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'avito',id:'AV-1811899',query:'Microsoft Office ключ активации',title:'Office 2024 Professional Plus ltsc ключ активации',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:85,op:22990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'yandex',id:'YM-4491476',query:'Microsoft Office ключ активации',title:'Microsoft Office 365 - бессрочный, мультиязычный аккаунт, 100 ГБ One Drive',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:89,op:6990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'yandex',id:'YM-3626000',query:'Microsoft Office ключ активации',title:'Ключ активации Office Professional Plus 2021 бессрочный 1 ПК без привязки',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:89,op:22990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'yandex',id:'YM-1944448',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Office 2024 LTSC Pro Plus для 1 ПК без привязки к аккаунту',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:89,op:22990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'yandex',id:'YM-4804358',query:'Microsoft Office ключ активации',title:'Ключ активации Office 2024 Pro Plus бессрочный 1 ПК без привязки',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:89,op:22990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'yandex',id:'YM-7605668',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 для дома и учебы T5D-03487 ESD электронный ключ',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:89,op:14990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'avito',id:'AV-8492946',query:'Microsoft Office ключ активации',title:'Microsoft Office 2016 Professional Plus',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:98,op:7990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'avito',id:'AV-4288093',query:'Microsoft Office ключ активации',title:'Ключ активации Windows 10/11+Office 2026/24/21/365',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:99,op:6990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'avito',id:'AV-4477081',query:'Microsoft Office ключ активации',title:'Microsoft Office 2019 Professional Plus',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:99,op:8990,regDays:null,auth:null},
+        {date:'2026-03-14',pl:'avito',id:'AV-8371264',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 Professional Plus',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:99,op:22990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'avito',id:'AV-5701544',query:'Microsoft Office ключ активации',title:'Microsoft Office 2024 ltsc Professional Plus',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:99,op:22990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'avito',id:'AV-4755297',query:'Microsoft Office ключ активации',title:'Ключ Microsoft Office 2021 Professional Plus ltsc',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:100,op:22990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'avito',id:'AV-4525490',query:'Microsoft Office ключ активации',title:'Ключ активации Windows 10/11+Office 19/21/24/365',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:100,op:6990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'yandex',id:'YM-4283538',query:'Microsoft Office ключ активации',title:'Microsoft Office 365 Pro Plus Бессрочный Аккаунт + Облако 100GB / Для Win+VacOS + Android + IOS',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:107,op:6990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'yandex',id:'YM-4004685',query:'Microsoft Office ключ активации',title:'Microsoft Office Home and Student 2021 для Windows ESD',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:116,op:14990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'avito',id:'AV-9408064',query:'Microsoft Office ключ активации',title:'Microsoft Office 2024 Professional plus',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:120,op:22990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'avito',id:'AV-3948393',query:'Microsoft Office ключ активации',title:'Windows 10 Pro/11 ключ активации',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:120,op:16990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'wildberries',id:'WB-3129893',query:'Microsoft Office 365 ключ',title:'Office 365 Pro Plus подписка на готовый аккаунт Win Mac ios',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20365%20%D0%BA%D0%BB%D1%8E%D1%87',price:124,op:6990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'yandex',id:'YM-9834645',query:'Microsoft Office ключ активации',title:'Microsoft Office 2024 Pro Plus LTSC электронный ключ , бессрочная лицензия, 1 ПК',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:124,op:22990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'avito',id:'AV-4019313',query:'Microsoft Office ключ активации',title:'Microsoft Office 2013 Professional Plus онлайн',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:128,op:6990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'avito',id:'AV-8081591',query:'Microsoft Office ключ активации',title:'Microsoft Office 2024 Professional Plus ltsc',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:150,op:22990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'avito',id:'AV-4074862',query:'Microsoft Office ключ активации',title:'Ключ активации Windows 10/11+Office 21/24/365',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:150,op:6990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'avito',id:'AV-3645332',query:'Microsoft Office ключ активации',title:'Ключ активации Windows 11 10 8 7 и других версии',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:150,op:13990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'avito',id:'AV-5725118',query:'Microsoft Office ключ активации',title:'Лицензия Microsoft Office навсегда',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:150,op:14990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'ozon',id:'OZ-3998135',query:'Microsoft Office ключ активации',title:'Office 2019 Pro Plus LTSC Лицензионный ключ / Интернет активация / Бессрочная лицензия',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:152,op:8990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'ozon',id:'OZ-2931541',query:'Microsoft Office ключ активации',title:'Ключ Project 2024 Pro LTSC - бессрочная активация, на 1 устройство, без ограничений',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:152,op:22990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'ozon',id:'OZ-2640203',query:'Microsoft Office ключ активации',title:'Ключ Office 2021 Pro Plus - бессрочная активация, на 1 устройство, без ограничений',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:153,op:22990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'ozon',id:'OZ-4541681',query:'Microsoft Office ключ активации',title:'Ключ Project Pro 2021 - бессрочная лицензия на 1PC, быстрая активация (Windows 10, 11)',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:154,op:14990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'ozon',id:'OZ-5515246',query:'Microsoft Office ключ активации',title:'Ключ Office 2016 Pro Plus - бессрочная активация, на 1 устройство, без ограничений',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:155,op:7990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'ozon',id:'OZ-3883418',query:'Microsoft Office ключ активации',title:'Ключ Visio Pro 2016 - бессрочная лицензия на 1PC, быстрая активация (Windows 10, 11)',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:156,op:7990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'avito',id:'AV-9282488',query:'Microsoft Office ключ активации',title:'Microsoft Office 2010 Professional Plus',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:158,op:6990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'ozon',id:'OZ-3606548',query:'Microsoft Office ключ активации',title:'Office 2016 Pro Plus LTSC Лицензионный ключ / Интернет активация / Бессрочная лицензия',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:159,op:7990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'wildberries',id:'WB-5662088',query:'Microsoft Office ключ активации',title:'Office 2021 Pro Plus',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:159,op:22990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'ozon',id:'OZ-1525495',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 Pro Plus с привязкой к учетной записи Microsoft для Windows',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:162,op:22990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'ozon',id:'OZ-9303711',query:'Microsoft Office ключ активации',title:'Adobe Acrobat PRO DC 2020 бессрочный ключ активации для Windows',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:163,op:16990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'ozon',id:'OZ-7942398',query:'Microsoft Office ключ активации',title:'Ключ Office 2024 Для Дома и Бизнеса - с привязкой к учетной записи, бессрочный (Windows, MacOS)',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:170,op:14990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'ozon',id:'OZ-3906194',query:'Microsoft Office ключ активации',title:'Ключ Windows 10 Корпоративная LTSC 2021 (Enterprise LTSC) - бессрочная активация, для 1 устройства',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:170,op:14990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'wildberries',id:'WB-4289477',query:'Microsoft Office ключ активации',title:'Office 2019 Pro Plus LTSC ключ активации 1 ПК',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:170,op:8990,regDays:null,auth:null},
+        {date:'2026-03-14',pl:'avito',id:'AV-9771988',query:'Microsoft Office ключ активации',title:'Ключ Windows 11 pro, Microsoft office 2021 Pro',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:170,op:14990,regDays:null,auth:null},
+        {date:'2026-03-14',pl:'wildberries',id:'WB-9449090',query:'Microsoft Office ключ активации',title:'Office 2019 Pro Plus Retail ключ активации по телефону',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:182,op:8990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'wildberries',id:'WB-7684845',query:'Microsoft Office ключ активации',title:'Office 2021 Pro Plus ключ активации для 1 ПК',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:182,op:22990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'ozon',id:'OZ-6925531',query:'Microsoft Office ключ активации',title:'Ключ активации Windows 11 Home (бессрочная лицензия, онлайн активация)',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:184,op:13990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'ozon',id:'OZ-6891133',query:'Microsoft Office ключ активации',title:'Windows 10 pro лицензионный ключ активации 1 ПК - Онлайн доставка (все языки)',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:185,op:16990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'ozon',id:'OZ-8500799',query:'Microsoft Office ключ активации',title:'Ключ активации Windows 10 Home (бессрочная лицензия, онлайн активация)',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:186,op:13990,regDays:null,auth:null},
+        {date:'2026-03-14',pl:'ozon',id:'OZ-2304399',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Project 2021 Professional, бессрочная лицензия на 1 ПК',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:186,op:22990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'ozon',id:'OZ-2655958',query:'Microsoft Office ключ активации',title:'Ключ Office 2021 Pro Plus - с привязкой к учетной записи, бессрочный (для Windows)',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:188,op:22990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'ozon',id:'OZ-6647222',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 Pro plus, ключ активации, онлайн доставка',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:189,op:22990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'avito',id:'AV-8981911',query:'Microsoft Office ключ активации',title:'Лицензионные ключи Windows 11 Pro/Home',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:190,op:16990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'avito',id:'AV-4568994',query:'Microsoft Office ключ активации',title:'Microsoft Office 2016 Professional Plus онлайн',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:198,op:7990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'wildberries',id:'WB-2710149',query:'Microsoft Office ключ активации',title:'Office Professional Plus 2021 Ключ активации',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:199,op:22990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'avito',id:'AV-8524810',query:'Microsoft Office ключ активации',title:'Microsoft office 2024 навсегда windows/macos',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:199,op:22990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'avito',id:'AV-9160744',query:'Microsoft Office ключ активации',title:'Ключ активации Office Professional Plus 10/16/19',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:199,op:14990,regDays:null,auth:null},
+        {date:'2026-03-14',pl:'avito',id:'AV-2635870',query:'Microsoft Office ключ активации',title:'Microsoft Office 2024 навсегда',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:199,op:22990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'yandex',id:'YM-9547969',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 Home and Business T5D-03548 для MacOS ESD',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:199,op:14990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'yandex',id:'YM-3665356',query:'Microsoft Office ключ активации',title:'Microsoft Office 2019 Home and Business T5D-03319 для MacOS ESD',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:199,op:8990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'avito',id:'AV-7925423',query:'Microsoft Office ключ активации',title:'Ключ активации MS Office 24/21/19/ 16/365',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:200,op:6990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'avito',id:'AV-8348495',query:'Microsoft Office ключ активации',title:'Microsoft Office 2024 Pro Plus MacOS— Навсегда',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:200,op:22990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'avito',id:'AV-8271550',query:'Microsoft Office ключ активации',title:'Windows 11 ключ, Windows 10 ключ активации',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:200,op:13990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'avito',id:'AV-9800894',query:'Microsoft Office ключ активации',title:'Microsoft Office 2024 Professional Plus — Навсегда',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:200,op:22990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'wildberries',id:'WB-7597683',query:'Microsoft Office ключ активации',title:'Office 365 Pro Plus подписка ключ активации',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:201,op:6990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'yandex',id:'YM-3894561',query:'Microsoft Office ключ активации',title:'Ключ активации Office 2024 Pro Plus LTSC - Оригинальная активация Microsoft - Офисные программы Word, Excel, PowerPoint',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:210,op:22990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'ozon',id:'OZ-7689442',query:'Microsoft Office ключ активации',title:'Windows 11 pro лицензионный ключ активации 1 ПК - Онлайн доставка (все языки)',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:215,op:16990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'wildberries',id:'WB-5630254',query:'Microsoft Office ключ активации',title:'Office Professional Plus 2024 Ключ активации',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:216,op:22990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'yandex',id:'YM-7018027',query:'Microsoft Office ключ активации',title:'Активация Office 365 (Аккаунт с бессрочной подпиской / Русский язык / Официальная версия)',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:219,op:6990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'wildberries',id:'WB-1851901',query:'Microsoft Office 365 ключ',title:'Office 365 Pro Plus бессрочный аккаунт на 5 ПК',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20365%20%D0%BA%D0%BB%D1%8E%D1%87',price:220,op:6990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'wildberries',id:'WB-2910009',query:'Microsoft Office ключ активации',title:'Office 2021 Pro Plus LTSC ключ активации 1 ПК',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:225,op:22990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'avito',id:'AV-7246766',query:'Microsoft Office ключ активации',title:'Microsoft Office 2019 Professional Plus онлайн',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:249,op:8990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'avito',id:'AV-1002322',query:'Microsoft Office ключ активации',title:'Office 24,21,19,16 ключ Microsoft 365 Win/MacOS',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:250,op:6990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'avito',id:'AV-5360948',query:'Microsoft Office ключ активации',title:'Office 2024 / 365 – Ключ активации',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:250,op:6990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'avito',id:'AV-3546216',query:'Microsoft Office ключ активации',title:'Office 2016 2019 2021 2024 365 - Бессрочный ключ',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:250,op:6990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'avito',id:'AV-9716264',query:'Microsoft Office ключ активации',title:'Ключ Активации windows и Microsoft office 2024',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:250,op:22990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'avito',id:'AV-5288350',query:'Microsoft Office ключ активации',title:'Microsoft office 2024 2021 2019 2016 365 ключ',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:250,op:6990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'avito',id:'AV-6842961',query:'Microsoft Office ключ активации',title:'Microsoft Office 2019 Professional Plus Навсегда',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:250,op:8990,regDays:null,auth:null},
+        {date:'2026-03-14',pl:'wildberries',id:'WB-8567702',query:'Microsoft Office ключ активации',title:'Office 365 бессрочная лицензия',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:258,op:6990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'ozon',id:'OZ-2735646',query:'Microsoft Office ключ активации',title:'Microsoft Office 2024 Pro Plus LTSC Ключ активации, онлайн доставка',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:264,op:22990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'yandex',id:'YM-4233015',query:'Microsoft Office ключ активации',title:'Microsoft Office 365 Pro Plus (Бессрочный аккаунт на 5 устройств) Подписка для Win-Mac',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:266,op:6990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'ozon',id:'OZ-6402999',query:'Microsoft Office ключ активации',title:'Ключ активации Visio 2019 Pro, бессрочная лицензия для 1 ПК, для Windows',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:270,op:8990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'yandex',id:'YM-5317374',query:'Microsoft Office ключ активации',title:'Microsoft Office 365 Personal лицензионный ключ (ESD) на 12 месяцев для Windows и Mac',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:282,op:6990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'yandex',id:'YM-8435462',query:'Microsoft Office ключ активации',title:'Microsoft 365 Personal 12 месяцев ESD электронный ключ',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:282,op:6990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'yandex',id:'YM-3406087',query:'Microsoft Office ключ активации',title:'Microsoft Office 365 Personal 12 месяцев ESD ключ активации QQ2-00004',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:282,op:6990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'yandex',id:'YM-2378496',query:'Microsoft Office ключ активации',title:'Microsoft 365 Family 12 месяцев ESD электронный ключ',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:282,op:6990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'yandex',id:'YM-5965602',query:'Microsoft Office ключ активации',title:'Microsoft Office 365 Personal 12 месяцев BOX ключ активации QQ2-01897',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:282,op:6990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'wildberries',id:'WB-2022414',query:'Microsoft Office ключ активации',title:'Office 365 Pro Plus ключ активации подписка',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:290,op:6990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'wildberries',id:'WB-5205113',query:'Microsoft Office 2021 ключ',title:'Office 2021 Pro Plus ключ активации 2 ПК',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%202021%20%D0%BA%D0%BB%D1%8E%D1%87',price:290,op:22990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'wildberries',id:'WB-3547876',query:'Microsoft Office 365 ключ',title:'Комплект Windows 11 Home + Office 365 Pro Plus',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20365%20%D0%BA%D0%BB%D1%8E%D1%87',price:294,op:6990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'avito',id:'AV-3316350',query:'Microsoft Office ключ активации',title:'Ключ windows 11 pro + office 2021',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:300,op:14990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'avito',id:'AV-7712556',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 macOS навсегда',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:300,op:14990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'avito',id:'AV-9981521',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 навсегда',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:300,op:14990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'avito',id:'AV-7922917',query:'Microsoft Office ключ активации',title:'Активация microsoft office',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:300,op:14990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'avito',id:'AV-6684056',query:'Microsoft Office ключ активации',title:'Ключ активации Ms office 2024 ltsc проф плюс',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:300,op:22990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'avito',id:'AV-9494041',query:'Microsoft Office ключ активации',title:'Лицензионный ключ Windows 11 10 8 7 Pro / Home',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:300,op:16990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'avito',id:'AV-5508908',query:'Microsoft Office ключ активации',title:'Лицензия Microsoft Office 365 Professional Plus',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:300,op:6990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'wildberries',id:'WB-6040562',query:'Microsoft Office ключ активации',title:'Office 2021 Pro Plus Retail ключ активации по телефону',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:307,op:22990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'wildberries',id:'WB-7353672',query:'Microsoft Office ключ активации',title:'Office 2024 Pro Plus LTSC ключ активации по телефону',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:311,op:22990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'wildberries',id:'WB-1814269',query:'Microsoft Office 2021 ключ',title:'Комплект Windows 11 Pro и Office 2021 Pro Plus на 1 ПК',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%202021%20%D0%BA%D0%BB%D1%8E%D1%87',price:312,op:22990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'wildberries',id:'WB-1788302',query:'Microsoft Office 2021 ключ',title:'Комплект Windows 11 Pro + Office 2021 Pro Plus 1ПК без USB',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%202021%20%D0%BA%D0%BB%D1%8E%D1%87',price:318,op:22990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'avito',id:'AV-4111037',query:'Microsoft Office ключ активации',title:'Microsoft office 2024/2021/2019 Pro Plus',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:349,op:22990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'avito',id:'AV-2210450',query:'Microsoft Office ключ активации',title:'Microsoft office 2024 macOS. Бессрочно',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:350,op:22990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'wildberries',id:'WB-1739344',query:'Microsoft Office ключ активации',title:'Office 2021 Pro Plus USB + ключ активации 1 ПК',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:354,op:22990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'avito',id:'AV-7660098',query:'Microsoft Office ключ активации',title:'Word / Excel/ PowerPoint 2024 лицензия',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:380,op:22990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'avito',id:'AV-4721513',query:'Microsoft Office ключ активации',title:'Nitro PDF Pro 10 пожизненный ключ активации',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:390,op:14990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'yandex',id:'YM-5260937',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 Home and Business T5D-03484 для Windows ESD',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:399,op:14990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'avito',id:'AV-3152630',query:'Microsoft Office ключ активации',title:'Ключ активации Office 2024 2021 2019 2016',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:400,op:14990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'wildberries',id:'WB-2256046',query:'Microsoft Office 365 ключ',title:'Office 365 Pro Plus USB ключ активации подписка',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20365%20%D0%BA%D0%BB%D1%8E%D1%87',price:404,op:6990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'yandex',id:'YM-6685476',query:'Microsoft Office ключ активации',title:'Microsoft Office 2024 Pro Plus (Professional Plus) / Электронный ключ активации / Только для Windows 10|11 Pro или Home',url:'https://market.yandex.ru/search?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:433,op:22990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'avito',id:'AV-2275725',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 Pro Plus с привязкой',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:450,op:22990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'avito',id:'AV-1024765',query:'Microsoft Office ключ активации',title:'Ключ-активация MS office 365 pro',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:450,op:6990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'avito',id:'AV-2348382',query:'Microsoft Office ключ активации',title:'Активация Microsoft Office 2021',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:450,op:14990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'ozon',id:'OZ-5341261',query:'Microsoft Office ключ активации',title:'Microsoft Office 365 Pro Plus Новая учетная запись+ Облако 100GB / Для Win+MacOS + Android + IOS',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:451,op:6990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'avito',id:'AV-5994076',query:'Microsoft Office ключ активации',title:'Microsoft Office 365 ключ / активация / лицензия',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:490,op:6990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'avito',id:'AV-3439666',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Office 2024 Pro Plus ltsc',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:499,op:22990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'avito',id:'AV-2749000',query:'Microsoft Office ключ активации',title:'Microsoft Excel 2024-2010 бессрочно (Mac/Win)',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:500,op:22990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'avito',id:'AV-9300389',query:'Microsoft Office ключ активации',title:'Microsoft Office 2024-2010 бессрочно (Mac/Win)',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:500,op:22990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'avito',id:'AV-9500534',query:'Microsoft Office ключ активации',title:'Microsoft Word 2024-2010 бессрочно (Mac/Win)',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:500,op:22990,regDays:null,auth:null},
+        {date:'2026-03-14',pl:'ozon',id:'OZ-8980613',query:'Microsoft Office ключ активации',title:'Ключ активации Visio 2024 Pro LTSC, бессрочная лицензия для 1 ПК, для Windows',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:539,op:22990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'ozon',id:'OZ-2839172',query:'Microsoft Office ключ активации',title:'Microsoft Office 2021 Home & Business для MacOS с привязкой к учетной записи Microsoft',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:571,op:14990,regDays:null,auth:null},
+        {date:'2026-03-14',pl:'ozon',id:'OZ-1337012',query:'Microsoft Office ключ активации',title:'Ключ Visio Pro 2024 - с привязкой к записи, бессрочная лицензия (Windows 10, 11)',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:622,op:22990,regDays:null,auth:null},
+        {date:'2026-03-15',pl:'wildberries',id:'WB-5250483',query:'Microsoft Office 2021 ключ',title:'Office 2021 Pro Plus на 1 ПК с USB-флешкой без привязки',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%202021%20%D0%BA%D0%BB%D1%8E%D1%87',price:630,op:22990,regDays:null,auth:null},
+        {date:'2026-03-11',pl:'avito',id:'AV-3182451',query:'Microsoft Office ключ активации',title:'Microsoft Office 365 (Офис) — Активация',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:650,op:6990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'ozon',id:'OZ-5638717',query:'Microsoft Office ключ активации',title:'Ключ Visio 2024 Pro LTSC - бессрочная активация, на 1 устройство, без ограничений',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:687,op:22990,regDays:null,auth:null},
+        {date:'2026-03-14',pl:'ozon',id:'OZ-5186940',query:'Microsoft Office ключ активации',title:'Ключ активации Microsoft Project 2016 Professional, бессрочная лицензия на 1 ПК',url:'https://www.ozon.ru/search/?text=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:843,op:7990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'avito',id:'AV-5652120',query:'Microsoft Office ключ активации',title:'Майкрософт офис 365 ключ',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:1000,op:6990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'avito',id:'AV-6942549',query:'Microsoft Office ключ активации',title:'Ключ активации microsoft office 2021',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:1000,op:14990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'wildberries',id:'WB-8965295',query:'Microsoft Office 2021 ключ',title:'Бессрочный ключ Office 2021 для дома и бизнеса macOS',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%202021%20%D0%BA%D0%BB%D1%8E%D1%87',price:1372,op:14990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'wildberries',id:'WB-5105057',query:'Microsoft Office 365 ключ',title:'Подписка Office 365 Win-Mac-iOs 12 месяцев',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%20365%20%D0%BA%D0%BB%D1%8E%D1%87',price:1470,op:6990,regDays:null,auth:null},
+        {date:'2026-03-14',pl:'wildberries',id:'WB-4675060',query:'Microsoft Office 2021 ключ',title:'Office 2021 для дома и бизнеса macOS',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%202021%20%D0%BA%D0%BB%D1%8E%D1%87',price:1470,op:14990,regDays:null,auth:null},
+        {date:'2026-03-13',pl:'avito',id:'AV-8192522',query:'Microsoft Office ключ активации',title:'По для Юр. Лиц Microsoft Windows 11 Pro FQC-10547',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:1487,op:16990,regDays:null,auth:null},
+        {date:'2026-03-18',pl:'avito',id:'AV-1178992',query:'Microsoft Office ключ активации',title:'Office 365 Персональный- На личную почту',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:1500,op:6990,regDays:null,auth:null},
+        {date:'2026-03-17',pl:'wildberries',id:'WB-9113364',query:'Microsoft Office 2021 ключ',title:'Лицензия для Office 2021 Pro Plus на 1 ПК с привязкой',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%202021%20%D0%BA%D0%BB%D1%8E%D1%87',price:1764,op:22990,regDays:null,auth:null},
+        {date:'2026-03-12',pl:'wildberries',id:'WB-1306732',query:'Microsoft Office 2021 ключ',title:'Office 2021 Pro Plus на 1 ПК без USB-флешки с привязкой',url:'https://www.wildberries.ru/catalog/0/search.aspx?search=Microsoft%20Office%202021%20%D0%BA%D0%BB%D1%8E%D1%87',price:1862,op:22990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'avito',id:'AV-4443388',query:'Microsoft Office ключ активации',title:'Microsoft Office 365 Personal Персональный ключ',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:2900,op:6990,regDays:null,auth:null},
+        {date:'2026-03-16',pl:'avito',id:'AV-4392148',query:'Microsoft Office ключ активации',title:'Microsoft Office 365 Family Семейная',url:'https://www.avito.ru/all/igry_pristavki_i_programmy/programmy-ASgBAgICAUSSAs4J?q=Microsoft%20Office%20%D0%BA%D0%BB%D1%8E%D1%87%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8',price:4099,op:6990,regDays:null,auth:null}
     ];
     const MON_PL_LABEL = {ozon:'OZON',wildberries:'Wildberries',yandex:'Яндекс.Маркет',avito:'Авито'};
     const MON_PL_STYLE = {ozon:'background:#e3f2fd;color:#1565c0',wildberries:'background:#f3e5f5;color:#6a1b9a',yandex:'background:#fff3e0;color:#e65100',avito:'background:#e8f5e9;color:#2e7d32'};
@@ -4000,7 +4127,7 @@
         'Microsoft Office 2021 ключ'
     ];
 
-    let monState = {pl:'all', disc:0, flag:0, search:'', query:'', page:0, pageSize:50};
+    let monState = {pl:'all', disc:0, flag:0, search:'', query:'', page:0, pageSize:50, sortCol:'', sortDir:1};
     let monFiltered = [...MON_DATA];
 
     function monSaveQueries() {
@@ -4113,10 +4240,12 @@
             if(monState.query && r.query && !r.query.toLowerCase().includes(monState.query.toLowerCase()) && !r.title.toLowerCase().includes(monState.query.toLowerCase())) return false;
             return true;
         }).sort((a,b) => b.date.localeCompare(a.date));
+        if(monState.sortCol) monApplySortToFiltered();
         document.getElementById('monCount').textContent = monFiltered.length;
         const tot = document.getElementById('monTotal');
         if(tot) tot.textContent = MON_DATA.length;
         monState.page = 0;
+        monUpdateSortIndicators();
         monRender();
     }
     function monRender() {
@@ -4143,6 +4272,39 @@
                 <td style="white-space:nowrap;">${monFlagPills(f)}</td>
             </tr>`;
         }).join('');
+    }
+    function monSortBy(col) {
+        if(monState.sortCol === col) {
+            monState.sortDir = -monState.sortDir;
+        } else {
+            monState.sortCol = col;
+            monState.sortDir = 1;
+        }
+        monApplySortToFiltered();
+        monState.page = 0;
+        monUpdateSortIndicators();
+        monRender();
+    }
+    function monApplySortToFiltered() {
+        const col = monState.sortCol;
+        if(!col) return;
+        const dir = monState.sortDir;
+        monFiltered.sort((a,b) => {
+            let va, vb;
+            if(col==='disc') { va=a.flags.disc; vb=b.flags.disc; }
+            else if(col==='flags') { va=monFlagCount(a.flags); vb=monFlagCount(b.flags); }
+            else { va=a[col]; vb=b[col]; }
+            if(typeof va==='number') return (va-vb)*dir;
+            return String(va||'').localeCompare(String(vb||''),'ru')*dir;
+        });
+    }
+    function monUpdateSortIndicators() {
+        ['date','pl','title','price','op','disc','flags'].forEach(c => {
+            const el = document.getElementById('mts-'+c);
+            if(!el) return;
+            if(monState.sortCol===c) el.textContent = monState.sortDir===1 ? ' ▲' : ' ▼';
+            else el.textContent = '';
+        });
     }
     function monPrev() { if(monState.page>0){monState.page--;monRender();} }
     function monNext() { if((monState.page+1)*monState.pageSize<monFiltered.length){monState.page++;monRender();} }
