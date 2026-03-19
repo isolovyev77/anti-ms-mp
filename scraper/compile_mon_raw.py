@@ -2,7 +2,7 @@
 """
 compile_mon_raw.py
 ------------------
-Читает 4 raw-файла (avito_raw.txt, ym_raw.txt, wb_raw.txt, ozon_raw.txt),
+Читает 5 raw-файлов (avito_raw.txt, ym_raw.txt, wb_raw.txt, ozon_raw.txt, ale_raw.txt),
 фильтрует и компилирует массив MON_RAW, патчит anti-ms-dashboard/index.html.
 
 Формат raw-файлов: price|cardId|query|title  (UTF-8, одна запись на строку)
@@ -31,6 +31,7 @@ SOURCES = [
     ('yandex',      os.path.join(SCRIPT_DIR, 'ym_raw.txt')),
     ('wildberries', os.path.join(SCRIPT_DIR, 'wb_raw.txt')),
     ('ozon',        os.path.join(SCRIPT_DIR, 'ozon_raw.txt')),
+    ('aliexpress',  os.path.join(SCRIPT_DIR, 'ale_raw.txt')),
 ]
 
 DASHBOARD_HTML = os.path.join(PROJECT_DIR, 'anti-ms-dashboard', 'index.html')
@@ -80,7 +81,7 @@ def make_id(pl: str, idx: int, query: str) -> str:
     Генерирует внутренний ID записи (совместим с scrape-marketplaces.js):
     PL-{qhash}{idx:04}
     """
-    prefixes = {'ozon': 'OZ', 'wildberries': 'WB', 'yandex': 'YM', 'avito': 'AV'}
+    prefixes = {'ozon': 'OZ', 'wildberries': 'WB', 'yandex': 'YM', 'avito': 'AV', 'aliexpress': 'AL'}
     qhash = 0
     for c in query:
         qhash = (qhash * 31 + ord(c)) & 0x7FFFFFFF
@@ -98,6 +99,8 @@ def make_url(pl: str, card_id: str) -> str:
         return f'https://www.wildberries.ru/catalog/{card_id}/detail.aspx'
     elif pl == 'ozon':
         return f'https://www.ozon.ru/product/-{card_id}/'
+    elif pl == 'aliexpress':
+        return f'https://aliexpress.ru/item/{card_id}.html'
     return ''
 
 
