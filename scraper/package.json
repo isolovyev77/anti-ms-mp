@@ -1,0 +1,21 @@
+{
+  "name": "ms-key-monitor",
+  "version": "1.0.0",
+  "description": "Мониторинг нелицензионных ключей Microsoft на российских маркетплейсах",
+  "main": "scrape-marketplaces.js",
+  "scripts": {
+    "scrape": "node scrape-marketplaces.js",
+    "scrape:all": "node scrape-marketplaces.js --pages 5",
+    "scrape:ozon": "node scrape-marketplaces.js --platforms ozon --pages 10",
+    "scrape:wb": "node scrape-marketplaces.js --platforms wildberries --pages 10",
+    "scrape:ym": "node scrape-marketplaces.js --platforms yandex --pages 5",
+    "scrape:avito": "node scrape-marketplaces.js --platforms avito --pages 5",
+    "test": "node scrape-marketplaces.js --platforms ozon --pages 1 --query 'Microsoft Office ключ активации'"
+  },
+  "dependencies": {
+    "playwright": "^1.42.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
