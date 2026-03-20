@@ -37,7 +37,7 @@ price|cardId|query|title
 - query - поисковый запрос которым найдена карточка
 - title - до 120 символов
 
-Файлы: `avito_raw.txt`, `ym_raw.txt`, `wb_raw.txt`, `ozon_raw.txt`
+Файлы: `avito_raw.txt`, `ym_raw.txt`, `wb_raw.txt`, `ozon_raw.txt`, `ale_raw.txt`
 
 ---
 
@@ -254,6 +254,202 @@ cardId - числовой (5-12 цифр в конце URL)
 
 ---
 
+## ALIEXPRESS (ale_raw.txt)
+
+### Поисковые запросы (2026)
+```
+Office 2021 ключ активации
+Office 365 ключ активации
+Microsoft Office ключ
+Office 2024 ключ
+```
+
+**Важно**: AliExpress Russia имеет очень маленький пул - всего ~5 уникальных позиций по всем запросам. Страницы 2+ дают 0 новых результатов. Парсинг быстрый.
+
+### URL пагинации
+```
+https://aliexpress.ru/wholesale?SearchText=ENCODED_QUERY&page=N
+```
+- Параметр `page=N`, начиная с 1
+- Признак конца: менее 3 карточек на странице ИЛИ 0 новых items 2 страницы подряд
+
+### DOM-структура (2026)
+```
+[data-product-id]                - карточка товара
+  ├─ data-product-id             - ID (часто "1" - НЕНАДЁЖНО, см. ниже)
+  ├─ a[href*="/item/"]           - ссылка → настоящий itemId в href
+  └─ innerText                   - цена (ВНИМАНИЕ: разделитель тысяч U+A0, не пробел)
+```
+
+### КРИТИЧЕСКИЙ БАГ: NBSP вместо пробела в ценах
+
+AliExpress использует **неразрывный пробел U+A0** (NBSP) как разделитель тысяч в ценах.
+Обычный regex `\d[\d\s]` его НЕ матчит, и "3 451 ₽" парсится как "451 ₽".
+
+**Диагностика**:
+```javascript
+// Если цена кажется заниженной - проверь:
+document.querySelector('[data-product-id]').innerText.charCodeAt(X) // должно быть 160 = U+A0
+```
+
+**Обязательный fix перед парсингом цены**:
+```javascript
+const rawText = c.innerText.replace(/\u00a0/g, ' ');
+```
+
+### КРИТИЧЕСКИЙ БАГ: cardId = "1"
+
+У большинства карточек `data-product-id` = `"1"` - потому что настоящий ID хранится в href ссылки, а не в атрибуте карточки.
+
+**Правильное извлечение itemId**:
+```javascript
+const link = c.querySelector('a[href*="/item/"]');
+const itemId = link ? (link.href.match(/\/item\/(\d+)/) || [])[1] : cardId;
+```
+
+Если `itemId` не извлёкся (короче 5 цифр) - назначить синтетический ID при постобработке.
+
+### JS-коллектор (запускать на каждой странице)
+```javascript
+function collectALE(query) {
+  const items = [];
+  const cards = document.querySelectorAll('[data-product-id]');
+  for (const c of cards) {
+    const cardId = c.getAttribute('data-product-id');
+    if (!cardId) continue;
+    const link = c.querySelector('a[href*="/item/"]');
+    const itemId = link ? (link.href.match(/\/item\/(\d+)/) || [])[1] : cardId;
+    if (!itemId) continue;
+    // NBSP-fix: нормализуем перед парсингом
+    const rawText = c.innerText.replace(/\u00a0/g, ' ');
+    const allPrices = [...rawText.matchAll(/([\d][\d ]{0,9}(?:,\d{1,2})?)\s*₽/g)];
+    let price = 0;
+    for (const m of allPrices) {
+      const p = Math.round(parseFloat(m[1].replace(/\s/g,'').replace(',','.')));
+      if (p >= 50 && p <= 10000) { price = p; break; }
+    }
+    if (!price) continue;
+    const lines = c.innerText.trim().split('\n').map(l => l.trim());
+    const title = lines.find(l =>
+      l.length > 20 && !l.includes('₽') && !l.includes('купили') &&
+      !l.includes('купоном') && !l.includes('бесплатно') && !l.includes('доставка')
+    ) || '';
+    if (!title) continue;
+    const t = title.toLowerCase();
+    if (!t.includes('office') && !(t.includes('365') && t.includes('microsoft'))) continue;
+    items.push({cardId: itemId, price, title: title.replace(/\n/g,' ').slice(0,120), query});
+  }
+  const prev = JSON.parse(sessionStorage.getItem('ale1') || '[]');
+  const prevIds = new Set(prev.map(r => r.cardId));
+  const newItems = items.filter(r => !prevIds.has(r.cardId));
+  const all = [...prev, ...newItems];
+  sessionStorage.setItem('ale1', JSON.stringify(all));
+  return {p: new URLSearchParams(location.search).get('page'), cards: cards.length, new: newItems.length, total: all.length};
+}
+collectALE('Office 2021 ключ активации'); // менять под текущий запрос
+```
+
+### Постобработка: дедупликация и синтетические ID (Python)
+
+Запускать после скачивания `ale1_new.txt` - если в файле есть строки с cardId = "1" или короче 5 цифр:
+
+```python
+lines = open('ale1_new.txt', encoding='utf-8').read().splitlines()
+seen_titles = {}
+out = []
+counter = 0
+for line in lines:
+    parts = line.split('|', 3)
+    if len(parts) < 4:
+        continue
+    price, card_id, query, title = parts
+    # Проверяем валидность cardId
+    if not card_id.isdigit() or len(card_id) < 5:
+        key = title[:60].lower()
+        if key in seen_titles:
+            continue  # дубль по заголовку
+        seen_titles[key] = True
+        card_id = f'10050000{counter:05d}'
+        counter += 1
+    out.append(f'{price}|{card_id}|{query}|{title}')
+open('ale_raw.txt', 'w', encoding='utf-8').write('\n'.join(out))
+```
+
+### Ключ sessionStorage
+- `ale1` - для всех запросов AliExpress
+
+### URL карточек AliExpress
+```
+https://aliexpress.ru/item/{itemId}.html
+```
+itemId - числовой (обычно 13-19 цифр)
+
+---
+
+## ПРОВЕРЕННЫЕ, НО ОТКЛОНЁННЫЕ ПЛОЩАДКИ
+
+### Сбер МегаМаркет
+- Проверен: только 1 легитимный Office 2019 по ~33 000 ₽
+- Подозрительных дешёвых ключей нет - мониторинг не нужен
+- Примечание: сайт может показывать "Сайт больше не поддерживает ваш браузер", но результаты всё равно грузятся
+
+### ВКонтакте Маркет
+- Публичный поиск требует авторизации
+- Продают **аккаунты** (логин+пароль), а не ключи активации
+- Пример: группа `vk.com/key_office365` - "Учётная запись Office 365" за 800 ₽, продажа через ЛС
+- VK Маркет как агрегатор реэкспортирует OZON/WB (значки "ЗАКАЗ НА OZON") - дубли уже покрыты
+- Вывод: не добавляем в мониторинг
+
+---
+
+## compile_mon_raw.py
+
+Скрипт `compile_mon_raw.py` (этот каталог) обновляет дашборд:
+```
+python3 compile_mon_raw.py
+```
+
+### Текущий title_ok фильтр (актуальный)
+
+```python
+def title_ok(title: str) -> bool:
+    t = title.lower()
+    has_ms_office = (
+        'office' in t or
+        ('365' in t and 'microsoft' in t) or
+        ('офис' in t and 'microsoft' in t)
+    )
+    return has_ms_office
+```
+
+**Почему именно так**: предыдущая версия с широкими ключевыми словами ('microsoft', 'лиценз', '2021' и т.д.)
+ловила посторонние карточки - Windows-ключи, Celemony Melodyne, МойОфис и другое нерелевантное ПО.
+Теперь требуется явное упоминание Office/офиса.
+
+### Источники (SOURCES)
+```python
+SOURCES = [
+    ('avito',       'avito_raw.txt'),
+    ('yandex',      'ym_raw.txt'),
+    ('wildberries', 'wb_raw.txt'),
+    ('ozon',        'ozon_raw.txt'),
+    ('aliexpress',  'ale_raw.txt'),
+]
+```
+
+### Официальные цены (op) по типу продукта
+| Продукт | op (руб.) |
+|---------|-----------|
+| Office 365 / Personal / подписка | 6990 |
+| Office 2021 Home | 14990 |
+| Office 2021 Home & Business | 22990 |
+| Windows 11 Pro | 16990 |
+| Windows 11 Home | 13990 |
+| Windows 10 | 13990 |
+| Прочее | 9990 |
+
+---
+
 ## Перенос данных из браузера в VM
 
 **Проблема**: VM изолирован на 127.0.0.1, нет xclip/xsel. JS tool обрезает вывод ~1300 символов.
@@ -273,31 +469,6 @@ document.body.appendChild(div);
 
 ---
 
-## compile_mon_raw.py
-
-Скрипт `compile_mon_raw.py` (этот каталог) обновляет дашборд:
-```
-python3 compile_mon_raw.py
-```
-
-**Фильтры**:
-- Цена 50-5000 руб. (дешевле - явно контрафакт, дороже - легитимный товар)
-- Title содержит: office, microsoft, 365, 2021, 2024, 2019, 2016, ключ актив, лиценз
-- Дедупликация по cardId
-
-**Официальные цены (op) по типу продукта**:
-| Продукт | op (руб.) |
-|---------|-----------|
-| Office 365 / Personal / подписка | 6990 |
-| Office 2021 Home | 14990 |
-| Office 2021 Home & Business | 22990 |
-| Windows 11 Pro | 16990 |
-| Windows 11 Home | 13990 |
-| Windows 10 | 13990 |
-| Прочее | 9990 |
-
----
-
 ## Ключевые уроки
 
 1. **YM не имеет API пагинации** - только `?page=N` в URL. Страница 20 = конец (редирект на главную).
@@ -313,3 +484,11 @@ python3 compile_mon_raw.py
 6. **Autoclick не всегда работает** в Chrome. Показывать видимую кнопку и ждать клика пользователя надёжнее.
 
 7. **Дисконт округлять вниз** (floor, не round) - чтобы не показывать 100% скидку при цене 50 руб.
+
+8. **AliExpress NBSP (U+A0)** - разделитель тысяч в ценах не пробел, а неразрывный пробел. Без `.replace(/\u00a0/g, ' ')` цена "3 451 ₽" парсится как "451 ₽".
+
+9. **AliExpress cardId = "1"** - `data-product-id` ненадёжен, настоящий ID только в `a[href*="/item/"]`. Без извлечения из href - все карточки получают одинаковый ID и дедуплицируются в одну.
+
+10. **AliExpress пул очень мал** - ~5 уникальных позиций по Office на всём aliexpress.ru. Страницы 2+ дают 0 новых результатов. Не стоит делать многостраничный обход.
+
+11. **title_ok должен быть строгим** - широкие фильтры ('microsoft', 'лиценз', '2021') захватывают Windows-ключи, Celemony, МойОфис и прочий мусор. Всегда требовать явного 'office' в заголовке.
