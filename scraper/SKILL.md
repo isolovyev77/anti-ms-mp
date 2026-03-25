@@ -469,6 +469,76 @@ document.body.appendChild(div);
 
 ---
 
+## Автоматический Playwright scraper (Node.js)
+
+Вместо ручного JS-коллектора через Chrome — `scrape-marketplaces.js` запускается один командой:
+
+```bash
+node scrape-marketplaces.js                             # всё по умолчанию
+node scrape-marketplaces.js --platforms ozon --pages 10 # только Ozon
+```
+
+Работает headless с российского IP. Результат → `mon_data.json` + `mon_raw_snippet.js`.
+
+### После получения mon_data.json → загрузка в Supabase
+
+```bash
+python3 upload_raw_to_supabase.py   # для raw-файлов (YM/Avito/WB/AliExpress)
+```
+
+Для Ozon-данных из `mon_data.json` — отдельный скрипт (см. session-notes-2026-03-22.md) или адаптировать upload_raw_to_supabase.py.
+
+### SSL на macOS: использовать curl, не Python requests
+
+Python `urllib` / `requests` выдают `SSL: CERTIFICATE_VERIFY_FAILED` при запросах к Supabase на macOS. Решение — subprocess + curl (уже реализовано в `upload_raw_to_supabase.py`).
+
+---
+
+## Правило: что мониторим (scope)
+
+**Только Microsoft Office** во всех вариантах написания:
+- `Microsoft Office 2021 / 2024 / 2019 / Home / Pro Plus`
+- `Office 365 / Microsoft 365` (подписка)
+- `MS Office ключ активации`
+- `офис microsoft` / `microsoft офис`
+
+**НЕ мониторим** (не наш scope):
+- Windows 10 / 11 / Server ключи — отдельный продукт
+- Visio, Project — не входят в стандартный Office
+- Adobe Acrobat, FL Studio, Minecraft и другое ПО
+- OfficeSuite — конкурент, не Microsoft
+- МойОфис — российский аналог, не Microsoft
+
+**Фильтр `titleOk`** (единый для всех скриптов):
+```javascript
+// JS (scrape-marketplaces.js)
+function titleOk(title) {
+  const t = title.toLowerCase();
+  if (t.includes('officesuite')) return false;
+  return t.includes('office') ||
+    (t.includes('365') && t.includes('microsoft')) ||
+    (t.includes('офис') && t.includes('microsoft'));
+}
+```
+```python
+# Python (compile_mon_raw.py, upload_raw_to_supabase.py)
+def title_ok(title):
+    t = title.lower()
+    if 'officesuite' in t: return False
+    return 'office' in t or ('365' in t and 'microsoft' in t) or ('офис' in t and 'microsoft' in t)
+```
+
+**Поисковые запросы** (актуальные, без Windows):
+```
+Microsoft Office ключ активации
+Microsoft Office 365 ключ
+Office 2021 ключ активации
+Office 2024 ключ активации
+MS Office ключ активации
+```
+
+---
+
 ## Ключевые уроки
 
 1. **YM не имеет API пагинации** - только `?page=N` в URL. Страница 20 = конец (редирект на главную).

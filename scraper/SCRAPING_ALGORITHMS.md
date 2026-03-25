@@ -194,13 +194,42 @@ def scrape_ozon(query: str, max_pages: int = 20) -> list[dict]:
 ```
 
 ### Особенности и антиблокировка
-- OZON активно блокирует headless-браузеры. Рекомендуется:
-  - `playwright-stealth` или `undetected-playwright`
-  - Случайные задержки между страницами (2-5 сек)
-  - Ротация user-agent
-  - Использование residential proxy (datacenter IP блокируется быстро)
-- Альтернатива: OZON Data API (если доступен для партнёров)
-- Lazy-load обязателен: карточки подгружаются при скролле
+
+**ВАЖНОЕ ОБНОВЛЕНИЕ (март 2026):** Playwright headless **работает на Ozon** при запуске с локальной машины с российским IP. Ключевые условия:
+
+1. **Флаги запуска браузера** — обязательны:
+   ```javascript
+   chromium.launch({
+     headless: true,
+     args: [
+       '--no-sandbox',
+       '--disable-setuid-sandbox',
+       '--disable-blink-features=AutomationControlled',  // КРИТИЧНО
+       '--lang=ru-RU',
+     ]
+   })
+   ```
+2. **Контекст с русской локалью** — Ozon проверяет заголовки:
+   ```javascript
+   browser.newContext({
+     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+     locale: 'ru-RU',
+     timezoneId: 'Europe/Moscow',
+     viewport: { width: 1366, height: 768 },
+     extraHTTPHeaders: { 'Accept-Language': 'ru-RU,ru;q=0.9,en;q=0.8' },
+   })
+   ```
+3. **Скрыть navigator.webdriver** через initScript:
+   ```javascript
+   context.addInitScript(() => {
+     Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+     window.chrome = { runtime: {} };
+   });
+   ```
+4. **Российский IP** — обязателен. С американских/европейских IP (Firecrawl, VPS без VPN) Ozon возвращает 403. Datacenter IP блокируется. Решение: запускать с локальной машины пользователя.
+5. **Lazy-load прокрутка** обязательна: карточки подгружаются при скролле до конца страницы.
+
+Результат (22 марта 2026): 1 243 карточки за один прогон (5 запросов × 10 страниц).
 
 ---
 
@@ -615,6 +644,104 @@ Cron-запись (ежедневно в 6:00):
 ```
 0 6 * * * /usr/bin/python3 /path/to/run_all_scrapers.py >> /var/log/anti-ms-scraper.log 2>&1
 ```
+
+---
+
+## Node.js Playwright scraper (рекомендуемый подход)
+
+Файл `scrape-marketplaces.js` — основной автоматический скрапер. Запускать с локальной машины.
+
+### Запуск
+```bash
+cd scraper
+node scrape-marketplaces.js                             # все площадки, 5 запросов, 5 страниц
+node scrape-marketplaces.js --platforms ozon --pages 10 # только Ozon, 10 страниц
+node scrape-marketplaces.js --query "Office 365 ключ"   # один запрос
+```
+
+### Установка Chromium (один раз)
+```bash
+cd scraper
+npm install
+npx playwright install chromium
+# На VPS дополнительно:
+npx playwright install-deps chromium
+```
+
+Chromium хранится в `~/.cache/ms-playwright/chromium-XXXX/` — повторно не скачивается.
+
+### Вывод
+- `mon_data.json` — полный JSON `{ generated, queries, total, stats, data[] }`
+- `mon_raw_snippet.js` — JS-массив `MON_RAW` для вставки в дашборд
+
+### Формат записи в mon_data.json
+```json
+{
+  "date": "2026-03-22",
+  "pl": "ozon",
+  "id": "OZ-84120001",           // НЕ совпадает с cardId из raw-файлов!
+  "query": "Microsoft Office 365 ключ",
+  "title": "Office 365 Pro Plus...",
+  "url": "https://www.ozon.ru/...",
+  "price": 157,
+  "op": 6990,
+  "regDays": null,
+  "auth": null,
+  "flags": { "disc": 97, "F1": true, "F2": true, ... }
+}
+```
+
+**Важно про product_id:** скрапер генерирует id как `{PREFIX}-{qhash}{idx}`, а НЕ через реальный cardId. Для Supabase upsert это нормально, но при повторных запусках одни и те же карточки получат разные id.
+
+### Известный баг: `*/` в JS-комментарии
+Cron-строка `*/6` внутри блочного комментария `/** ... */` ломает парсинг — `*/` завершает комментарий досрочно. Решение: экранировать в комментарии как `*\/6` или выносить cron-пример за пределы блочного комментария.
+
+---
+
+## Supabase upload pipeline
+
+После получения данных (из `mon_data.json` или raw-файлов) — загрузка в Supabase через REST API.
+
+### Скрипт upload_raw_to_supabase.py
+Загружает данные из raw-файлов (ym_raw.txt, avito_raw.txt, wb_raw.txt, ale_raw.txt) в таблицу `listings`:
+```bash
+python3 upload_raw_to_supabase.py
+```
+
+### Почему curl, а не Python requests
+На macOS Python `urllib` / `requests` выдают SSL ошибку при обращении к Supabase:
+```
+SSL: CERTIFICATE_VERIFY_FAILED
+```
+Решение — subprocess + `curl`. Работает стабильно:
+```python
+subprocess.run(['curl', '-s', '-X', 'POST', f'{SUPABASE_URL}/rest/v1/listings',
+    '-H', f'apikey: {KEY}', '-H', 'Prefer: resolution=merge-duplicates',
+    '-d', json.dumps(batch)])
+```
+
+### Upsert по product_id
+Supabase REST API поддерживает upsert через заголовок `Prefer: resolution=merge-duplicates`.
+Таблица `listings` имеет `UNIQUE` constraint на `product_id` — повторный запуск обновляет существующие записи, не дублирует.
+
+### product_id форматы
+| Источник | Формат | Пример |
+|---------|--------|--------|
+| `ozon_raw.txt` / `scrape-marketplaces.js` | `OZ-{qhash}{idx}` | `OZ-84120001` |
+| `ym_raw.txt` | `YM-{cardId}` | `YM-xep3ubtl9ng` |
+| `avito_raw.txt` | `AV-{cardId}` | `AV-4294363995` |
+| `wb_raw.txt` | `WB-{cardId}` | `WB-130635707` |
+| `ale_raw.txt` | `AL-{cardId}` | `AL-1005000000000` |
+
+### Статистика (22 марта 2026)
+| Площадка | Записей | Мин. цена | Средняя |
+|----------|---------|-----------|---------|
+| yandex   | 1 186   | 50 ₽      | 605 ₽   |
+| ozon     | 1 038   | 110 ₽     | 389 ₽   |
+| avito    | 735     | 50 ₽      | 821 ₽   |
+| wildberries | 61   | 107 ₽    | 996 ₽   |
+| aliexpress | 3     | 3 451 ₽  | 3 766 ₽ |
+| **ИТОГО** | **3 023** |         |         |
 
 ---
 

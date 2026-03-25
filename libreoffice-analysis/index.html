@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аргументы против включения LibreOffice в реестр российского ПО</title>
-    <script src="https://cdn.tailwindcss.com" onerror="document.body.classList.add('tailwind-failed')"></script>
+    <script src="https://cdn.tailwindcss.com" onerror="document.documentElement.classList.add('tailwind-failed')"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Critical CSS for mobile when Tailwind fails -->
     <style>
@@ -26,48 +26,140 @@
     <style type="text/tailwindcss">
         @layer base {
             :root {
-                --color-primary: #1a1a2e;
-                --color-accent: #c41e3a;
-                --color-gold: #d4af37;
-                --color-warm: #f5f0e8;
-                --color-dark: #0f0f1a;
+                --color-primary: #2b313d;
+                --color-accent: #d97706;
+                --color-accent-soft: #fdba74;
+                --color-gold: #f3b66d;
+                --color-warm: #f6efe7;
+                --color-dark: #1f232b;
+                --page-bg: linear-gradient(180deg, #242933 0%, #1e232b 54%, #1b1f27 100%);
+                --page-bg-solid: #1f232b;
+                --page-radial-a: rgba(245, 158, 11, 0.10);
+                --page-radial-b: rgba(148, 163, 184, 0.12);
+                --color-panel: rgba(43, 49, 61, 0.78);
+                --color-panel-strong: rgba(56, 63, 76, 0.92);
+                --color-panel-soft: rgba(55, 61, 73, 0.72);
+                --color-border: rgba(243, 182, 109, 0.22);
+                --color-border-strong: rgba(247, 201, 138, 0.25);
+                --color-text: #f6efe7;
+                --color-text-strong: #fffaf5;
+                --color-text-muted: #b7c0cd;
+                --color-text-faint: #95a0b0;
+                --color-nav: rgba(30, 35, 43, 0.86);
+                --color-shadow: rgba(15, 23, 42, 0.22);
+                --color-shadow-accent: rgba(245, 158, 11, 0.10);
+                --color-grid: rgba(243, 182, 109, 0.028);
+                --color-line: rgba(251, 191, 36, 0.24);
+                --semantic-critical-fg: #f4a261;
+                --semantic-critical-bg: rgba(234, 136, 75, 0.18);
+                --semantic-critical-bg-strong: rgba(234, 136, 75, 0.22);
+                --semantic-critical-border: rgba(244, 162, 97, 0.30);
+                --semantic-caution-fg: #f7c98a;
+                --semantic-caution-fg-strong: #fde7c7;
+                --semantic-caution-bg: rgba(245, 185, 107, 0.15);
+                --semantic-caution-bg-strong: rgba(245, 185, 107, 0.18);
+                --semantic-caution-border: rgba(247, 201, 138, 0.28);
+                --semantic-info-fg: #93c5fd;
+                --semantic-info-fg-strong: #dbeafe;
+                --semantic-info-bg: rgba(59, 130, 246, 0.16);
+                --semantic-info-bg-strong: rgba(59, 130, 246, 0.20);
+                --semantic-info-border: rgba(96, 165, 250, 0.30);
+                --semantic-success-fg: #86efac;
+                --semantic-success-fg-strong: #dcfce7;
+                --semantic-success-bg: rgba(34, 197, 94, 0.14);
+                --semantic-success-bg-strong: rgba(34, 197, 94, 0.18);
+                --semantic-success-border: rgba(74, 222, 128, 0.28);
+            }
+            :root[data-theme="light"],
+            body[data-theme="light"] {
+                --page-bg: linear-gradient(180deg, #fbf7f2 0%, #f3ede5 52%, #ece4d8 100%);
+                --page-bg-solid: #f6efe6;
+                --page-radial-a: rgba(245, 158, 11, 0.14);
+                --page-radial-b: rgba(148, 163, 184, 0.10);
+                --color-panel: rgba(255, 251, 246, 0.86);
+                --color-panel-strong: rgba(250, 245, 238, 0.95);
+                --color-panel-soft: rgba(247, 241, 233, 0.88);
+                --color-border: rgba(217, 119, 6, 0.18);
+                --color-border-strong: rgba(217, 119, 6, 0.22);
+                --color-text: #352f2a;
+                --color-text-strong: #211d19;
+                --color-text-muted: #6d717a;
+                --color-text-faint: #878d98;
+                --color-nav: rgba(248, 242, 234, 0.88);
+                --color-shadow: rgba(120, 98, 73, 0.10);
+                --color-shadow-accent: rgba(217, 119, 6, 0.08);
+                --color-grid: rgba(217, 119, 6, 0.035);
+                --color-line: rgba(217, 119, 6, 0.12);
+                --semantic-critical-fg: #b91c1c;
+                --semantic-critical-bg: rgba(239, 68, 68, 0.08);
+                --semantic-critical-bg-strong: rgba(239, 68, 68, 0.12);
+                --semantic-critical-border: rgba(239, 68, 68, 0.22);
+                --semantic-caution-fg: #b45309;
+                --semantic-caution-fg-strong: #9a3412;
+                --semantic-caution-bg: rgba(217, 119, 6, 0.08);
+                --semantic-caution-bg-strong: rgba(217, 119, 6, 0.11);
+                --semantic-caution-border: rgba(217, 119, 6, 0.20);
+                --semantic-info-fg: #1d4ed8;
+                --semantic-info-fg-strong: #1e3a8a;
+                --semantic-info-bg: rgba(59, 130, 246, 0.08);
+                --semantic-info-bg-strong: rgba(59, 130, 246, 0.12);
+                --semantic-info-border: rgba(59, 130, 246, 0.20);
+                --semantic-success-fg: #166534;
+                --semantic-success-fg-strong: #14532d;
+                --semantic-success-bg: rgba(34, 197, 94, 0.08);
+                --semantic-success-bg-strong: rgba(34, 197, 94, 0.12);
+                --semantic-success-border: rgba(34, 197, 94, 0.18);
+            }
+            html, body {
+                background-color: var(--page-bg-solid);
+            }
+            html {
+                background:
+                    radial-gradient(circle at top right, var(--page-radial-a), transparent 28%),
+                    radial-gradient(circle at top left, var(--page-radial-b), transparent 24%),
+                    var(--page-bg);
             }
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                background: var(--color-dark);
-                color: var(--color-warm);
+                color: var(--color-text);
+                color-scheme: dark;
+                background-color: transparent;
             }
+            :root[data-theme="light"],
+            body[data-theme="light"] { color-scheme: light; }
             h1, h2, h3, .display {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
                 font-weight: 600;
             }
         }
         @layer components {
-            .risk-high { border-left: 4px solid #c41e3a; }
-            .risk-medium { border-left: 4px solid #d4af37; }
-            .risk-low { border-left: 4px solid #2d5a3d; }
+            .risk-high { border-left: 4px solid #ea9a49; }
+            .risk-medium { border-left: 4px solid #f3b66d; }
+            .risk-low { border-left: 4px solid #7ab89b; }
             .card {
-                background: rgba(26, 26, 46, 0.8);
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(212, 175, 55, 0.2);
+                background: linear-gradient(180deg, var(--color-panel-strong), var(--color-panel));
+                backdrop-filter: blur(14px);
+                border: 1px solid var(--color-border);
+                box-shadow: 0 18px 38px var(--color-shadow);
                 transition: all 0.3s ease;
             }
             .card:hover {
-                border-color: rgba(212, 175, 55, 0.5);
+                border-color: rgba(251, 191, 36, 0.34);
                 transform: translateY(-2px);
-                box-shadow: 0 10px 40px rgba(196, 30, 58, 0.15);
+                box-shadow: 0 20px 42px var(--color-shadow-accent);
             }
             .tab-active {
-                background: linear-gradient(135deg, #c41e3a 0%, #8b1538 100%);
-                color: white;
+                background: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
+                color: #fffaf5;
+                box-shadow: 0 12px 28px rgba(217, 119, 6, 0.18);
             }
             .tab-inactive {
-                background: rgba(26, 26, 46, 0.6);
-                color: #9ca3af;
+                background: var(--color-panel-strong);
+                color: var(--color-text-muted);
             }
             .tab-inactive:hover {
-                background: rgba(26, 26, 46, 0.9);
-                color: #d4af37;
+                background: rgba(71, 78, 91, 0.92);
+                color: #ffd29a;
             }
             .expandable-content {
                 max-height: 0;
@@ -78,22 +170,28 @@
                 max-height: 2000px;
             }
             .metric-value {
-                background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+                background: linear-gradient(135deg, #ffd3a1 0%, #f59e0b 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+            body[data-theme="light"] .metric-value {
+                background: linear-gradient(135deg, #f59e0b 0%, #c2410c 100%);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
                 background-clip: text;
             }
             .grid-pattern {
                 background-image: 
-                    linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
+                    linear-gradient(var(--color-grid) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
                 background-size: 50px 50px;
             }
             .diagonal-line {
                 position: absolute;
                 width: 200%;
                 height: 1px;
-                background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+                background: linear-gradient(90deg, transparent, var(--color-line), transparent);
                 transform: rotate(-5deg);
                 pointer-events: none;
             }
@@ -122,6 +220,16 @@
                 width: 12px;
                 height: 12px;
             }
+            body[data-theme="light"] .source-link,
+            body[data-theme="light"] .external-link {
+                color: var(--semantic-info-fg);
+                border-bottom-color: var(--semantic-info-fg);
+            }
+            body[data-theme="light"] .source-link:hover,
+            body[data-theme="light"] .external-link:hover {
+                color: var(--semantic-info-fg-strong);
+                border-bottom-color: var(--semantic-info-fg-strong);
+            }
             .metric-card {
                 cursor: pointer;
                 position: relative;
@@ -140,19 +248,407 @@
                 opacity: 1;
             }
             .metric-card:hover {
-                border-color: rgba(212, 175, 55, 0.6);
+                border-color: rgba(251, 191, 36, 0.34);
+                box-shadow: 0 16px 34px var(--color-shadow-accent);
+            }
+
+            /* Global palette softening for Tailwind utility classes already used in the page */
+            .text-white { color: var(--color-text-strong) !important; }
+            .text-gray-300, .text-gray-400 { color: var(--color-text-muted) !important; }
+            .text-gray-500, .text-gray-600 { color: var(--color-text-faint) !important; }
+            .bg-gray-800\/50 { background-color: var(--color-panel-soft) !important; }
+            .bg-gray-700 { background-color: rgba(70, 78, 93, 0.9) !important; }
+            .border-gray-700 { border-color: var(--color-border-strong) !important; }
+
+            .text-red-300, .text-red-400, .text-red-500 { color: var(--semantic-critical-fg) !important; }
+            .bg-red-900\/20 { background-color: var(--semantic-critical-bg) !important; }
+            .bg-red-900\/30 { background-color: var(--semantic-critical-bg-strong) !important; }
+            .bg-red-900\/40 { background-color: var(--semantic-critical-bg-strong) !important; }
+            .bg-red-900\/50 { background-color: var(--semantic-critical-bg-strong) !important; }
+            .bg-red-900\/60 { background-color: var(--semantic-critical-bg-strong) !important; }
+            .border-red-600\/30,
+            .border-red-700\/30,
+            .border-red-700\/40,
+            .border-red-700\/50 { border-color: var(--semantic-critical-border) !important; }
+
+            .text-yellow-200 { color: var(--semantic-caution-fg-strong) !important; }
+            .text-yellow-300, .text-yellow-400, .text-yellow-500,
+            .text-orange-200, .text-orange-300, .text-orange-400,
+            .text-amber-300 { color: var(--semantic-caution-fg) !important; }
+            .bg-yellow-900\/20,
+            .bg-orange-900\/20,
+            .bg-amber-900\/20 { background-color: var(--semantic-caution-bg) !important; }
+            .bg-yellow-900\/30 { background-color: var(--semantic-caution-bg-strong) !important; }
+            .border-yellow-600\/30,
+            .border-yellow-600\/40,
+            .border-yellow-700\/30,
+            .border-yellow-700\/40,
+            .border-orange-700\/30,
+            .border-orange-700\/40,
+            .border-amber-700\/30 { border-color: var(--semantic-caution-border) !important; }
+
+            .text-blue-300, .text-blue-400, .text-blue-500,
+            .text-cyan-200, .text-cyan-300, .text-cyan-400,
+            .text-purple-300, .text-purple-400 {
+                color: var(--semantic-info-fg) !important;
+            }
+            .bg-blue-900\/20,
+            .bg-cyan-900\/20,
+            .bg-purple-900\/20 { background-color: var(--semantic-info-bg) !important; }
+            .bg-blue-900\/30,
+            .bg-blue-900\/50 { background-color: var(--semantic-info-bg-strong) !important; }
+            .border-blue-700\/30,
+            .border-cyan-700\/30,
+            .border-purple-700\/30,
+            .border-blue-500,
+            .border-cyan-500,
+            .border-purple-500 { border-color: var(--semantic-info-border) !important; }
+
+            .text-green-300, .text-green-400, .text-green-500 { color: var(--semantic-success-fg) !important; }
+            .bg-green-900\/20 { background-color: var(--semantic-success-bg) !important; }
+            .border-green-700\/30,
+            .border-green-500,
+            .border-green-500\/50 { border-color: var(--semantic-success-border) !important; }
+
+            .from-red-900\/40 {
+                --tw-gradient-from: rgba(78, 87, 104, 0.55) var(--tw-gradient-from-position) !important;
+                --tw-gradient-to: rgba(78, 87, 104, 0) var(--tw-gradient-to-position) !important;
+                --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+            }
+            .from-red-900\/30 {
+                --tw-gradient-from: rgba(78, 87, 104, 0.48) var(--tw-gradient-from-position) !important;
+                --tw-gradient-to: rgba(78, 87, 104, 0) var(--tw-gradient-to-position) !important;
+                --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+            }
+            .to-red-800\/10 {
+                --tw-gradient-to: rgba(245, 158, 11, 0.06) var(--tw-gradient-to-position) !important;
+            }
+            .to-orange-900\/20 {
+                --tw-gradient-to: rgba(251, 146, 60, 0.10) var(--tw-gradient-to-position) !important;
+            }
+            .from-blue-900\/30 {
+                --tw-gradient-from: var(--semantic-info-bg-strong) var(--tw-gradient-from-position) !important;
+                --tw-gradient-to: rgba(59, 130, 246, 0) var(--tw-gradient-to-position) !important;
+                --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+            }
+            .to-blue-800\/10 {
+                --tw-gradient-to: rgba(59, 130, 246, 0.04) var(--tw-gradient-to-position) !important;
+            }
+            .to-purple-900\/20 {
+                --tw-gradient-to: rgba(59, 130, 246, 0.07) var(--tw-gradient-to-position) !important;
+            }
+            body[data-theme="light"] .bg-gray-700 {
+                background-color: rgba(122, 132, 145, 0.18) !important;
+            }
+            body[data-theme="light"] .text-white {
+                color: #2a241f !important;
+            }
+            body[data-theme="light"] .text-gray-300,
+            body[data-theme="light"] .text-gray-400 {
+                color: #626b78 !important;
+            }
+            body[data-theme="light"] .text-gray-500,
+            body[data-theme="light"] .text-gray-600 {
+                color: #767f8c !important;
+            }
+            body[data-theme="light"] blockquote,
+            body[data-theme="light"] cite {
+                color: #495264 !important;
+            }
+
+            .border-yellow-600\/20 { border-color: var(--color-border) !important; }
+            .theme-toggle {
+                position: fixed;
+                top: 18px;
+                right: 22px;
+                z-index: 70;
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                border-radius: 999px;
+                border: 1px solid var(--color-border-strong);
+                background: var(--color-nav);
+                color: var(--color-text-strong);
+                backdrop-filter: blur(14px);
+                box-shadow: 0 12px 28px var(--color-shadow);
+                transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            }
+            .theme-toggle:hover {
+                transform: translateY(-1px);
+                border-color: rgba(245, 158, 11, 0.32);
+                box-shadow: 0 16px 34px var(--color-shadow-accent);
+            }
+            .theme-toggle-track {
+                width: 42px;
+                height: 24px;
+                border-radius: 999px;
+                background: rgba(148, 163, 184, 0.26);
+                position: relative;
+                flex-shrink: 0;
+            }
+            .theme-toggle-thumb {
+                position: absolute;
+                top: 3px;
+                left: 3px;
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #ffd3a1 0%, #f59e0b 100%);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+                transition: transform 0.22s ease;
+            }
+            body[data-theme="light"] .theme-toggle-thumb {
+                transform: translateX(18px);
+            }
+            .theme-toggle-label {
+                font-size: 12px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--color-text-muted);
+            }
+            .summary-panel {
+                background:
+                    linear-gradient(180deg, rgba(56, 63, 76, 0.96), rgba(43, 49, 61, 0.94));
+                border: 1px solid rgba(243, 182, 109, 0.24);
+                box-shadow: 0 18px 40px rgba(15, 23, 42, 0.20);
+            }
+            .summary-panel h3 {
+                color: var(--color-text-strong);
+            }
+            .summary-panel li {
+                color: var(--color-text);
+                line-height: 1.65;
+            }
+            .summary-panel code {
+                background: rgba(23, 28, 36, 0.72);
+                color: #ffe0b2;
+                padding: 1px 6px;
+                border-radius: 6px;
+            }
+            body[data-theme="light"] .summary-panel {
+                background:
+                    linear-gradient(180deg, rgba(255, 250, 244, 0.97), rgba(247, 239, 229, 0.96));
+                border-color: rgba(217, 119, 6, 0.18);
+                box-shadow: 0 16px 36px rgba(120, 98, 73, 0.12);
+            }
+            body[data-theme="light"] .summary-panel code {
+                background: rgba(226, 217, 206, 0.72);
+                color: #9a3412;
+            }
+            .elevator-panel {
+                background: linear-gradient(135deg, rgba(31, 35, 43, 0.98) 0%, rgba(38, 43, 53, 0.96) 100%);
+                border: 2px solid rgba(243, 182, 109, 0.58);
+                box-shadow: 0 20px 44px rgba(15, 23, 42, 0.20);
+            }
+            .elevator-badge {
+                width: 40px;
+                height: 40px;
+                border-radius: 999px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                background: linear-gradient(135deg, #f3b66d 0%, #f59e0b 100%);
+                color: #1f232b;
+                box-shadow: 0 10px 22px rgba(245, 158, 11, 0.20);
+            }
+            .elevator-heading {
+                font-size: 22px;
+                font-weight: 700;
+                color: #ffe0b2;
+            }
+            .elevator-subheading {
+                color: var(--color-text-muted);
+                font-size: 14px;
+            }
+            .elevator-stack {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+            }
+            .elevator-step {
+                display: flex;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            .elevator-rail {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .elevator-node {
+                width: 36px;
+                height: 36px;
+                border-radius: 999px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                color: #fffaf5;
+                font-size: 15px;
+                flex-shrink: 0;
+                background: var(--step-accent);
+                box-shadow: 0 10px 20px rgba(15, 23, 42, 0.16);
+            }
+            .elevator-line {
+                width: 2px;
+                flex: 1;
+                min-height: 40px;
+                margin-top: 4px;
+                background: linear-gradient(var(--step-accent), #f3b66d);
+            }
+            .elevator-card {
+                padding: 16px;
+                border-radius: 10px;
+                flex: 1;
+                margin-bottom: 8px;
+                background: var(--step-bg);
+                border: 1px solid var(--step-border);
+            }
+            .elevator-card-title {
+                color: var(--step-title);
+                font-weight: 600;
+                margin-bottom: 6px;
+            }
+            .elevator-card-title.large {
+                font-size: 16px;
+                font-weight: 700;
+                margin-bottom: 8px;
+            }
+            .elevator-card-body {
+                color: var(--color-text-muted);
+                font-size: 14px;
+                line-height: 1.6;
+            }
+            .elevator-card-body.small {
+                font-size: 13px;
+            }
+            .elevator-card strong,
+            .elevator-card em {
+                color: var(--color-text-strong) !important;
+            }
+            .elevator-highlight {
+                color: #f7c98a !important;
+            }
+            .elevator-card code {
+                background: rgba(255, 255, 255, 0.10) !important;
+                color: #ffe0b2 !important;
+                padding: 1px 5px !important;
+                border-radius: 4px !important;
+            }
+            .elevator-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+            .elevator-subcard {
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid transparent;
+            }
+            .elevator-subcard.good {
+                background: rgba(34, 197, 94, 0.10);
+                border-color: rgba(34, 197, 94, 0.26);
+            }
+            .elevator-subcard.bad {
+                background: rgba(239, 68, 68, 0.10);
+                border-color: rgba(239, 68, 68, 0.26);
+            }
+            .elevator-subcard-title {
+                font-size: 12px;
+                font-weight: 700;
+                margin-bottom: 6px;
+            }
+            .elevator-subcard.good .elevator-subcard-title {
+                color: #9ae6b4;
+            }
+            .elevator-subcard.bad .elevator-subcard-title {
+                color: #fdba74;
+            }
+            .elevator-subcard-body {
+                font-size: 12px;
+                color: var(--color-text-muted);
+                line-height: 1.8;
+            }
+            .elevator-chip-row {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .elevator-chip {
+                padding: 4px 12px;
+                background: rgba(243, 182, 109, 0.12);
+                border: 1px solid rgba(243, 182, 109, 0.28);
+                border-radius: 999px;
+                font-size: 12px;
+                color: #fde7c7;
+            }
+            .elevator-chip a {
+                color: inherit;
+                text-decoration: none;
+                border-bottom: 1px dotted currentColor;
+            }
+            .elevator-step.step-1 { --step-accent: #c45d49; --step-bg: rgba(196, 93, 73, 0.14); --step-border: rgba(196, 93, 73, 0.34); --step-title: #fdbaaa; }
+            .elevator-step.step-2 { --step-accent: #d17c3d; --step-bg: rgba(209, 124, 61, 0.14); --step-border: rgba(209, 124, 61, 0.34); --step-title: #fdc68a; }
+            .elevator-step.step-3 { --step-accent: #b59a24; --step-bg: rgba(181, 154, 36, 0.12); --step-border: rgba(181, 154, 36, 0.30); --step-title: #fde7a1; }
+            .elevator-step.step-4 { --step-accent: #5b83d6; --step-bg: rgba(91, 131, 214, 0.14); --step-border: rgba(91, 131, 214, 0.30); --step-title: #bfdbfe; }
+            .elevator-step.step-5 { --step-accent: #f3b66d; --step-bg: rgba(243, 182, 109, 0.14); --step-border: rgba(243, 182, 109, 0.40); --step-title: #fde7c7; }
+            body[data-theme="light"] .elevator-panel {
+                background: linear-gradient(135deg, rgba(255, 250, 244, 0.98) 0%, rgba(246, 238, 229, 0.96) 100%);
+                border-color: rgba(217, 119, 6, 0.34);
+                box-shadow: 0 18px 38px rgba(120, 98, 73, 0.10);
+            }
+            body[data-theme="light"] .elevator-heading {
+                color: #b45309;
+            }
+            body[data-theme="light"] .elevator-badge {
+                color: #fffaf5;
+            }
+            body[data-theme="light"] .elevator-card code {
+                background: rgba(217, 119, 6, 0.10) !important;
+                color: #9a3412 !important;
+            }
+            body[data-theme="light"] .elevator-chip {
+                background: rgba(217, 119, 6, 0.10);
+                border-color: rgba(217, 119, 6, 0.22);
+                color: #9a3412;
+            }
+            @media (max-width: 640px) {
+                .theme-toggle {
+                    top: 12px;
+                    right: 12px;
+                    padding: 8px 12px;
+                    gap: 8px;
+                }
+                .theme-toggle-label {
+                    font-size: 11px;
+                    letter-spacing: 0.06em;
+                }
+            }
+            @media (max-width: 768px) {
+                .elevator-grid {
+                    grid-template-columns: 1fr;
+                }
             }
         }
     </style>
 </head>
-<body class="min-h-screen grid-pattern">
+<body class="min-h-screen grid-pattern" data-theme="dark">
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Переключить тему" onclick="toggleTheme()">
+        <span id="theme-toggle-label" class="theme-toggle-label">Тёмная тема</span>
+        <span class="theme-toggle-track" aria-hidden="true">
+            <span class="theme-toggle-thumb"></span>
+        </span>
+    </button>
     <!-- Header -->
     <header class="relative overflow-hidden py-12 px-6 border-b border-yellow-600/20">
         <div class="diagonal-line top-20 -left-20"></div>
         <div class="diagonal-line top-32 -left-10"></div>
         <div class="max-w-7xl mx-auto">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-red-700 to-red-900 flex items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-950/20">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
@@ -173,27 +669,27 @@
     <!-- Key Metrics -->
     <section class="px-6 py-8">
         <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="card metric-card rounded-lg p-6 text-center" onclick="showTab('security'); setTimeout(() => document.getElementById('content-security').scrollIntoView({behavior: 'smooth'}), 100);">
-                <div class="text-4xl font-bold metric-value mb-2">Высокий</div>
-                <div class="text-sm text-gray-400 uppercase tracking-wider">Общий риск отказа</div>
+            <div class="card metric-card rounded-lg p-6 text-center" onclick="jumpToArgument('legal', 'key-rights', 'legal-5')">
+                <div class="text-3xl md:text-4xl font-bold metric-value mb-2">П. 5(а)</div>
+                <div class="text-sm text-gray-400 uppercase tracking-wider">Исключительные права нужны на продукт целиком</div>
             </div>
-            <div class="card metric-card rounded-lg p-6 text-center" onclick="showTab('legal'); setTimeout(() => { toggleExpand('legal-2'); document.getElementById('legal-2').scrollIntoView({behavior: 'smooth', block: 'center'}); }, 100);">
-                <div class="text-4xl font-bold metric-value mb-2">MPL 2.0</div>
-                <div class="text-sm text-gray-400 uppercase tracking-wider">Лицензия LibreOffice</div>
+            <div class="card metric-card rounded-lg p-6 text-center" onclick="jumpToArgument('legal', 'key-composite-work', 'legal-5')">
+                <div class="text-3xl md:text-4xl font-bold metric-value mb-2">Ст. 1260</div>
+                <div class="text-sm text-gray-400 uppercase tracking-wider">Составное произведение не даёт прав на ядро LibreOffice</div>
             </div>
-            <div class="card metric-card rounded-lg p-6 text-center" onclick="showTab('legal'); setTimeout(() => document.getElementById('content-legal').scrollIntoView({behavior: 'smooth'}), 100);">
-                <div class="text-4xl font-bold metric-value mb-2">2016</div>
-                <div class="text-sm text-gray-400 uppercase tracking-wider">Год позиции Минцифры</div>
+            <div class="card metric-card rounded-lg p-6 text-center" onclick="jumpToArgument('so-argument', 'key-loader')">
+                <div class="text-3xl md:text-4xl font-bold metric-value mb-2">1,47 МБ</div>
+                <div class="text-sm text-gray-400 uppercase tracking-wider">На экспертизу подавали загрузчик, а не офисный пакет</div>
             </div>
-            <div class="card metric-card rounded-lg p-6 text-center" onclick="showTab('legal'); setTimeout(() => document.getElementById('content-legal').scrollIntoView({behavior: 'smooth'}), 100);">
-                <div class="text-4xl font-bold metric-value mb-2">8+</div>
-                <div class="text-sm text-gray-400 uppercase tracking-wider">Критических рисков</div>
+            <div class="card metric-card rounded-lg p-6 text-center" onclick="jumpToArgument('so-argument', 'key-os-dependent')">
+                <div class="text-3xl md:text-4xl font-bold metric-value mb-2">OS-зависим</div>
+                <div class="text-sm text-gray-400 uppercase tracking-wider">Состав «Свободного офиса» меняется под ALT и Astra</div>
             </div>
         </div>
     </section>
 
     <!-- Navigation Tabs -->
-    <nav class="px-6 py-4 sticky top-0 z-50 bg-opacity-95" style="background: rgba(15, 15, 26, 0.95); backdrop-filter: blur(10px);">
+    <nav class="px-6 py-4 sticky top-0 z-50 bg-opacity-95" style="background: var(--color-nav); backdrop-filter: blur(10px);">
         <div class="max-w-7xl mx-auto flex flex-wrap gap-2">
             <button onclick="showTab('legal')" id="tab-legal" class="tab-active px-6 py-3 rounded-lg font-semibold transition-all">
                 Правовые риски
@@ -420,11 +916,11 @@
                 </div>
 
                 <!-- Legal argument 9: ст.1260 ГК РФ -->
-                <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('legal-5')" style="margin-top:8px;">
+                <div id="key-rights" class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('legal-5')" style="margin-top:8px;">
                     <div class="flex justify-between items-start mb-4">
                         <div class="flex items-center gap-3">
                             <span class="w-8 h-8 rounded-full bg-blue-900/50 flex items-center justify-center text-blue-400 font-bold text-sm">9</span>
-                            <h3 class="text-lg font-semibold text-white leading-tight"><a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" class="external-link">Ст. 1260 ГК РФ</a>: самоквалификация как «составное произведение»</h3>
+                            <h3 id="key-composite-work" class="text-lg font-semibold text-white leading-tight"><a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" class="external-link">Ст. 1260 ГК РФ</a>: самоквалификация как «составное произведение»</h3>
                         </div>
                         <svg id="icon-legal-5" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -1679,63 +2175,63 @@
                 </div>
 
                 <!-- ELEVATOR PITCH: Логическая цепочка -->
-                <div class="mb-8 p-6 rounded-xl border-2 border-yellow-500/60" style="background: linear-gradient(135deg, rgba(26,26,46,0.95) 0%, rgba(15,15,26,0.98) 100%);">
+                <div class="elevator-panel mb-8 p-6 rounded-xl">
                     <div class="flex items-center gap-3 mb-6">
-                        <div style="width:40px;height:40px;background:linear-gradient(135deg,#d4af37,#f4d03f);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <svg style="width:20px;height:20px;color:#0f0f1a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <div class="elevator-badge">
+                            <svg style="width:20px;height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
                         <div>
-                            <h3 style="font-size:22px;font-weight:700;color:#f4d03f;">Элевейтор-тест: 5 шагов к отказу</h3>
-                            <p style="color:#9ca3af;font-size:14px;">Логическая цепочка, опирающаяся исключительно на документы самого заявителя</p>
+                            <h3 class="elevator-heading">Элевейтор-тест: 5 шагов к отказу</h3>
+                            <p class="elevator-subheading">Логическая цепочка, опирающаяся исключительно на документы самого заявителя</p>
                         </div>
                     </div>
 
-                    <div style="display:flex;flex-direction:column;gap:0;">
+                    <div class="elevator-stack">
                         <!-- Step 1 -->
-                        <div style="display:flex;gap:16px;align-items:flex-start;">
-                            <div style="display:flex;flex-direction:column;align-items:center;">
-                                <div style="width:36px;height:36px;border-radius:50%;background:#c41e3a;display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:15px;flex-shrink:0;">1</div>
-                                <div style="width:2px;flex:1;background:linear-gradient(#c41e3a,#d4af37);min-height:40px;margin-top:4px;"></div>
+                        <div class="elevator-step step-1">
+                            <div class="elevator-rail">
+                                <div class="elevator-node">1</div>
+                                <div class="elevator-line"></div>
                             </div>
-                            <div style="padding:16px;background:rgba(196,30,58,0.15);border:1px solid rgba(196,30,58,0.4);border-radius:8px;flex:1;margin-bottom:8px;">
-                                <p style="color:#f9a8a8;font-weight:600;margin-bottom:6px;">Ядро продукта - в иностранном репозитории</p>
-                                <p style="color:#9ca3af;font-size:14px;">LibreOffice (~45 млн строк кода) разрабатывается исключительно в <a href="https://gerrit.libreoffice.org/" target="_blank" style="color:#60a5fa;text-decoration:underline;">gerrit.libreoffice.org</a>, принадлежащем немецкому фонду <a href="https://blog.documentfoundation.org/" target="_blank" style="color:#60a5fa;text-decoration:underline;">The Document Foundation</a>. Репозитории altlinux.org хранят только <strong style="color:white;">spec-файлы (упаковочные инструкции)</strong>, а не исходный код LibreOffice. В заявке 346971 runtime-скачивание с TDF убрано: freeoffice-installer теперь вызывает <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px;">apt-get install freeoffice</code> из Сизифа. Однако <strong style="color:#fbbf24;">на уровне сборки (SRPM Source:)</strong> исходники LibreOffice по-прежнему берутся с серверов TDF - это неустранимо, пока ядро разрабатывается там.</p>
+                            <div class="elevator-card">
+                                <p class="elevator-card-title">Ядро продукта - в иностранном репозитории</p>
+                                <p class="elevator-card-body">LibreOffice (~45 млн строк кода) разрабатывается исключительно в <a href="https://gerrit.libreoffice.org/" target="_blank" style="color:#60a5fa;text-decoration:underline;">gerrit.libreoffice.org</a>, принадлежащем немецкому фонду <a href="https://blog.documentfoundation.org/" target="_blank" style="color:#60a5fa;text-decoration:underline;">The Document Foundation</a>. Репозитории altlinux.org хранят только <strong>spec-файлы (упаковочные инструкции)</strong>, а не исходный код LibreOffice. В заявке 346971 runtime-скачивание с TDF убрано: freeoffice-installer теперь вызывает <code>apt-get install freeoffice</code> из Сизифа. Однако <strong class="elevator-highlight">на уровне сборки (SRPM Source:)</strong> исходники LibreOffice по-прежнему берутся с серверов TDF - это неустранимо, пока ядро разрабатывается там.</p>
                             </div>
                         </div>
 
                         <!-- Step 2 -->
-                        <div style="display:flex;gap:16px;align-items:flex-start;">
-                            <div style="display:flex;flex-direction:column;align-items:center;">
-                                <div style="width:36px;height:36px;border-radius:50%;background:#c45c1e;display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:15px;flex-shrink:0;">2</div>
-                                <div style="width:2px;flex:1;background:linear-gradient(#c45c1e,#d4af37);min-height:40px;margin-top:4px;"></div>
+                        <div class="elevator-step step-2">
+                            <div class="elevator-rail">
+                                <div class="elevator-node">2</div>
+                                <div class="elevator-line"></div>
                             </div>
-                            <div style="padding:16px;background:rgba(196,92,30,0.15);border:1px solid rgba(196,92,30,0.4);border-radius:8px;flex:1;margin-bottom:8px;">
-                                <p style="color:#fdba74;font-weight:600;margin-bottom:6px;">Зависимость от иностранной инфраструктуры подтверждена самим заявителем</p>
-                                <p style="color:#9ca3af;font-size:14px;">Заявитель прямо указывает в документах: <em style="color:#e5e7eb;">«Разработчики Базальт СПО осуществляют регулярные коммиты в апстрим»</em> с ссылкой на <a href="https://gerrit.libreoffice.org/q/owner:nuke@altlinux.org" target="_blank" style="color:#60a5fa;text-decoration:underline;">gerrit.libreoffice.org/q/owner:nuke@altlinux.org</a>. Исправление в Thunderbird также отправлено в <a href="https://hg-edge.mozilla.org/comm-central/rev/5c130de114a6" target="_blank" style="color:#60a5fa;text-decoration:underline;">репозиторий Mozilla</a>. Таким образом, зависимость от иностранной инфраструктуры не устранена - она <strong style="color:white;">структурно встроена</strong> в процесс разработки.</p>
+                            <div class="elevator-card">
+                                <p class="elevator-card-title">Зависимость от иностранной инфраструктуры подтверждена самим заявителем</p>
+                                <p class="elevator-card-body">Заявитель прямо указывает в документах: <em>«Разработчики Базальт СПО осуществляют регулярные коммиты в апстрим»</em> с ссылкой на <a href="https://gerrit.libreoffice.org/q/owner:nuke@altlinux.org" target="_blank" style="color:#60a5fa;text-decoration:underline;">gerrit.libreoffice.org/q/owner:nuke@altlinux.org</a>. Исправление в Thunderbird также отправлено в <a href="https://hg-edge.mozilla.org/comm-central/rev/5c130de114a6" target="_blank" style="color:#60a5fa;text-decoration:underline;">репозиторий Mozilla</a>. Таким образом, зависимость от иностранной инфраструктуры не устранена - она <strong>структурно встроена</strong> в процесс разработки.</p>
                             </div>
                         </div>
 
                         <!-- Step 3 -->
-                        <div style="display:flex;gap:16px;align-items:flex-start;">
-                            <div style="display:flex;flex-direction:column;align-items:center;">
-                                <div style="width:36px;height:36px;border-radius:50%;background:#b5a200;display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:15px;flex-shrink:0;">3</div>
-                                <div style="width:2px;flex:1;background:linear-gradient(#b5a200,#d4af37);min-height:40px;margin-top:4px;"></div>
+                        <div class="elevator-step step-3">
+                            <div class="elevator-rail">
+                                <div class="elevator-node">3</div>
+                                <div class="elevator-line"></div>
                             </div>
-                            <div style="padding:16px;background:rgba(181,162,0,0.12);border:1px solid rgba(181,162,0,0.4);border-radius:8px;flex:1;margin-bottom:8px;">
-                                <p style="color:#fde68a;font-weight:600;margin-bottom:8px;">Предложенный продукт - набор обёрток и плагинов (2 из 7 компонентов «собственные»)</p>
+                            <div class="elevator-card">
+                                <p class="elevator-card-title">Предложенный продукт - набор обёрток и плагинов (2 из 7 компонентов «собственные»)</p>
                                 <!-- Component breakdown -->
-                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-                                    <div style="padding:10px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:6px;">
-                                        <p style="color:#86efac;font-size:12px;font-weight:600;margin-bottom:6px;">СОБСТВЕННЫЕ РАЗРАБОТКИ (2)</p>
-                                        <div style="font-size:12px;color:#9ca3af;line-height:1.8;">
+                                <div class="elevator-grid">
+                                    <div class="elevator-subcard good">
+                                        <p class="elevator-subcard-title">СОБСТВЕННЫЕ РАЗРАБОТКИ (2)</p>
+                                        <div class="elevator-subcard-body">
                                             <div>✓ <a href="https://git.altlinux.org/gears/s/surguch.git" target="_blank" style="color:#60a5fa;">Surguch</a> — PDF+ЭП (GPL-3.0)</div>
                                             <div>✓ <a href="https://packages.altlinux.org/ru/sisyphus/srpms/LibreOffice-plugin-altcsp/" target="_blank" style="color:#60a5fa;">LibreOffice-plugin-altcsp</a> — плагин КриптоПро</div>
                                         </div>
                                     </div>
-                                    <div style="padding:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:6px;">
-                                        <p style="color:#fca5a5;font-size:12px;font-weight:600;margin-bottom:6px;">ИНОСТРАННЫЕ КОМПОНЕНТЫ (5)</p>
-                                        <div style="font-size:12px;color:#9ca3af;line-height:1.8;">
-                                            <div>✗ libreoffice (TDF, Германия) <span style="color:#6b7280;font-size:11px;">— в заявке 346971 переименован из LibreOffice-still</span></div>
+                                    <div class="elevator-subcard bad">
+                                        <p class="elevator-subcard-title">ИНОСТРАННЫЕ КОМПОНЕНТЫ (5)</p>
+                                        <div class="elevator-subcard-body">
+                                            <div>✗ libreoffice (TDF, Германия) <span style="font-size:11px;">— в заявке 346971 переименован из LibreOffice-still</span></div>
                                             <div>✗ Thunderbird (Mozilla Foundation, США)</div>
                                             <div>✗ Chromium (Google, США)</div>
                                             <div>✗ davmail (GPL-2.0+, Франция)</div>
@@ -1743,37 +2239,37 @@
                                         </div>
                                     </div>
                                 </div>
-                                <p style="color:#9ca3af;font-size:13px;">По документам самого заявителя (<a href="https://git.altlinux.org/srpms/L/LibreOffice-still.git" target="_blank" style="color:#60a5fa;text-decoration:underline;">Список доработок, раздел I «Собственные разработки Базальт СПО»</a>) к собственным относятся только Surguch и alt-csp-cryptopro. Все остальные компоненты прямо отнесены к разделу II «Компоненты под свободными лицензиями».</p>
+                                <p class="elevator-card-body small">По документам самого заявителя (<a href="https://git.altlinux.org/srpms/L/LibreOffice-still.git" target="_blank" style="color:#60a5fa;text-decoration:underline;">Список доработок, раздел I «Собственные разработки Базальт СПО»</a>) к собственным относятся только Surguch и alt-csp-cryptopro. Все остальные компоненты прямо отнесены к разделу II «Компоненты под свободными лицензиями».</p>
                             </div>
                         </div>
 
                         <!-- Step 4 -->
-                        <div style="display:flex;gap:16px;align-items:flex-start;">
-                            <div style="display:flex;flex-direction:column;align-items:center;">
-                                <div style="width:36px;height:36px;border-radius:50%;background:#1e40af;display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:15px;flex-shrink:0;">4</div>
-                                <div style="width:2px;flex:1;background:linear-gradient(#1e40af,#d4af37);min-height:40px;margin-top:4px;"></div>
+                        <div class="elevator-step step-4">
+                            <div class="elevator-rail">
+                                <div class="elevator-node">4</div>
+                                <div class="elevator-line"></div>
                             </div>
-                            <div style="padding:16px;background:rgba(30,64,175,0.15);border:1px solid rgba(30,64,175,0.4);border-radius:8px;flex:1;margin-bottom:8px;">
-                                <p style="color:#93c5fd;font-weight:600;margin-bottom:6px;"><a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" style="color:#93c5fd;text-decoration:none;border-bottom:1px dotted #93c5fd;">Ст. 1260 ГК РФ</a>: заявитель сам квалифицировал продукт как «составное произведение»</p>
-                                <p style="color:#9ca3af;font-size:14px;">Заявитель прямо называет «Свободный офис» <em style="color:#e5e7eb;">«программным комплексом (составным произведением)»</em>. По <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" style="color:white;text-decoration:none;border-bottom:1px dotted white;">ст. 1260 ГК РФ</a>, автор составного произведения обладает авторским правом лишь на осуществлённые им <strong style="color:white;">подбор и расположение материала</strong>, но НЕ на компоненты (п. 3 <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" style="color:white;text-decoration:none;border-bottom:1px dotted white;">ст. 1260 ГК РФ</a>). Исключительные права на LibreOffice остаются у The Document Foundation. Следовательно, у заявителя <strong style="color:#fca5a5;">отсутствуют исключительные права на продукт в целом</strong>, требуемые <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" style="color:#fca5a5;text-decoration:none;border-bottom:1px dotted #fca5a5;">п. 5(а) Постановления № 1236</a>.</p>
+                            <div class="elevator-card">
+                                <p class="elevator-card-title"><a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dotted currentColor;">Ст. 1260 ГК РФ</a>: заявитель сам квалифицировал продукт как «составное произведение»</p>
+                                <p class="elevator-card-body">Заявитель прямо называет «Свободный офис» <em>«программным комплексом (составным произведением)»</em>. По <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dotted currentColor;">ст. 1260 ГК РФ</a>, автор составного произведения обладает авторским правом лишь на осуществлённые им <strong>подбор и расположение материала</strong>, но НЕ на компоненты (п. 3 <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dotted currentColor;">ст. 1260 ГК РФ</a>). Исключительные права на LibreOffice остаются у The Document Foundation. Следовательно, у заявителя <strong class="elevator-highlight">отсутствуют исключительные права на продукт в целом</strong>, требуемые <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dotted currentColor;">п. 5(а) Постановления № 1236</a>.</p>
                             </div>
                         </div>
 
                         <!-- Step 5 - Conclusion -->
-                        <div style="display:flex;gap:16px;align-items:flex-start;">
-                            <div style="display:flex;flex-direction:column;align-items:center;">
-                                <div style="width:36px;height:36px;border-radius:50%;background:#d4af37;display:flex;align-items:center;justify-content:center;font-weight:700;color:#0f0f1a;font-size:15px;flex-shrink:0;">5</div>
+                        <div class="elevator-step step-5">
+                            <div class="elevator-rail">
+                                <div class="elevator-node" style="color:#1f232b;">5</div>
                             </div>
-                            <div style="padding:16px;background:rgba(212,175,55,0.15);border:2px solid rgba(212,175,55,0.5);border-radius:8px;flex:1;">
-                                <p style="color:#fde68a;font-weight:700;font-size:16px;margin-bottom:8px;">Вывод: включить плагины, а не офисный пакет</p>
-                                <p style="color:#d1d5db;font-size:14px;margin-bottom:10px;">Если у заявителя нет исключительных прав на LibreOffice (ст. 1260 ГК РФ + MPL 2.0), то логично рассматривать внесение в реестр только тех объектов, на которые у него такие права есть: <strong style="color:white;">Surguch</strong> (утилита для работы с PDF и ЭП) и <strong style="color:white;">LibreOffice-plugin-altcsp</strong> (плагин КриптоПро). Это отдельные, самостоятельные программы, подпадающие под соответствующие классы реестра. Включение «Свободного офиса» как <em>офисного пакета</em> некорректно, поскольку ядром офисного функционала является LibreOffice, права на который заявитель не может подтвердить в полном объёме.</p>
-                                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                                    <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" style="text-decoration:none;"><span style="padding:4px 12px;background:rgba(212,175,55,0.2);border:1px solid rgba(212,175,55,0.4);border-radius:20px;font-size:12px;color:#fde68a;cursor:pointer;">Постановление № 1236, п. 5(а)</span></a>
-                                    <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" style="text-decoration:none;"><span style="padding:4px 12px;background:rgba(212,175,55,0.2);border:1px solid rgba(212,175,55,0.4);border-radius:20px;font-size:12px;color:#fde68a;cursor:pointer;">Ст. 1260 ГК РФ</span></a>
-                                    <span style="padding:4px 12px;background:rgba(212,175,55,0.2);border:1px solid rgba(212,175,55,0.4);border-radius:20px;font-size:12px;color:#fde68a;">MPL 2.0 (<a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517&rangeId=2008552" target="_blank" style="color:#fde68a;text-decoration:none;border-bottom:1px dotted #fde68a;">ст. 1229</a>, <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517&rangeId=2008558" target="_blank" style="color:#fde68a;text-decoration:none;border-bottom:1px dotted #fde68a;">1235 ГК РФ</a>)</span>
-                                    <span style="padding:4px 12px;background:rgba(212,175,55,0.2);border:1px solid rgba(212,175,55,0.4);border-radius:20px;font-size:12px;color:#fde68a;">Заявление самого заявителя</span>
-                                    <span style="padding:4px 12px;background:rgba(212,175,55,0.2);border:1px solid rgba(212,175,55,0.4);border-radius:20px;font-size:12px;color:#fde68a;">EULA п.2.1: «авторские права на ДИСТРИБУТИВ как составное произведение»</span>
-                                    <span style="padding:4px 12px;background:rgba(212,175,55,0.2);border:1px solid rgba(212,175,55,0.4);border-radius:20px;font-size:12px;color:#fde68a;">Сизиф: LibreOffice = «международный проект» (собств. сайт Базальт)</span>
+                            <div class="elevator-card" style="border-width:2px;">
+                                <p class="elevator-card-title large">Вывод: включить плагины, а не офисный пакет</p>
+                                <p class="elevator-card-body" style="margin-bottom:10px;">Если у заявителя нет исключительных прав на LibreOffice (ст. 1260 ГК РФ + MPL 2.0), то логично рассматривать внесение в реестр только тех объектов, на которые у него такие права есть: <strong>Surguch</strong> (утилита для работы с PDF и ЭП) и <strong>LibreOffice-plugin-altcsp</strong> (плагин КриптоПро). Это отдельные, самостоятельные программы, подпадающие под соответствующие классы реестра. Включение «Свободного офиса» как <em>офисного пакета</em> некорректно, поскольку ядром офисного функционала является LibreOffice, права на который заявитель не может подтвердить в полном объёме.</p>
+                                <div class="elevator-chip-row">
+                                    <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" class="elevator-chip">Постановление № 1236, п. 5(а)</a>
+                                    <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" class="elevator-chip">Ст. 1260 ГК РФ</a>
+                                    <span class="elevator-chip">MPL 2.0 (<a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517&rangeId=2008552" target="_blank">ст. 1229</a>, <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517&rangeId=2008558" target="_blank">1235 ГК РФ</a>)</span>
+                                    <span class="elevator-chip">Заявление самого заявителя</span>
+                                    <span class="elevator-chip">EULA п.2.1: «авторские права на ДИСТРИБУТИВ как составное произведение»</span>
+                                    <span class="elevator-chip">Сизиф: LibreOffice = «международный проект» (собств. сайт Базальт)</span>
                                 </div>
                             </div>
                         </div>
@@ -2033,7 +2529,7 @@
                 </div>
 
                     <!-- Claim 342570-A: freeoffice-installer = download script -->
-                    <div class="card rounded-lg p-6 border-l-4 border-red-600">
+                    <div id="key-loader" class="card rounded-lg p-6 border-l-4 border-red-600">
                         <div class="flex items-start gap-4">
                             <div class="w-10 h-10 rounded-full bg-red-900/60 flex items-center justify-center flex-shrink-0">
                                 <svg style="width:18px;height:18px;" fill="none" stroke="#f87171" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -2320,68 +2816,142 @@
                         </div>
                     </div>
 
+                    <!-- Claim: Astra case is different from standalone office package -->
+                    <div class="card rounded-lg p-6 border-l-4 border-cyan-500" style="margin-top:16px;">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-cyan-900/50 flex items-center justify-center flex-shrink-0">
+                                <svg style="width:18px;height:18px;" fill="none" stroke="#22d3ee" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3-3v6m8 4H4a1 1 0 01-1-1V6a1 1 0 011-1h5l2 2h9a1 1 0 011 1v10a1 1 0 01-1 1z"/></svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <h3 class="text-lg font-semibold text-white">Материалы Астры не оправдывают «Свободный офис», а показывают другой сценарий допуска</h3>
+                                    <span style="padding:2px 8px;background:rgba(34,211,238,0.18);border:1px solid rgba(34,211,238,0.4);border-radius:12px;font-size:11px;color:#67e8f9;white-space:nowrap;">Сравнение кейсов</span>
+                                </div>
+                                <div class="p-4 bg-gray-800/50 rounded-lg mb-4">
+                                    <p class="text-gray-300 text-sm italic">Из пояснений ООО «РусБИТех-Астра» к заявкам №№ 346971 и 351219:</p>
+                                    <p class="text-cyan-200 text-sm mt-2">Объект заявки у Астры - <strong class="text-white">Astra Linux Special Edition</strong>, а не отдельный офисный пакет. LibreOffice, Thunderbird и криптоплагины описаны как компоненты <strong class="text-white">в составе ОС</strong>; в обосновании отдельно подчеркнуты лицензия ФСБ и тематическое заключение ФСБ России № 149/3/2/1-2768 от 06.10.2021 по совместной работе со СКЗИ КриптоПро CSP.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-cyan-900/20 rounded border border-cyan-700/30">
+                                        <p class="text-cyan-300 text-sm font-semibold mb-1">Что доказывает Астра</p>
+                                        <p class="text-gray-400 text-sm">Материалы Астры подтверждают только то, что LibreOffice может использоваться внутри <strong class="text-white">сертифицированной российской ОС</strong> совместно с отечественными криптосредствами и собственными интеграционными модулями. Это аргумент о доверенной среде эксплуатации, а не о том, что права на LibreOffice «переходят» к российскому вендору.</p>
+                                    </div>
+                                    <div class="p-3 bg-red-900/20 rounded border border-red-700/30">
+                                        <p class="text-red-300 text-sm font-semibold mb-1">Что Астра не доказывает</p>
+                                        <p class="text-gray-400 text-sm">Ни лицензия ФСБ/ФСТЭК, ни тематическое заключение по СКЗИ не снимают требования <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" class="external-link" style="color:#fca5a5;">п. 5(а) Постановления № 1236</a> к правам на заявляемый продукт. В таблице Астры LibreOffice и Thunderbird прямо названы теми же внешними компонентами, что и у Базальта. Значит, даже по логике Астры спор идёт не о «российскости» ядра LibreOffice, а о допустимости его использования внутри другого, более крупного и сертифицированного продукта.</p>
+                                    </div>
+                                    <div class="p-3 bg-yellow-900/20 rounded border border-yellow-700/30">
+                                        <p class="text-yellow-300 text-sm font-semibold mb-1">Практический вывод для допуска</p>
+                                        <p class="text-gray-400 text-sm">Если кейс Астры вообще релевантен, то он поддерживает не регистрацию отдельного LibreOffice-based офиса, а только сценарий <strong class="text-white">«российская ОС + собственные криптоинтеграции + подтверждённая совместимость»</strong>. Для «Свободного офиса» это работает скорее против заявки: допустимый объект реестра тогда - сама ОС или самостоятельные российские модули (Surguch, CSP-плагины), а не отдельный офисный пакет, в котором ядро остаётся LibreOffice.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Claim: Basalt presentation and disagreement table narrow rather than solve the dispute -->
+                    <div id="key-os-dependent" class="card rounded-lg p-6 border-l-4 border-amber-500" style="margin-top:16px;">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-amber-900/50 flex items-center justify-center flex-shrink-0">
+                                <svg style="width:18px;height:18px;" fill="none" stroke="#f59e0b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6m3 6V7m3 10v-4m5 8H4a1 1 0 01-1-1V4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1z"/></svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <h3 class="text-lg font-semibold text-white">Презентация Базальта и таблица разногласий не снимают замечания по существу</h3>
+                                    <span style="padding:2px 8px;background:rgba(245,158,11,0.18);border:1px solid rgba(245,158,11,0.4);border-radius:12px;font-size:11px;color:#fcd34d;white-space:nowrap;">Смысл материалов Минцифры</span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-amber-900/20 rounded border border-amber-700/30">
+                                        <p class="text-amber-300 text-sm font-semibold mb-1">Прямое признание OS-зависимого состава</p>
+                                        <p class="text-gray-400 text-sm">В презентации Базальта указано, что для ALT архив не включает Chromium и Thunderbird, потому что они уже входят в ОС, а <strong class="text-white">для Astra Linux архив должен быть иным - в формате deb и со «всем необходимым ПО»</strong>. Это означает, что состав «Свободного офиса» меняется в зависимости от целевой ОС. Такой продукт трудно считать единым самостоятельным офисным пакетом; он выглядит как установщик и интеграционная обвязка вокруг ОС-специфичных компонентов.</p>
+                                    </div>
+                                    <div class="p-3 bg-red-900/20 rounded border border-red-700/30">
+                                        <p class="text-red-300 text-sm font-semibold mb-1">Сертификация ФСТЭК у Базальта относится к ОС, а не к ядру «Свободного офиса»</p>
+                                        <p class="text-gray-400 text-sm">Базальт отдельно ссылается на то, что компоненты уже находятся в составе дистрибутивов ОС ALT, включая сертифицированную версию по требованиям ФСТЭК. Это усиливает только доверие к платформе ALT Linux, но не устраняет вопрос: <strong class="text-white">кому принадлежат права на LibreOffice/DavMail/Thunderbird в заявляемом офисном продукте</strong>. По существу это та же логика, что у Астры: доверенная ОС не превращает LibreOffice в собственную разработку заявителя.</p>
+                                    </div>
+                                    <div class="p-3 bg-blue-900/20 rounded border border-blue-700/30">
+                                        <p class="text-blue-300 text-sm font-semibold mb-1">Что реально показывает таблица разногласий Минцифры</p>
+                                        <p class="text-gray-400 text-sm">«Таблица ответов заявителя на замечания экспертов» - это не акт согласия Минцифры с позицией Базальта, а процессуальный документ, где спор сводится к одному тезису: заявитель считает, что прав на <strong class="text-white">составное произведение</strong> по <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=503517#h1867" target="_blank" class="external-link">ст. 1260 ГК РФ</a> достаточно. При этом сама таблица фиксирует, что замечания по LibreOffice, DavMail, товарному знаку, хранению исходников, обращениям к github.com и OS-зависимому составу никуда не исчезли - на них дан лишь единый ответ через концепцию составного произведения.</p>
+                                    </div>
+                                    <div class="p-3 bg-purple-900/20 rounded border border-purple-700/30">
+                                        <p class="text-purple-300 text-sm font-semibold mb-1">Юридическое последствие</p>
+                                        <p class="text-gray-400 text-sm">После изучения презентации и таблицы спор становится уже, а не слабее: вопрос теперь звучит так - <strong class="text-white">можно ли допустить в реестр отдельный офисный пакет, если заявитель признаёт, что его ядро состоит из чужих программ, а свои права обосновывает только подбором и интеграцией?</strong> Именно на этом узком вопросе Базальт пока не даёт нового факта, а только повторяет прежнюю правовую квалификацию.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 <!-- Summary -->
-                <div class="mt-8 p-6 bg-gradient-to-r from-red-900/40 to-orange-900/20 rounded-lg border border-red-600/30">
+                <div class="summary-panel mt-8 p-6 rounded-lg">
                     <div class="flex items-start gap-4">
-                        <div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-950/20">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
                         </div>
                         <div>
                             <h3 class="text-xl font-bold text-white mb-3">Итоговый вывод по аргументации «Свободного офиса»</h3>
-                            <ul class="space-y-2 text-gray-300 text-sm">
+                            <ul class="space-y-3 text-sm">
                                 <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span>«Регулярные коммиты в upstream» и «отправка переводов» — признание зависимости от иностранной инфраструктуры</span>
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span>Экспертное заключение 2025 прямо указывает: «код формируется за границей РФ на инфраструктуре TDF»</span>
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span>Экспертное заключение 2026: ни одно требование не подтверждено, всё «на обсуждение»</span>
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span>MPL 2.0 требует открытия модификаций — но где публичный репозиторий с полным форком?</span>
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="text-yellow-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span>«Собственные разработки» — это плагины и обёртки, а не ядро офисного пакета</span>
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span><strong class="text-white">Заявка 342570:</strong> предоставлен не продукт, а 1.47 МБ-скрипт загрузки; spec-файл Сизифа прямо указывает на <code class="bg-gray-700 px-1 rounded text-xs">download.documentfoundation.org</code> как источник исходников</span>
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span><strong class="text-white">Три ложных утверждения</strong> Базальт СПО в «Справке для эксперта» опровергнуты документально экспертом Щегловым П.Е.</span>
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="text-yellow-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span>Между заявками 342570 и 346971 применена стратегия обфускации: прямая ссылка на TDF скрыта в установщике, но зависимость от иностранных исходников не устранена</span>
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span><strong class="text-white">EULA п.2.1</strong>: в собственном лицензионном соглашении Базальт прямо называет продукт «дистрибутивом как составным произведением» и указывает, что на компоненты лишь «получены разрешения» — то есть признаёт отсутствие исключительных прав в юридически обязывающем документе</span>
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span><strong class="text-white">Сайт Базальт СПО</strong>: на странице «Проект Сизиф» LibreOffice явно изображён как «международный проект» — прямо противоречит заявленной «собственной разработке» в форме реестра</span>
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="text-gray-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span><strong class="text-white">Контекст: Ростелеком (конец 2025)</strong>: приобрёл 25% Базальт СПО — Ростелеком российская государственная компания, поэтому п.5(б) об иностранном участии не затрагивается. Фактически это означает усиление государственного участия в структуре, что для целей реестра нейтрально или положительно. <span style="color:#6b7280;font-size:12px;">[Фактический контекст, не правовой аргумент против заявки]</span></span>
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span><strong class="text-white">Состав дистрибутива 346971:</strong> Chromium и Thunderbird фактически не входят в дистрибутив - они устанавливаются отдельно после freeoffice-installer. Установщик также удаляет LibreOffice из ALT OS 11 при запуске (эксперт Щеглов П.Е.). Таким образом, декларируемый в заявке состав продукта расходится с фактическим содержимым дистрибутива.</span>
                                 </li>
                                 <li class="flex items-start gap-2">
-                                    <span class="text-yellow-500 mt-1">•</span>
+                                    <span class="text-orange-400 mt-1">•</span>
                                     <span><strong class="text-white">«LibreOffice Community» маркировка:</strong> TDF ввела это обозначение специально для отказа от обязательств по enterprise-поддержке. Базальт использует именно эту маркировку - тем самым признавая, что сборка не имеет статуса поддерживаемого enterprise-дистрибутива TDF. Это усиливает аргумент о структурной зависимости: без enterprise-статуса TDF Базальт лишён гарантированного SLA на патчи CVE.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-orange-400 mt-1">•</span>
+                                    <span><strong class="text-white">Кейс Астры</strong> не подтверждает допустимость отдельного LibreOffice-based офиса: он описывает другой объект реестра - сертифицированную ОС со встроенными офисными компонентами и собственными криптоплагинами. Это аргумент за доверенную среду, а не за права на ядро LibreOffice.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-orange-400 mt-1">•</span>
+                                    <span><strong class="text-white">Презентация Базальта и таблица разногласий Минцифры</strong> сужают спор до одной точки: заявитель не опровергает иностранное происхождение ключевых компонентов, а лишь утверждает, что прав на составное произведение достаточно. Именно этот тезис и должен оцениваться на соответствие <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756&cwi=233#h865" target="_blank" class="external-link" style="color:#fca5a5;">п. 5(а) № 1236</a>.</span>
                                 </li>
                             </ul>
                         </div>
@@ -2474,6 +3044,34 @@
                                 <a href="https://app.opencve.io/cve/?vendor=libreoffice" target="_blank" class="external-link text-blue-400">
                                     OpenCVE — LibreOffice vulnerabilities<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
                                 <p class="text-gray-500 text-xs mt-1">База уязвимостей</p>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Local dossier -->
+                    <div class="card rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h8m-8 4h6M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+                            </svg>
+                            Материалы спора 2025-2026
+                        </h3>
+                        <ul class="space-y-3 text-sm">
+                            <li>
+                                <span class="text-cyan-300">Пояснения ООО «РусБИТех-Астра» к заявкам №№ 346971 и 351219</span>
+                                <p class="text-gray-500 text-xs mt-1">Использовано для разграничения двух сценариев: сертифицированная ОС с компонентами LibreOffice внутри и отдельный офисный пакет как самостоятельный объект реестра.</p>
+                            </li>
+                            <li>
+                                <span class="text-cyan-300">«Презентация_Свободный офис_итог.pdf» (Базальт СПО)</span>
+                                <p class="text-gray-500 text-xs mt-1">Содержит ключевые признания: OS-зависимый состав дистрибутива, опору на ст. 1260 ГК РФ и ссылку на наличие компонентов в сертифицированной ОС ALT.</p>
+                            </li>
+                            <li>
+                                <span class="text-cyan-300">«Таблица разногласий_итог.pdf» (Минцифры / ответы заявителя)</span>
+                                <p class="text-gray-500 text-xs mt-1">Использована как процессуальный документ, фиксирующий предмет спора по п. 5 Правил, а не как подтверждение соответствия заявки.</p>
+                            </li>
+                            <li>
+                                <span class="text-cyan-300">Экспертные заключения Журавлёва и Закоржевского</span>
+                                <p class="text-gray-500 text-xs mt-1">Поддерживают линию о «комплексе программ», отсутствии прав на ключевые компоненты и различии между собственной разработкой и составным произведением.</p>
                             </li>
                         </ul>
                     </div>
@@ -2575,6 +3173,50 @@
     </footer>
 
     <script>
+        function applyTheme(theme, persist = true) {
+            document.documentElement.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+            document.documentElement.style.colorScheme = theme;
+            const label = document.getElementById('theme-toggle-label');
+            if (label) {
+                label.textContent = theme === 'dark' ? 'Тёмная тема' : 'Светлая тема';
+            }
+            if (persist) {
+                localStorage.setItem('libreoffice-analysis-theme', theme);
+            }
+        }
+
+        function toggleTheme() {
+            const current = document.body.getAttribute('data-theme') || 'dark';
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('libreoffice-analysis-theme');
+            if (saved === 'dark' || saved === 'light') {
+                applyTheme(saved, false);
+                return;
+            }
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(prefersDark ? 'dark' : 'light', false);
+        }
+
+        function jumpToArgument(tabName, targetId, expandId = null) {
+            showTab(tabName);
+            setTimeout(() => {
+                if (expandId) {
+                    const content = document.getElementById('expand-' + expandId);
+                    if (content && !content.classList.contains('open')) {
+                        toggleExpand(expandId);
+                    }
+                }
+                const target = document.getElementById(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        }
+
         // Tab switching
         function showTab(tabName) {
             // Hide all content
@@ -2609,7 +3251,8 @@
             }
         }
 
-        // Initialize first tab
+        // Initialize
+        initTheme();
         showTab('legal');
     </script>
 </body>

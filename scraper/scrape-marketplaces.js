@@ -13,7 +13,7 @@
  *   node scrape-marketplaces.js --platforms ozon,wildberries --output data.json
  *
  * VPS cron (каждые 6 часов):
- *   0 */6 * * * cd /opt/ms-monitor && node scrape-marketplaces.js >> logs/cron.log 2>&1
+ *   0 *\/6 * * * cd /opt/ms-monitor && node scrape-marketplaces.js >> logs/cron.log 2>&1
  */
 
 const { chromium } = require('playwright');
@@ -22,13 +22,13 @@ const path = require('path');
 
 // ========== КОНФИГУРАЦИЯ ==========
 const CONFIG = {
-  // Поисковые запросы для мониторинга
+  // Поисковые запросы для мониторинга (только Microsoft Office, без Windows)
   queries: [
     'Microsoft Office ключ активации',
     'Microsoft Office 365 ключ',
-    'Windows 11 ключ активации',
     'Office 2021 ключ активации',
-    'Windows 10 ключ активации',
+    'Office 2024 ключ активации',
+    'MS Office ключ активации',
   ],
   // Площадки: ozon | wildberries | yandex | avito
   platforms: ['ozon', 'wildberries', 'yandex', 'avito'],
@@ -101,6 +101,20 @@ function computeFlags(r) {
   };
 }
 
+/**
+ * Фильтр заголовков — только Microsoft Office и все его вариации.
+ * Исключает: Windows, Visio, Project, Adobe, МойОфис, OfficeSuite и прочее.
+ */
+function titleOk(title) {
+  const t = title.toLowerCase();
+  if (t.includes('officesuite')) return false;  // конкурент, не Microsoft
+  return (
+    t.includes('office') ||
+    (t.includes('365') && t.includes('microsoft')) ||
+    (t.includes('офис') && t.includes('microsoft'))
+  );
+}
+
 function makeId(pl, idx, query) {
   const prefixes = { ozon: 'OZ', wildberries: 'WB', yandex: 'YM', avito: 'AV' };
   const qhash = Math.abs(query.split('').reduce((a,c) => a*31+c.charCodeAt(0), 0)) % 10000;
@@ -163,6 +177,7 @@ async function scrapeOzon(page, query, maxPages) {
       }
 
       items.forEach((item, i) => {
+        if (!titleOk(item.title)) return;
         const op = detectOfficialPrice(item.title);
         results.push({
           date: today(),
@@ -240,6 +255,7 @@ async function scrapeWildberries(page, query, maxPages) {
       if (!items.length) break;
 
       items.forEach((item, i) => {
+        if (!titleOk(item.title)) return;
         const op = detectOfficialPrice(item.title);
         results.push({
           date: today(),
@@ -341,6 +357,7 @@ async function scrapeYandexMarket(page, query, maxPages) {
       }
 
       unique.forEach((item, i) => {
+        if (!titleOk(item.title)) return;
         const op = detectOfficialPrice(item.title);
         results.push({
           date: today(),
@@ -413,6 +430,7 @@ async function scrapeAvito(page, query, maxPages) {
       }
 
       items.forEach((item, i) => {
+        if (!titleOk(item.title)) return;
         const op = detectOfficialPrice(item.title);
         results.push({
           date: today(),
