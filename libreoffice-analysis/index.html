@@ -436,6 +436,152 @@
                 background: rgba(226, 217, 206, 0.72);
                 color: #9a3412;
             }
+            .evidence-section {
+                margin-top: 28px;
+            }
+            .evidence-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 18px;
+                margin-top: 18px;
+            }
+            .evidence-card {
+                background: linear-gradient(180deg, var(--color-panel-strong), var(--color-panel));
+                border: 1px solid var(--color-border);
+                border-top: 3px solid transparent;
+                border-radius: 18px;
+                padding: 16px;
+                box-shadow: 0 16px 34px var(--color-shadow);
+            }
+            .evidence-card.critical {
+                border-top-color: var(--semantic-critical-fg);
+            }
+            .evidence-card.caution {
+                border-top-color: var(--semantic-caution-fg);
+            }
+            .evidence-card.info {
+                border-top-color: var(--semantic-info-fg);
+            }
+            .evidence-card.success {
+                border-top-color: var(--semantic-success-fg);
+            }
+            .evidence-meta {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+            .evidence-badge,
+            .evidence-meaning {
+                display: inline-flex;
+                align-items: center;
+                padding: 4px 10px;
+                border-radius: 999px;
+                font-size: 11px;
+                font-weight: 600;
+                line-height: 1;
+                letter-spacing: 0.03em;
+            }
+            .evidence-badge {
+                color: var(--color-text-strong);
+                background: rgba(148, 163, 184, 0.14);
+                border: 1px solid rgba(148, 163, 184, 0.22);
+            }
+            .evidence-card.critical .evidence-meaning {
+                color: var(--semantic-critical-fg);
+                background: var(--semantic-critical-bg);
+                border: 1px solid var(--semantic-critical-border);
+            }
+            .evidence-card.caution .evidence-meaning {
+                color: var(--semantic-caution-fg);
+                background: var(--semantic-caution-bg);
+                border: 1px solid var(--semantic-caution-border);
+            }
+            .evidence-card.info .evidence-meaning {
+                color: var(--semantic-info-fg);
+                background: var(--semantic-info-bg);
+                border: 1px solid var(--semantic-info-border);
+            }
+            .evidence-card.success .evidence-meaning {
+                color: var(--semantic-success-fg);
+                background: var(--semantic-success-bg);
+                border: 1px solid var(--semantic-success-border);
+            }
+            .evidence-title {
+                color: var(--color-text-strong);
+                font-size: 18px;
+                font-weight: 700;
+                line-height: 1.35;
+                margin-bottom: 12px;
+            }
+            .evidence-shot-link {
+                display: block;
+                border-radius: 14px;
+                overflow: hidden;
+                border: 1px solid rgba(148, 163, 184, 0.22);
+                background: rgba(255, 255, 255, 0.95);
+                box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+            }
+            .evidence-shot {
+                display: block;
+                width: 100%;
+                height: auto;
+                max-height: 310px;
+                object-fit: contain;
+                background: #ffffff;
+            }
+            .evidence-caption {
+                color: var(--color-text-faint);
+                font-size: 12px;
+                margin-top: 8px;
+                line-height: 1.5;
+            }
+            .evidence-quote {
+                margin-top: 14px;
+                padding: 12px 14px;
+                border-radius: 12px;
+                font-size: 14px;
+                line-height: 1.6;
+                color: var(--color-text);
+                background: rgba(148, 163, 184, 0.10);
+                border-left: 3px solid rgba(148, 163, 184, 0.30);
+            }
+            .evidence-card.critical .evidence-quote {
+                background: var(--semantic-critical-bg);
+                border-left-color: var(--semantic-critical-border);
+            }
+            .evidence-card.caution .evidence-quote {
+                background: var(--semantic-caution-bg);
+                border-left-color: var(--semantic-caution-border);
+            }
+            .evidence-card.info .evidence-quote {
+                background: var(--semantic-info-bg);
+                border-left-color: var(--semantic-info-border);
+            }
+            .evidence-card.success .evidence-quote {
+                background: var(--semantic-success-bg);
+                border-left-color: var(--semantic-success-border);
+            }
+            .evidence-takeaway {
+                margin-top: 12px;
+                color: var(--color-text);
+                font-size: 14px;
+                line-height: 1.6;
+            }
+            .evidence-takeaway strong {
+                color: var(--color-text-strong);
+            }
+            body[data-theme="light"] .evidence-card {
+                box-shadow: 0 16px 32px rgba(120, 98, 73, 0.10);
+            }
+            body[data-theme="light"] .evidence-shot-link {
+                border-color: rgba(191, 171, 146, 0.48);
+                box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.88);
+            }
+            body[data-theme="light"] .evidence-quote {
+                color: #3d4652;
+            }
             .elevator-panel {
                 background: linear-gradient(135deg, rgba(31, 35, 43, 0.98) 0%, rgba(38, 43, 53, 0.96) 100%);
                 border: 2px solid rgba(243, 182, 109, 0.58);
@@ -628,6 +774,9 @@
                 }
             }
             @media (max-width: 768px) {
+                .evidence-grid {
+                    grid-template-columns: 1fr;
+                }
                 .elevator-grid {
                     grid-template-columns: 1fr;
                 }
@@ -2879,6 +3028,118 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="evidence-section">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-900/50 flex items-center justify-center flex-shrink-0">
+                                <svg style="width:18px;height:18px;" fill="none" stroke="#60a5fa" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10m-7 4h7M5 20h14a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-white">Документальные врезки: ключевые фрагменты из PDF</h3>
+                                <p class="text-gray-400 text-sm mt-2">Ниже не пересказ, а прямые фрагменты спорных материалов. Каждая карточка отвечает на отдельный вопрос: что именно заявлено, что именно признаёт Базальт, и что именно показывают экспертные возражения.</p>
+                            </div>
+                        </div>
+
+                        <div class="evidence-grid">
+                            <article class="evidence-card info">
+                                <div class="evidence-meta">
+                                    <span class="evidence-badge">Астра, стр. 1</span>
+                                    <span class="evidence-meaning">Объект заявки = ОС</span>
+                                </div>
+                                <h4 class="evidence-title">Астра описывает не отдельный офисный пакет, а сертифицированную ОС с офисными компонентами</h4>
+                                <a class="evidence-shot-link" href="assets/evidence/astra-p1.png" target="_blank" rel="noopener">
+                                    <img class="evidence-shot" src="assets/evidence/astra-p1.png" alt="Скан страницы 1 документа Астра с описанием Astra Linux Special Edition и таблицей компонентов">
+                                </a>
+                                <p class="evidence-caption">Источник: «Сравнение для экспертов_Астра.pdf», стр. 1.</p>
+                                <blockquote class="evidence-quote">«ООО "РусБИТех-Астра" подано заявление ... программному обеспечению: "Astra Linux Special Edition"... подтверждения применения офисных программ в составе операционной системы...»</blockquote>
+                                <p class="evidence-takeaway"><strong>Что это доказывает:</strong> кейс Астры отвечает на вопрос о доверенной российской ОС и совместимости со СКЗИ, но не на вопрос о переходе исключительных прав на ядро <code>LibreOffice</code>.</p>
+                            </article>
+
+                            <article class="evidence-card caution">
+                                <div class="evidence-meta">
+                                    <span class="evidence-badge">Презентация Базальта, стр. 3</span>
+                                    <span class="evidence-meaning">OS-зависимый состав</span>
+                                </div>
+                                <h4 class="evidence-title">Базальт сам признаёт, что состав архива меняется под конкретную ОС</h4>
+                                <a class="evidence-shot-link" href="assets/evidence/basalt-presentation-p3.png" target="_blank" rel="noopener">
+                                    <img class="evidence-shot" src="assets/evidence/basalt-presentation-p3.png" alt="Страница 3 презентации Базальта с описанием состава заявки и формата deb для Astra Linux">
+                                </a>
+                                <p class="evidence-caption">Источник: «Презентация_Свободный офис_итог.pdf», стр. 3.</p>
+                                <blockquote class="evidence-quote">«При этом в архив не входят Chromium и Thunderbird... Для других ОС, например, Astra Linux, архив будет содержать пакеты в формате deb, а не rpm и все необходимое ПО...»</blockquote>
+                                <p class="evidence-takeaway"><strong>Что это доказывает:</strong> заявленный продукт ведёт себя не как единый офисный пакет, а как инсталлятор и интеграционная сборка, состав которой зависит от целевой ОС.</p>
+                            </article>
+
+                            <article class="evidence-card caution">
+                                <div class="evidence-meta">
+                                    <span class="evidence-badge">Презентация Базальта, стр. 4</span>
+                                    <span class="evidence-meaning">Ответ сводится к ст. 1260</span>
+                                </div>
+                                <h4 class="evidence-title">Ключевой ответ Базальта: достаточно прав на составное произведение в целом</h4>
+                                <a class="evidence-shot-link" href="assets/evidence/basalt-presentation-p4.png" target="_blank" rel="noopener">
+                                    <img class="evidence-shot" src="assets/evidence/basalt-presentation-p4.png" alt="Страница 4 презентации Базальта с аргументом о составном произведении и статье 1260 ГК РФ">
+                                </a>
+                                <p class="evidence-caption">Источник: «Презентация_Свободный офис_итог.pdf», стр. 4.</p>
+                                <blockquote class="evidence-quote">«Права на составное произведение "Свободный Офис" принадлежат Заявителю в соответствии со ст. 1260 ГК РФ... Достаточно наличия исключительных прав на составное произведение в целом...»</blockquote>
+                                <p class="evidence-takeaway"><strong>Что это доказывает:</strong> после всех ответов спор сужается до одной правовой конструкции: Базальт не доказывает права на ядро <code>LibreOffice</code>, а доказывает достаточность прав на подбор и интеграцию.</p>
+                            </article>
+
+                            <article class="evidence-card caution">
+                                <div class="evidence-meta">
+                                    <span class="evidence-badge">Таблица разногласий, стр. 8</span>
+                                    <span class="evidence-meaning">Официальная процессуальная позиция</span>
+                                </div>
+                                <h4 class="evidence-title">В таблице разногласий Базальт повторяет ту же схему: open-source допускается, если есть права на структуру и интеграцию</h4>
+                                <a class="evidence-shot-link" href="assets/evidence/disagreements-p8.png" target="_blank" rel="noopener">
+                                    <img class="evidence-shot" src="assets/evidence/disagreements-p8.png" alt="Страница 8 таблицы разногласий с ответом про open-source компоненты и права на структуру и интеграцию">
+                                </a>
+                                <p class="evidence-caption">Источник: «Таблица разногласий_итог.pdf», стр. 8.</p>
+                                <blockquote class="evidence-quote">«Использование программ третьих лиц... само по себе не исключает наличие исключительных прав на составное произведение в целом... правообладатель которого обладает правами на его структуру, интеграцию и собственные модули...»</blockquote>
+                                <p class="evidence-takeaway"><strong>Что это доказывает:</strong> таблица разногласий не снимает экспертные замечания, а фиксирует официальный ответ заявителя: права на ядро не подтверждаются, вместо этого подтверждаются права на интеграцию.</p>
+                            </article>
+
+                            <article class="evidence-card critical">
+                                <div class="evidence-meta">
+                                    <span class="evidence-badge">Журавлёв, стр. 3</span>
+                                    <span class="evidence-meaning">Прецедент Ankey SIEM</span>
+                                </div>
+                                <h4 class="evidence-title">Экспертный контраргумент: суд уже подтверждал, что прав на составное произведение может быть недостаточно для реестра</h4>
+                                <a class="evidence-shot-link" href="assets/evidence/zhuravlev-p3.png" target="_blank" rel="noopener">
+                                    <img class="evidence-shot" src="assets/evidence/zhuravlev-p3.png" alt="Страница 3 заключения Журавлева с цитатой про Ankey SIEM и недостаточность прав на составное произведение">
+                                </a>
+                                <p class="evidence-caption">Источник: «Свободный_офис_Журавлев.pdf», стр. 3.</p>
+                                <blockquote class="evidence-quote">«...ПО представляет собой составное произведение... но в то же время заявитель не обладает исключительным правом на ПО... ПО не соответствует требованиям ... и не может включаться в Реестр».</blockquote>
+                                <p class="evidence-takeaway"><strong>Что это доказывает:</strong> враждебный для Базальта прецедент уже существует: сама по себе квалификация по <code>ст. 1260 ГК РФ</code> не гарантирует соответствие реестровому критерию исключительных прав.</p>
+                            </article>
+
+                            <article class="evidence-card critical">
+                                <div class="evidence-meta">
+                                    <span class="evidence-badge">Закоржевский, стр. 2</span>
+                                    <span class="evidence-meaning">Ключевая функциональность чужая</span>
+                                </div>
+                                <h4 class="evidence-title">Эксперт фиксирует, что собственная разработка Базальта ограничивается установщиком и ЭП-модулями</h4>
+                                <a class="evidence-shot-link" href="assets/evidence/zakorzhevsky-p2.png" target="_blank" rel="noopener">
+                                    <img class="evidence-shot" src="assets/evidence/zakorzhevsky-p2.png" alt="Страница 2 заключения Закоржевского с перечислением собственных и зарубежных компонентов Свободного офиса">
+                                </a>
+                                <p class="evidence-caption">Источник: «Свободный_офис_Закоржевский.pdf», стр. 2.</p>
+                                <blockquote class="evidence-quote">«Собственной разработкой "Базальт СПО" являются: инсталлятор пакетов... инструменты для работы с электронной подписью... Ключевые компоненты... LibreOffice, DavMail, Chromium, Thunderbird».</blockquote>
+                                <p class="evidence-takeaway"><strong>Что это доказывает:</strong> собственный вклад Базальта находится на периферии продукта, а основная офисная функциональность реализуется чужими компонентами.</p>
+                            </article>
+
+                            <article class="evidence-card critical">
+                                <div class="evidence-meta">
+                                    <span class="evidence-badge">Закоржевский, стр. 3</span>
+                                    <span class="evidence-meaning">Нет значимых модификаций ядра</span>
+                                </div>
+                                <h4 class="evidence-title">По экспертной оценке, модификации <code>LibreOffice</code> и <code>DavMail</code> минимальны, а код формируется вне РФ</h4>
+                                <a class="evidence-shot-link" href="assets/evidence/zakorzhevsky-p3.png" target="_blank" rel="noopener">
+                                    <img class="evidence-shot" src="assets/evidence/zakorzhevsky-p3.png" alt="Страница 3 заключения Закоржевского с тезисом об отсутствии значимых модификаций и формировании кода за границей">
+                                </a>
+                                <p class="evidence-caption">Источник: «Свободный_офис_Закоржевский.pdf», стр. 3.</p>
+                                <blockquote class="evidence-quote">«Не обнаружены модификаций кода DavMail... заявитель не в полном объеме обладает исключительным правом... код формально хранится на отечественных серверах, но фактически "подтягивается" с зарубежных репозиториев».</blockquote>
+                                <p class="evidence-takeaway"><strong>Что это доказывает:</strong> если существенной переработки ядра нет, то тезис о собственном офисном пакете становится ещё слабее и уходит в плоскость переупаковки и локальной интеграции.</p>
+                            </article>
                         </div>
                     </div>
 
