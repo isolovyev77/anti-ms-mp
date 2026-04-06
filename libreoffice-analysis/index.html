@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аргументы против включения LibreOffice в реестр российского ПО</title>
     <script src="https://cdn.tailwindcss.com" onerror="document.documentElement.classList.add('tailwind-failed')"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <!-- Critical CSS for mobile when Tailwind fails -->
     <style>
         /* Only applies when Tailwind CDN fails */
@@ -26,140 +26,150 @@
     <style type="text/tailwindcss">
         @layer base {
             :root {
-                --color-primary: #2b313d;
-                --color-accent: #d97706;
-                --color-accent-soft: #fdba74;
-                --color-gold: #f3b66d;
-                --color-warm: #f6efe7;
-                --color-dark: #1f232b;
-                --page-bg: linear-gradient(180deg, #242933 0%, #1e232b 54%, #1b1f27 100%);
-                --page-bg-solid: #1f232b;
-                --page-radial-a: rgba(245, 158, 11, 0.10);
-                --page-radial-b: rgba(148, 163, 184, 0.12);
-                --color-panel: rgba(43, 49, 61, 0.78);
-                --color-panel-strong: rgba(56, 63, 76, 0.92);
-                --color-panel-soft: rgba(55, 61, 73, 0.72);
-                --color-border: rgba(243, 182, 109, 0.22);
-                --color-border-strong: rgba(247, 201, 138, 0.25);
-                --color-text: #f6efe7;
-                --color-text-strong: #fffaf5;
-                --color-text-muted: #b7c0cd;
-                --color-text-faint: #95a0b0;
-                --color-nav: rgba(30, 35, 43, 0.86);
-                --color-shadow: rgba(15, 23, 42, 0.22);
-                --color-shadow-accent: rgba(245, 158, 11, 0.10);
-                --color-grid: rgba(243, 182, 109, 0.028);
-                --color-line: rgba(251, 191, 36, 0.24);
-                --semantic-critical-fg: #f4a261;
-                --semantic-critical-bg: rgba(234, 136, 75, 0.18);
-                --semantic-critical-bg-strong: rgba(234, 136, 75, 0.22);
-                --semantic-critical-border: rgba(244, 162, 97, 0.30);
-                --semantic-caution-fg: #f7c98a;
-                --semantic-caution-fg-strong: #fde7c7;
-                --semantic-caution-bg: rgba(245, 185, 107, 0.15);
-                --semantic-caution-bg-strong: rgba(245, 185, 107, 0.18);
-                --semantic-caution-border: rgba(247, 201, 138, 0.28);
-                --semantic-info-fg: #93c5fd;
-                --semantic-info-fg-strong: #dbeafe;
-                --semantic-info-bg: rgba(59, 130, 246, 0.16);
-                --semantic-info-bg-strong: rgba(59, 130, 246, 0.20);
-                --semantic-info-border: rgba(96, 165, 250, 0.30);
-                --semantic-success-fg: #86efac;
-                --semantic-success-fg-strong: #dcfce7;
-                --semantic-success-bg: rgba(34, 197, 94, 0.14);
-                --semantic-success-bg-strong: rgba(34, 197, 94, 0.18);
-                --semantic-success-border: rgba(74, 222, 128, 0.28);
+                /* Anthropic dark palette */
+                --color-primary: #1c1917;
+                --color-accent: #c85d27;
+                --color-accent-soft: #e8926a;
+                --color-gold: #d4784a;
+                --color-warm: #e8ddd0;
+                --color-dark: #141413;
+                --page-bg: linear-gradient(180deg, #1a1816 0%, #141413 60%, #111110 100%);
+                --page-bg-solid: #141413;
+                --page-radial-a: rgba(200, 93, 39, 0.07);
+                --page-radial-b: rgba(180, 160, 140, 0.05);
+                --color-panel: rgba(28, 25, 23, 0.90);
+                --color-panel-strong: rgba(34, 30, 27, 0.96);
+                --color-panel-soft: rgba(30, 27, 24, 0.82);
+                --color-border: rgba(200, 93, 39, 0.18);
+                --color-border-strong: rgba(200, 93, 39, 0.24);
+                --color-text: #e0d5c8;
+                --color-text-strong: #f0e8dd;
+                --color-text-muted: #9e9085;
+                --color-text-faint: #6e6358;
+                --color-nav: rgba(18, 16, 14, 0.92);
+                --color-shadow: rgba(0, 0, 0, 0.40);
+                --color-shadow-accent: rgba(200, 93, 39, 0.12);
+                --color-grid: rgba(200, 93, 39, 0.025);
+                --color-line: rgba(200, 93, 39, 0.18);
+                --semantic-critical-fg: #e07a4a;
+                --semantic-critical-bg: rgba(200, 93, 39, 0.14);
+                --semantic-critical-bg-strong: rgba(200, 93, 39, 0.20);
+                --semantic-critical-border: rgba(200, 93, 39, 0.28);
+                --semantic-caution-fg: #d4a574;
+                --semantic-caution-fg-strong: #e8c49a;
+                --semantic-caution-bg: rgba(180, 130, 80, 0.12);
+                --semantic-caution-bg-strong: rgba(180, 130, 80, 0.17);
+                --semantic-caution-border: rgba(180, 130, 80, 0.26);
+                --semantic-info-fg: #8aabca;
+                --semantic-info-fg-strong: #b8d0e4;
+                --semantic-info-bg: rgba(80, 120, 160, 0.14);
+                --semantic-info-bg-strong: rgba(80, 120, 160, 0.20);
+                --semantic-info-border: rgba(80, 120, 160, 0.28);
+                --semantic-success-fg: #7aaa8a;
+                --semantic-success-fg-strong: #a8c8b0;
+                --semantic-success-bg: rgba(60, 140, 90, 0.12);
+                --semantic-success-bg-strong: rgba(60, 140, 90, 0.18);
+                --semantic-success-border: rgba(60, 140, 90, 0.26);
             }
             :root[data-theme="light"],
             body[data-theme="light"] {
-                --page-bg: linear-gradient(180deg, #fbf7f2 0%, #f3ede5 52%, #ece4d8 100%);
-                --page-bg-solid: #f6efe6;
-                --page-radial-a: rgba(245, 158, 11, 0.14);
-                --page-radial-b: rgba(148, 163, 184, 0.10);
-                --color-panel: rgba(255, 251, 246, 0.86);
-                --color-panel-strong: rgba(250, 245, 238, 0.95);
-                --color-panel-soft: rgba(247, 241, 233, 0.88);
-                --color-border: rgba(217, 119, 6, 0.18);
-                --color-border-strong: rgba(217, 119, 6, 0.22);
-                --color-text: #352f2a;
-                --color-text-strong: #211d19;
-                --color-text-muted: #6d717a;
-                --color-text-faint: #878d98;
-                --color-nav: rgba(248, 242, 234, 0.88);
-                --color-shadow: rgba(120, 98, 73, 0.10);
-                --color-shadow-accent: rgba(217, 119, 6, 0.08);
-                --color-grid: rgba(217, 119, 6, 0.035);
-                --color-line: rgba(217, 119, 6, 0.12);
-                --semantic-critical-fg: #b91c1c;
-                --semantic-critical-bg: rgba(239, 68, 68, 0.08);
-                --semantic-critical-bg-strong: rgba(239, 68, 68, 0.12);
-                --semantic-critical-border: rgba(239, 68, 68, 0.22);
-                --semantic-caution-fg: #b45309;
-                --semantic-caution-fg-strong: #9a3412;
-                --semantic-caution-bg: rgba(217, 119, 6, 0.08);
-                --semantic-caution-bg-strong: rgba(217, 119, 6, 0.11);
-                --semantic-caution-border: rgba(217, 119, 6, 0.20);
-                --semantic-info-fg: #1d4ed8;
-                --semantic-info-fg-strong: #1e3a8a;
-                --semantic-info-bg: rgba(59, 130, 246, 0.08);
-                --semantic-info-bg-strong: rgba(59, 130, 246, 0.12);
-                --semantic-info-border: rgba(59, 130, 246, 0.20);
-                --semantic-success-fg: #166534;
-                --semantic-success-fg-strong: #14532d;
-                --semantic-success-bg: rgba(34, 197, 94, 0.08);
-                --semantic-success-bg-strong: rgba(34, 197, 94, 0.12);
-                --semantic-success-border: rgba(34, 197, 94, 0.18);
+                /* Anthropic light palette */
+                --page-bg: linear-gradient(180deg, #faf7f2 0%, #f5f0e8 52%, #ede6da 100%);
+                --page-bg-solid: #faf7f2;
+                --page-radial-a: rgba(200, 93, 39, 0.06);
+                --page-radial-b: rgba(180, 160, 140, 0.04);
+                --color-panel: rgba(255, 253, 249, 0.90);
+                --color-panel-strong: rgba(252, 249, 244, 0.97);
+                --color-panel-soft: rgba(249, 245, 239, 0.88);
+                --color-border: rgba(160, 100, 60, 0.14);
+                --color-border-strong: rgba(160, 100, 60, 0.20);
+                --color-text: #2a211a;
+                --color-text-strong: #1a1310;
+                --color-text-muted: #6b5d52;
+                --color-text-faint: #8e8078;
+                --color-nav: rgba(250, 247, 242, 0.94);
+                --color-shadow: rgba(60, 40, 20, 0.08);
+                --color-shadow-accent: rgba(200, 93, 39, 0.07);
+                --color-grid: rgba(160, 100, 60, 0.030);
+                --color-line: rgba(160, 100, 60, 0.10);
+                --semantic-critical-fg: #a83a10;
+                --semantic-critical-bg: rgba(200, 93, 39, 0.07);
+                --semantic-critical-bg-strong: rgba(200, 93, 39, 0.11);
+                --semantic-critical-border: rgba(200, 93, 39, 0.20);
+                --semantic-caution-fg: #8a5c20;
+                --semantic-caution-fg-strong: #6e4010;
+                --semantic-caution-bg: rgba(140, 90, 30, 0.07);
+                --semantic-caution-bg-strong: rgba(140, 90, 30, 0.11);
+                --semantic-caution-border: rgba(140, 90, 30, 0.18);
+                --semantic-info-fg: #2a5c8a;
+                --semantic-info-fg-strong: #1a3a5e;
+                --semantic-info-bg: rgba(50, 100, 160, 0.07);
+                --semantic-info-bg-strong: rgba(50, 100, 160, 0.11);
+                --semantic-info-border: rgba(50, 100, 160, 0.18);
+                --semantic-success-fg: #1a6030;
+                --semantic-success-fg-strong: #0f4020;
+                --semantic-success-bg: rgba(30, 120, 70, 0.07);
+                --semantic-success-bg-strong: rgba(30, 120, 70, 0.11);
+                --semantic-success-border: rgba(30, 120, 70, 0.16);
             }
             html, body {
                 background-color: var(--page-bg-solid);
             }
             html {
                 background:
-                    radial-gradient(circle at top right, var(--page-radial-a), transparent 28%),
-                    radial-gradient(circle at top left, var(--page-radial-b), transparent 24%),
+                    radial-gradient(ellipse at top right, var(--page-radial-a), transparent 32%),
+                    radial-gradient(ellipse at bottom left, var(--page-radial-b), transparent 28%),
                     var(--page-bg);
             }
             body {
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
                 color: var(--color-text);
                 color-scheme: dark;
                 background-color: transparent;
+                font-size: 15px;
+                line-height: 1.6;
+                letter-spacing: -0.01em;
             }
             :root[data-theme="light"],
             body[data-theme="light"] { color-scheme: light; }
             h1, h2, h3, .display {
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                font-weight: 600;
+                font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+                font-weight: 400;
+                letter-spacing: -0.02em;
             }
+            h1 { font-weight: 300; }
+            h2 { font-weight: 400; }
+            h3 { font-weight: 600; font-family: 'DM Sans', system-ui, sans-serif; letter-spacing: -0.01em; }
         }
         @layer components {
-            .risk-high { border-left: 4px solid #ea9a49; }
-            .risk-medium { border-left: 4px solid #f3b66d; }
-            .risk-low { border-left: 4px solid #7ab89b; }
+            .risk-high  { border-left: 3px solid #c85d27; }
+            .risk-medium { border-left: 3px solid #b87840; }
+            .risk-low   { border-left: 3px solid #5a8a6a; }
             .card {
-                background: linear-gradient(180deg, var(--color-panel-strong), var(--color-panel));
-                backdrop-filter: blur(14px);
+                background: var(--color-panel-strong);
                 border: 1px solid var(--color-border);
-                box-shadow: 0 18px 38px var(--color-shadow);
-                transition: all 0.3s ease;
+                box-shadow: 0 1px 3px var(--color-shadow), 0 8px 24px rgba(0,0,0,0.12);
+                transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
             }
             .card:hover {
-                border-color: rgba(251, 191, 36, 0.34);
-                transform: translateY(-2px);
-                box-shadow: 0 20px 42px var(--color-shadow-accent);
+                border-color: var(--color-border-strong);
+                transform: translateY(-1px);
+                box-shadow: 0 2px 6px var(--color-shadow), 0 12px 32px var(--color-shadow-accent);
             }
             .tab-active {
-                background: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
-                color: #fffaf5;
-                box-shadow: 0 12px 28px rgba(217, 119, 6, 0.18);
+                background: var(--color-accent);
+                color: #faf7f2;
+                box-shadow: 0 2px 8px rgba(200, 93, 39, 0.30);
             }
             .tab-inactive {
                 background: var(--color-panel-strong);
                 color: var(--color-text-muted);
+                border: 1px solid var(--color-border);
             }
             .tab-inactive:hover {
-                background: rgba(71, 78, 91, 0.92);
-                color: #ffd29a;
+                background: var(--color-panel);
+                color: var(--color-text);
+                border-color: var(--color-border-strong);
             }
             .expandable-content {
                 max-height: 0;
@@ -170,55 +180,52 @@
                 max-height: 2000px;
             }
             .metric-value {
-                background: linear-gradient(135deg, #ffd3a1 0%, #f59e0b 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
+                color: var(--color-accent-soft);
+                font-family: 'Source Serif 4', Georgia, serif;
+                font-weight: 300;
             }
             body[data-theme="light"] .metric-value {
-                background: linear-gradient(135deg, #f59e0b 0%, #c2410c 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
+                color: var(--color-accent);
             }
             .grid-pattern {
-                background-image: 
+                background-image:
                     linear-gradient(var(--color-grid) 1px, transparent 1px),
                     linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
-                background-size: 50px 50px;
+                background-size: 48px 48px;
             }
             .diagonal-line {
                 position: absolute;
                 width: 200%;
                 height: 1px;
                 background: linear-gradient(90deg, transparent, var(--color-line), transparent);
-                transform: rotate(-5deg);
+                transform: rotate(-3deg);
                 pointer-events: none;
             }
             .source-link {
-                color: #60a5fa;
+                color: var(--semantic-info-fg);
                 text-decoration: none;
-                border-bottom: 1px dotted #60a5fa;
+                border-bottom: 1px dotted var(--semantic-info-fg);
                 transition: all 0.2s;
             }
             .source-link:hover {
-                color: #93c5fd;
+                color: var(--semantic-info-fg-strong);
                 border-bottom-style: solid;
             }
             .external-link {
                 display: inline-flex;
                 align-items: center;
-                gap: 4px;
-                color: #60a5fa;
+                gap: 3px;
+                color: var(--semantic-info-fg);
                 text-decoration: none;
                 transition: color 0.2s;
             }
             .external-link:hover {
-                color: #93c5fd;
+                color: var(--semantic-info-fg-strong);
             }
             .external-link svg {
-                width: 12px;
-                height: 12px;
+                width: 11px;
+                height: 11px;
+                opacity: 0.7;
             }
             body[data-theme="light"] .source-link,
             body[data-theme="light"] .external-link {
@@ -240,7 +247,7 @@
                 bottom: 8px;
                 right: 12px;
                 font-size: 12px;
-                color: #60a5fa;
+                color: var(--color-accent-soft);
                 opacity: 0;
                 transition: opacity 0.2s;
             }
@@ -248,8 +255,42 @@
                 opacity: 1;
             }
             .metric-card:hover {
-                border-color: rgba(251, 191, 36, 0.34);
+                border-color: var(--color-border-strong);
                 box-shadow: 0 16px 34px var(--color-shadow-accent);
+            }
+            .report-export-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 18px;
+                border-radius: 6px;
+                background: var(--color-accent);
+                color: #faf7f2;
+                border: 1px solid rgba(200, 93, 39, 0.40);
+                box-shadow: 0 2px 8px rgba(200, 93, 39, 0.20);
+                font-size: 13px;
+                font-weight: 500;
+                letter-spacing: 0;
+                transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background 0.2s;
+            }
+            .report-export-btn:hover {
+                transform: translateY(-1px);
+                background: #b85020;
+                box-shadow: 0 4px 14px rgba(200, 93, 39, 0.28);
+            }
+            .report-export-btn:active {
+                transform: translateY(0);
+            }
+            .report-export-btn:disabled {
+                opacity: 0.7;
+                cursor: wait;
+            }
+            .report-export-status {
+                font-size: 13px;
+                color: var(--color-text-muted);
+            }
+            body[data-theme="light"] .report-export-status {
+                color: var(--color-text-faint);
             }
 
             /* Global palette softening for Tailwind utility classes already used in the page */
@@ -257,7 +298,7 @@
             .text-gray-300, .text-gray-400 { color: var(--color-text-muted) !important; }
             .text-gray-500, .text-gray-600 { color: var(--color-text-faint) !important; }
             .bg-gray-800\/50 { background-color: var(--color-panel-soft) !important; }
-            .bg-gray-700 { background-color: rgba(70, 78, 93, 0.9) !important; }
+            .bg-gray-700 { background-color: rgba(44, 38, 32, 0.80) !important; }
             .border-gray-700 { border-color: var(--color-border-strong) !important; }
 
             .text-red-300, .text-red-400, .text-red-500 { color: var(--semantic-critical-fg) !important; }
@@ -279,6 +320,9 @@
             .bg-orange-900\/20,
             .bg-amber-900\/20 { background-color: var(--semantic-caution-bg) !important; }
             .bg-yellow-900\/30 { background-color: var(--semantic-caution-bg-strong) !important; }
+            .bg-orange-900\/50,
+            .bg-amber-900\/50,
+            .bg-yellow-900\/50 { background-color: var(--semantic-caution-bg-strong) !important; }
             .border-yellow-600\/30,
             .border-yellow-600\/40,
             .border-yellow-700\/30,
@@ -338,80 +382,127 @@
                 --tw-gradient-to: rgba(59, 130, 246, 0.07) var(--tw-gradient-to-position) !important;
             }
             body[data-theme="light"] .bg-gray-700 {
-                background-color: rgba(122, 132, 145, 0.18) !important;
+                background-color: rgba(180, 160, 140, 0.16) !important;
             }
             body[data-theme="light"] .text-white {
-                color: #2a241f !important;
+                color: #1a1310 !important;
             }
             body[data-theme="light"] .text-gray-300,
             body[data-theme="light"] .text-gray-400 {
-                color: #626b78 !important;
+                color: #5a4e46 !important;
             }
             body[data-theme="light"] .text-gray-500,
             body[data-theme="light"] .text-gray-600 {
-                color: #767f8c !important;
+                color: #7a6e66 !important;
             }
             body[data-theme="light"] blockquote,
             body[data-theme="light"] cite {
-                color: #495264 !important;
+                color: #4a4038 !important;
             }
 
             .border-yellow-600\/20 { border-color: var(--color-border) !important; }
+
+            /* === Иконочный переключатель темы (луна/солнце) === */
             .theme-toggle {
                 position: fixed;
-                top: 18px;
-                right: 22px;
+                top: 16px;
+                right: 20px;
                 z-index: 70;
-                display: inline-flex;
+                width: 40px;
+                height: 40px;
+                display: flex;
                 align-items: center;
-                gap: 10px;
-                padding: 10px 14px;
-                border-radius: 999px;
+                justify-content: center;
+                border-radius: 8px;
                 border: 1px solid var(--color-border-strong);
                 background: var(--color-nav);
                 color: var(--color-text-strong);
-                backdrop-filter: blur(14px);
-                box-shadow: 0 12px 28px var(--color-shadow);
-                transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+                backdrop-filter: blur(8px);
+                box-shadow: 0 2px 8px var(--color-shadow);
+                cursor: pointer;
+                transition: background 0.25s ease, border-color 0.25s ease,
+                            box-shadow 0.25s ease, transform 0.2s ease;
+                overflow: hidden;
             }
             .theme-toggle:hover {
+                border-color: var(--color-accent);
+                box-shadow: 0 4px 14px var(--color-shadow-accent);
                 transform: translateY(-1px);
-                border-color: rgba(245, 158, 11, 0.32);
-                box-shadow: 0 16px 34px var(--color-shadow-accent);
             }
-            .theme-toggle-track {
-                width: 42px;
-                height: 24px;
-                border-radius: 999px;
-                background: rgba(148, 163, 184, 0.26);
+            .theme-toggle:active {
+                transform: scale(0.92);
+            }
+
+            /* Контейнер иконок — два SVG слотируются друг над другом */
+            .theme-icon-wrap {
                 position: relative;
-                flex-shrink: 0;
+                width: 20px;
+                height: 20px;
             }
-            .theme-toggle-thumb {
+            .theme-icon-sun,
+            .theme-icon-moon {
                 position: absolute;
-                top: 3px;
-                left: 3px;
-                width: 18px;
-                height: 18px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, #ffd3a1 0%, #f59e0b 100%);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-                transition: transform 0.22s ease;
+                inset: 0;
+                width: 20px;
+                height: 20px;
+                transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
             }
-            body[data-theme="light"] .theme-toggle-thumb {
-                transform: translateX(18px);
+
+            /* Тёмная тема: видна луна, солнце скрыто */
+            .theme-icon-sun {
+                opacity: 0;
+                transform: rotate(90deg) scale(0.6);
+                color: var(--color-accent-soft);
             }
-            .theme-toggle-label {
-                font-size: 12px;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                color: var(--color-text-muted);
+            .theme-icon-moon {
+                opacity: 1;
+                transform: rotate(0deg) scale(1);
+                color: var(--color-text-strong);
+            }
+
+            /* Лучи солнца: каждый луч анимируется отдельно */
+            .theme-icon-sun .ray {
+                transform-origin: center;
+                transform-box: fill-box;
+                transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                            opacity 0.35s ease;
+                opacity: 0;
+            }
+            body[data-theme="light"] .theme-icon-sun .ray {
+                opacity: 1;
+            }
+            .theme-icon-sun .ray:nth-child(1)  { transition-delay: 0.00s; }
+            .theme-icon-sun .ray:nth-child(2)  { transition-delay: 0.03s; }
+            .theme-icon-sun .ray:nth-child(3)  { transition-delay: 0.06s; }
+            .theme-icon-sun .ray:nth-child(4)  { transition-delay: 0.09s; }
+            .theme-icon-sun .ray:nth-child(5)  { transition-delay: 0.12s; }
+            .theme-icon-sun .ray:nth-child(6)  { transition-delay: 0.15s; }
+            .theme-icon-sun .ray:nth-child(7)  { transition-delay: 0.18s; }
+            .theme-icon-sun .ray:nth-child(8)  { transition-delay: 0.21s; }
+
+            /* Светлая тема: видно солнце, луна скрыта */
+            body[data-theme="light"] .theme-icon-sun {
+                opacity: 1;
+                transform: rotate(0deg) scale(1);
+            }
+            body[data-theme="light"] .theme-icon-moon {
+                opacity: 0;
+                transform: rotate(-90deg) scale(0.6);
+            }
+
+            /* Пульс при переключении */
+            @keyframes theme-pulse {
+                0%   { box-shadow: 0 0 0 0 rgba(200,93,39,0.40); }
+                60%  { box-shadow: 0 0 0 8px rgba(200,93,39,0); }
+                100% { box-shadow: 0 0 0 0 rgba(200,93,39,0); }
+            }
+            .theme-toggle.switching {
+                animation: theme-pulse 0.5s ease-out;
             }
             .summary-panel {
-                background:
-                    linear-gradient(180deg, rgba(56, 63, 76, 0.96), rgba(43, 49, 61, 0.94));
-                border: 1px solid rgba(243, 182, 109, 0.24);
-                box-shadow: 0 18px 40px rgba(15, 23, 42, 0.20);
+                background: var(--color-panel-strong);
+                border: 1px solid var(--color-border-strong);
+                box-shadow: 0 2px 8px var(--color-shadow);
             }
             .summary-panel h3 {
                 color: var(--color-text-strong);
@@ -421,20 +512,20 @@
                 line-height: 1.65;
             }
             .summary-panel code {
-                background: rgba(23, 28, 36, 0.72);
-                color: #ffe0b2;
+                background: rgba(200, 93, 39, 0.12);
+                color: var(--color-accent-soft);
                 padding: 1px 6px;
-                border-radius: 6px;
+                border-radius: 4px;
+                font-size: 0.9em;
             }
             body[data-theme="light"] .summary-panel {
-                background:
-                    linear-gradient(180deg, rgba(255, 250, 244, 0.97), rgba(247, 239, 229, 0.96));
-                border-color: rgba(217, 119, 6, 0.18);
-                box-shadow: 0 16px 36px rgba(120, 98, 73, 0.12);
+                background: var(--color-panel-strong);
+                border-color: var(--color-border-strong);
+                box-shadow: 0 2px 8px var(--color-shadow);
             }
             body[data-theme="light"] .summary-panel code {
-                background: rgba(226, 217, 206, 0.72);
-                color: #9a3412;
+                background: rgba(200, 93, 39, 0.08);
+                color: var(--color-accent);
             }
             .evidence-section {
                 margin-top: 28px;
@@ -583,26 +674,26 @@
                 color: #3d4652;
             }
             .elevator-panel {
-                background: linear-gradient(135deg, rgba(31, 35, 43, 0.98) 0%, rgba(38, 43, 53, 0.96) 100%);
-                border: 2px solid rgba(243, 182, 109, 0.58);
-                box-shadow: 0 20px 44px rgba(15, 23, 42, 0.20);
+                background: var(--color-panel-strong);
+                border: 1px solid var(--color-border-strong);
+                box-shadow: 0 20px 44px var(--color-shadow);
             }
             .elevator-badge {
                 width: 40px;
                 height: 40px;
-                border-radius: 999px;
+                border-radius: 8px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 flex-shrink: 0;
-                background: linear-gradient(135deg, #f3b66d 0%, #f59e0b 100%);
-                color: #1f232b;
-                box-shadow: 0 10px 22px rgba(245, 158, 11, 0.20);
+                background: var(--color-accent);
+                color: #faf7f2;
+                box-shadow: 0 10px 22px rgba(200, 93, 39, 0.22);
             }
             .elevator-heading {
                 font-size: 22px;
                 font-weight: 700;
-                color: #ffe0b2;
+                color: var(--color-text-strong);
             }
             .elevator-subheading {
                 color: var(--color-text-muted);
@@ -642,7 +733,7 @@
                 flex: 1;
                 min-height: 40px;
                 margin-top: 4px;
-                background: linear-gradient(var(--step-accent), #f3b66d);
+                background: linear-gradient(var(--step-accent), var(--color-border-strong));
             }
             .elevator-card {
                 padding: 16px;
@@ -675,11 +766,11 @@
                 color: var(--color-text-strong) !important;
             }
             .elevator-highlight {
-                color: #f7c98a !important;
+                color: var(--color-accent-soft) !important;
             }
             .elevator-card code {
-                background: rgba(255, 255, 255, 0.10) !important;
-                color: #ffe0b2 !important;
+                background: rgba(200, 93, 39, 0.14) !important;
+                color: var(--color-accent-soft) !important;
                 padding: 1px 5px !important;
                 border-radius: 4px !important;
             }
@@ -708,10 +799,10 @@
                 margin-bottom: 6px;
             }
             .elevator-subcard.good .elevator-subcard-title {
-                color: #9ae6b4;
+                color: var(--semantic-success-fg);
             }
             .elevator-subcard.bad .elevator-subcard-title {
-                color: #fdba74;
+                color: var(--semantic-critical-fg);
             }
             .elevator-subcard-body {
                 font-size: 12px;
@@ -725,52 +816,48 @@
             }
             .elevator-chip {
                 padding: 4px 12px;
-                background: rgba(243, 182, 109, 0.12);
-                border: 1px solid rgba(243, 182, 109, 0.28);
-                border-radius: 999px;
+                background: rgba(200, 93, 39, 0.12);
+                border: 1px solid rgba(200, 93, 39, 0.28);
+                border-radius: 4px;
                 font-size: 12px;
-                color: #fde7c7;
+                color: var(--color-accent-soft);
             }
             .elevator-chip a {
                 color: inherit;
                 text-decoration: none;
                 border-bottom: 1px dotted currentColor;
             }
-            .elevator-step.step-1 { --step-accent: #c45d49; --step-bg: rgba(196, 93, 73, 0.14); --step-border: rgba(196, 93, 73, 0.34); --step-title: #fdbaaa; }
-            .elevator-step.step-2 { --step-accent: #d17c3d; --step-bg: rgba(209, 124, 61, 0.14); --step-border: rgba(209, 124, 61, 0.34); --step-title: #fdc68a; }
-            .elevator-step.step-3 { --step-accent: #b59a24; --step-bg: rgba(181, 154, 36, 0.12); --step-border: rgba(181, 154, 36, 0.30); --step-title: #fde7a1; }
-            .elevator-step.step-4 { --step-accent: #5b83d6; --step-bg: rgba(91, 131, 214, 0.14); --step-border: rgba(91, 131, 214, 0.30); --step-title: #bfdbfe; }
-            .elevator-step.step-5 { --step-accent: #f3b66d; --step-bg: rgba(243, 182, 109, 0.14); --step-border: rgba(243, 182, 109, 0.40); --step-title: #fde7c7; }
+            .elevator-step.step-1 { --step-accent: #c85d27; --step-bg: rgba(200, 93, 39, 0.12); --step-border: rgba(200, 93, 39, 0.30); --step-title: #f0b898; }
+            .elevator-step.step-2 { --step-accent: #a84820; --step-bg: rgba(168, 72, 32, 0.12); --step-border: rgba(168, 72, 32, 0.30); --step-title: #e8a07a; }
+            .elevator-step.step-3 { --step-accent: #8a3a18; --step-bg: rgba(138, 58, 24, 0.12); --step-border: rgba(138, 58, 24, 0.28); --step-title: #d4886a; }
+            .elevator-step.step-4 { --step-accent: #6d6560; --step-bg: rgba(109, 101, 96, 0.14); --step-border: rgba(109, 101, 96, 0.30); --step-title: #c8bfb8; }
+            .elevator-step.step-5 { --step-accent: #c85d27; --step-bg: rgba(200, 93, 39, 0.10); --step-border: rgba(200, 93, 39, 0.28); --step-title: #f0b898; }
             body[data-theme="light"] .elevator-panel {
-                background: linear-gradient(135deg, rgba(255, 250, 244, 0.98) 0%, rgba(246, 238, 229, 0.96) 100%);
-                border-color: rgba(217, 119, 6, 0.34);
+                background: var(--color-panel-strong);
+                border-color: var(--color-border-strong);
                 box-shadow: 0 18px 38px rgba(120, 98, 73, 0.10);
             }
             body[data-theme="light"] .elevator-heading {
-                color: #b45309;
+                color: var(--color-text-strong);
             }
             body[data-theme="light"] .elevator-badge {
-                color: #fffaf5;
+                color: #faf7f2;
             }
             body[data-theme="light"] .elevator-card code {
-                background: rgba(217, 119, 6, 0.10) !important;
-                color: #9a3412 !important;
+                background: rgba(200, 93, 39, 0.10) !important;
+                color: #8a3018 !important;
             }
             body[data-theme="light"] .elevator-chip {
-                background: rgba(217, 119, 6, 0.10);
-                border-color: rgba(217, 119, 6, 0.22);
-                color: #9a3412;
+                background: rgba(200, 93, 39, 0.08);
+                border-color: rgba(200, 93, 39, 0.20);
+                color: #8a3018;
             }
             @media (max-width: 640px) {
                 .theme-toggle {
-                    top: 12px;
-                    right: 12px;
-                    padding: 8px 12px;
-                    gap: 8px;
-                }
-                .theme-toggle-label {
-                    font-size: 11px;
-                    letter-spacing: 0.06em;
+                    top: 10px;
+                    right: 10px;
+                    width: 36px;
+                    height: 36px;
                 }
             }
             @media (max-width: 768px) {
@@ -780,15 +867,33 @@
                 .elevator-grid {
                     grid-template-columns: 1fr;
                 }
+                .report-export-btn {
+                    width: 100%;
+                    justify-content: center;
+                }
             }
         }
     </style>
 </head>
 <body class="min-h-screen grid-pattern" data-theme="dark">
     <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Переключить тему" onclick="toggleTheme()">
-        <span id="theme-toggle-label" class="theme-toggle-label">Тёмная тема</span>
-        <span class="theme-toggle-track" aria-hidden="true">
-            <span class="theme-toggle-thumb"></span>
+        <span class="theme-icon-wrap" aria-hidden="true">
+            <!-- Солнце (светлая тема) -->
+            <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"/>
+                <line class="ray" x1="12" y1="2"  x2="12" y2="4"/>
+                <line class="ray" x1="12" y1="20" x2="12" y2="22"/>
+                <line class="ray" x1="2"  y1="12" x2="4"  y2="12"/>
+                <line class="ray" x1="20" y1="12" x2="22" y2="12"/>
+                <line class="ray" x1="4.93" y1="4.93"  x2="6.34" y2="6.34"/>
+                <line class="ray" x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>
+                <line class="ray" x1="19.07" y1="4.93"  x2="17.66" y2="6.34"/>
+                <line class="ray" x1="6.34"  y1="17.66" x2="4.93"  y2="19.07"/>
+            </svg>
+            <!-- Луна (тёмная тема) -->
+            <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
         </span>
     </button>
     <!-- Header -->
@@ -797,12 +902,12 @@
         <div class="diagonal-line top-32 -left-10"></div>
         <div class="max-w-7xl mx-auto">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-950/20">
+                <div class="w-12 h-12 flex items-center justify-center" style="background: var(--color-accent); border-radius: 8px; box-shadow: 0 4px 16px rgba(200,93,39,0.28);">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                 </div>
-                <span class="text-yellow-500 text-sm tracking-widest uppercase">Аналитический дешборд</span>
+                <span class="text-sm tracking-widest uppercase" style="color: var(--color-accent-soft);">Аналитический дешборд</span>
             </div>
             <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
                 Аргументы против включения<br>
@@ -812,6 +917,15 @@
                 Комплексный анализ правовых, технических и экономических рисков использования LibreOffice 
                 в качестве основы для российского офисного ПО
             </p>
+            <div class="mt-6 flex flex-wrap items-center gap-3">
+                <button id="export-report-btn" class="report-export-btn" type="button" onclick="downloadDashboardReport()">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16V4m0 12l-4-4m4 4l4-4M4 20h16"/>
+                    </svg>
+                    <span>Выгрузить аналитический отчёт (.md)</span>
+                </button>
+                <span id="export-report-status" class="report-export-status" aria-live="polite"></span>
+            </div>
         </div>
     </header>
 
@@ -982,7 +1096,7 @@
                         </div>
                         <p class="text-gray-400 mb-4">
                             <strong>Риск 5:</strong> Недостаточный объём и качество раскрытия сведений о заимствованных компонентах (SBOM).<br>
-                            <strong>Риск 6:</strong> Несоответствие дополнительным требованиям к офисному ПО (<a href="https://normativ.kontur.ru/document?moduleId=1&documentId=309965" target="_blank" class="external-link">постановление № 325<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>).
+                            <strong>Риск 6:</strong> Несоответствие требованиям к офисному ПО по совместимости с доверенными ОС (<a href="https://publication.pravo.gov.ru/document/0001202511280069" target="_blank" class="external-link">постановление № 1937<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>, вступило в силу 01.09.2026).
                         </p>
                         <div id="expand-legal-3" class="expandable-content">
                             <div class="pt-4 border-t border-gray-700">
@@ -998,18 +1112,17 @@
                                         <p class="text-sm text-gray-400 mt-2">Отсутствие полноценных SBOM (CycloneDX/SPDX) повышает риск негативной оценки со стороны Экспертного совета.</p>
                                     </div>
                                     <div>
-                                        <p class="text-yellow-500 font-semibold mb-2">6. Несоответствие постановлению № 325</p>
-                                        <p class="text-sm text-gray-400"><a href="https://normativ.kontur.ru/document?moduleId=1&documentId=309965" target="_blank" class="external-link">Постановление Правительства РФ от 23.03.2017 № 325<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> устанавливает дополнительные требования к офисному ПО:</p>
+                                        <p class="text-yellow-500 font-semibold mb-2">6. Несоответствие постановлению № 1937 (совместимость с доверенными ОС)</p>
+                                        <p class="text-sm text-gray-400"><a href="https://publication.pravo.gov.ru/document/0001202511280069" target="_blank" class="external-link">Постановление Правительства РФ от 28.11.2025 № 1937<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> (вступило в силу с 01.09.2026) вводит п.5(м): офисное ПО обязано подтвердить совместимость с не менее чем двумя российскими ОС из перечня доверенных. <strong>Примечание:</strong> ПП № 325 от 23.03.2017, на которое ранее ссылались аналитики, утратило силу с 01.03.2026 и в актуальной аргументации не используется.</p>
                                         <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm mt-2">
-                                            <li>Требования к функциональному составу</li>
-                                            <li>Требования к архитектуре</li>
-                                            <li>Требования к интеграции, совместимости, безопасности и локализации</li>
+                                            <li>Совместимость с двумя и более доверенными российскими ОС (из перечня, утверждённого Минцифры)</li>
+                                            <li>Подтверждение совместимости — через испытания в аттестованных центрах тестирования ПО (ЦТ по ПП № 1931)</li>
+                                            <li>LibreOffice-based продукты лишены самостоятельного контроля над ядром совместимости: патчи для российских ОС формируются TDF и/или вендорами ОС, а не российским правообладателем</li>
                                         </ul>
                                     </div>
                                     <div class="mt-4 p-4 bg-yellow-900/20 rounded-lg border border-yellow-700/30">
                                         <p class="text-yellow-300 text-sm">
-                                            Если LibreOffice-based решение не покрывает обязательные функции 
-                                            — это самостоятельное основание для отказа.
+                                            Неспособность гарантировать совместимость с доверенными ОС в установленные сроки (с 01.09.2026) является самостоятельным основанием для отказа во включении в реестр или для инициирования исключения.
                                         </p>
                                     </div>
                                 </div>
@@ -1087,7 +1200,7 @@
                                     <p class="text-sm text-yellow-300 mt-2">«Составитель не вправе запрещать авторам произведений, включённых в составное произведение, использовать эти произведения независимо.» Исключительные права на LibreOffice остаются у <a href="https://www.documentfoundation.org/" target="_blank" class="external-link text-blue-400">The Document Foundation</a>.</p>
                                 </div>
                                 <div class="p-4 bg-yellow-900/20 rounded-lg border border-yellow-700/30">
-                                    <p class="text-yellow-300 font-semibold mb-2">Нюанс: <a href="https://ksrf.ru/ru/Decision/Judgments/Documents/2022_June_16_25-P.pdf" target="_blank" class="external-link text-yellow-300">Постановление КС РФ № 25-П от 16.06.2022</a></p>
+                                    <p class="text-yellow-300 font-semibold mb-2">Нюанс: <a href="http://publication.pravo.gov.ru/document/0001202206210001" target="_blank" class="external-link text-yellow-300">Постановление КС РФ № 25-П от 16.06.2022<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a></p>
                                     <p class="text-sm text-gray-400">КС признал неконституционным отказ в защите прав автора составного произведения только на том основании, что он использовал компоненты без разрешения. Это означает: <strong class="text-white">права Базальт СПО на Surguch, CSP-плагин и SRPM-обёртки существуют и защищены</strong> — КС это подтверждает.</p>
                                     <p class="text-sm text-yellow-200 mt-2"><strong>Важно:</strong> КС защищает права автора на <em>его собственный вклад</em> (подбор/расположение), но <strong>не передаёт исключительных прав на чужие компоненты</strong>. Права на LibreOffice по-прежнему принадлежат TDF — постановление КС этого не меняет. Аргумент сохраняет силу, КС лишь уточняет его: проблема не в отсутствии прав как таковых, а в том, что права существуют только на собственный вклад, но не на ядро продукта (LibreOffice).</p>
                                     <p class="text-sm text-green-300 mt-2">✓ Постановление КС <strong>поддерживает</strong> альтернативный путь: Surguch + LibreOffice-plugin-altcsp могут быть включены в реестр как самостоятельные продукты — именно на них у заявителя есть полные исключительные права.</p>
@@ -1127,7 +1240,7 @@
                         <div class="pt-4 border-t border-gray-700">
                             <div class="space-y-4 text-gray-300">
                                 <div class="p-4 bg-blue-900/20 rounded-lg border border-blue-700/30">
-                                    <p class="text-blue-300 font-semibold mb-2">ГОСТ 19.101-2024 (вступил в силу 30.01.2025 - актуален для заявки 346971):</p>
+                                    <p class="text-blue-300 font-semibold mb-2"><a href="https://protect.gost.ru/document1.aspx?control=31&baseC=6&page=0&month=4&year=2026&search=19.101-2024&id=273817" target="_blank" class="external-link text-blue-300">ГОСТ 19.101-2024<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> (вступил в силу 30.01.2025 - актуален для заявки 346971):</p>
                                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">
                                         <div style="padding:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:6px;">
                                             <p style="color:#fca5a5;font-weight:600;margin-bottom:4px;">«Программный комплекс»</p>
@@ -1232,7 +1345,7 @@
                     <ul class="list-disc pl-5 space-y-2 text-gray-400 text-sm">
                         <li>Экспертный совет продолжает требовать прозрачности об использовании open-source компонентов</li>
                         <li>Недекларирование иностранного кода рассматривается как основание для отказа</li>
-                        <li>Методические рекомендации ЦКИТ (2023-2024) ужесточают требования к SBOM и лицензионной чистоте</li>
+                        <li><a href="https://ru-ikt.ru/metodic" target="_blank" class="source-link">Методические рекомендации ЦКИТ</a> (2023-2024) ужесточают требования к SBOM и лицензионной чистоте</li>
                     </ul>
                     <div class="mt-4 p-3 bg-blue-900/30 rounded border border-blue-700/30">
                         <p class="text-sm text-blue-300">
@@ -1847,29 +1960,61 @@
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex items-center gap-3">
                                 <span class="w-8 h-8 rounded-full bg-yellow-900/50 flex items-center justify-center text-yellow-400 font-bold text-sm">4</span>
-                                <h3 class="text-xl font-semibold text-white">Новые требования Минцифры (2026)</h3>
+                                <h3 class="text-xl font-semibold text-white">Требования к совместимости с доверенными ОС (ПП № 1937)</h3>
                             </div>
                             <svg id="icon-sov-4" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </div>
                         <p class="text-gray-400">
-                            Обязательная совместимость с двумя российскими ОС и подтверждение отсутствия иностранных компонентов.
+                            С 01.09.2026 офисное ПО обязано подтвердить совместимость с не менее чем двумя российскими ОС из перечня доверенных (ПП № 1937).
                         </p>
                         <div id="expand-sov-4" class="expandable-content">
                             <div class="pt-4 border-t border-gray-700 mt-4">
-                                <p class="text-gray-300 mb-3">С 2026 года (<a href="https://digital.gov.ru/" target="_blank" class="external-link">проект Минцифры<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>):</p>
+                                <p class="text-gray-300 mb-3"><a href="https://publication.pravo.gov.ru/document/0001202511280069" target="_blank" class="external-link">Постановление Правительства РФ от 28.11.2025 № 1937<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> вводит п.5(м) в требования к ПО для включения в реестр. С 01.09.2026 для класса «Офисное ПО»:</p>
                                 <ul class="list-disc pl-5 space-y-2 text-gray-400">
-                                    <li>Совместимость с двумя российскими ОС</li>
-                                    <li>Подтверждение отсутствия иностранных компонентов, отвечающих за ключевой функционал</li>
+                                    <li>Подтверждённая совместимость с не менее чем двумя российскими ОС из перечня доверенных</li>
+                                    <li>Совместимость подтверждается испытаниями в аттестованных центрах тестирования ПО (ЦТ) согласно ПП № 1931</li>
+                                    <li>Требование контроля над функциональным ядром: LibreOffice-based решения не могут самостоятельно гарантировать совместимость - она определяется TDF и/или вендорами ОС</li>
                                 </ul>
                                 <p class="mt-3 text-gray-300">
-                                    Эти требования направлены на повышение зрелости отечественных решений.
+                                    Это требование принципиально отличается от утратившего силу ПП № 325: фокус сместился с функциональных требований к ПО на требование совместимости с суверенной инфраструктурой ОС.
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                    <!-- Sov 6 -->
+                    <div class="card rounded-lg p-6 risk-high cursor-pointer" onclick="toggleExpand('sov-6')">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 font-bold text-sm">6</span>
+                                <h3 class="text-xl font-semibold text-white">Реестр доверенного ПО как закупочный барьер (ПП № 1931)</h3>
+                            </div>
+                            <svg id="icon-sov-6" class="w-6 h-6 text-yellow-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                        <p class="text-gray-400">
+                            С 01.03.2026 заказчики обязаны отдавать приоритет ПО из перечня доверенного. LibreOffice-based продукты лишены практической возможности получить этот статус.
+                        </p>
+                        <div id="expand-sov-6" class="expandable-content">
+                            <div class="pt-4 border-t border-gray-700 mt-4">
+                                <p class="text-gray-300 mb-3"><a href="https://publication.pravo.gov.ru/document/0001202511280066" target="_blank" class="external-link">Постановление Правительства РФ от 28.11.2025 № 1931<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a> вступило в силу 01.03.2026 и создаёт перечень доверенного ПО с обязательным приоритетом при государственных закупках. Ключевые последствия для LibreOffice-based продуктов:</p>
+                                <ul class="list-disc pl-5 space-y-2 text-gray-400">
+                                    <li><strong class="text-gray-200">Закупочный приоритет:</strong> заказчики обязаны приобретать ПО из перечня доверенного в первую очередь - продукты вне перечня конкурентно уязвимы</li>
+                                    <li><strong class="text-gray-200">Архитектурный барьер:</strong> для включения в перечень требуется прохождение испытаний в аттестованных центрах тестирования (ЦТ); LibreOffice-based продукты не могут подтвердить независимость функционального ядра - ключевое условие аттестации</li>
+                                    <li><strong class="text-gray-200">Практическая блокировка:</strong> по состоянию на апрель 2026 г. ни один ЦТ не аттестован и не функционирует - инфраструктура не сформирована, путь к статусу фактически закрыт для всех претендентов, включая LibreOffice-based решения</li>
+                                </ul>
+                                <div class="mt-4 p-3 bg-red-900/20 rounded border border-red-700/30">
+                                    <p class="text-sm text-red-300">
+                                        Даже при формировании инфраструктуры ЦТ архитектура LibreOffice-based продуктов делает получение статуса «доверенного» практически невозможным: TDF контролирует функциональное ядро, а не российский правообладатель.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 <!-- Success Stories -->
                 <div class="mt-8">
@@ -1944,7 +2089,7 @@
                         </div>
 
                         <div class="flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-yellow-600 flex items-center justify-center flex-shrink-0 z-10">
+                            <div class="w-8 h-8 flex items-center justify-center flex-shrink-0 z-10" style="border-radius:6px;background:var(--color-accent);">
                                 <span class="text-white text-xs font-bold">4</span>
                             </div>
                             <div class="card rounded-lg p-5 flex-1">
@@ -2940,7 +3085,7 @@
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-3">
                                     <h3 class="text-lg font-semibold text-white">Опровержение: «ОС Эльбрус уже в реестре с офисными приложениями»</h3>
-                                    <span style="padding:2px 8px;background:rgba(249,115,22,0.2);border:1px solid rgba(249,115,22,0.4);border-radius:12px;font-size:11px;color:#fdba74;white-space:nowrap;">Аргумент Базальт СПО</span>
+                                    <span style="padding:2px 8px;background:rgba(200,93,39,0.14);border:1px solid rgba(200,93,39,0.28);border-radius:4px;font-size:11px;color:var(--color-accent-soft);white-space:nowrap;">Аргумент Базальт СПО</span>
                                 </div>
                                 <div class="p-4 bg-gray-800/50 rounded-lg mb-4">
                                     <p class="text-gray-300 text-sm italic">Позиция Базальт СПО (предполагаемая):</p>
@@ -2999,15 +3144,15 @@
                     </div>
 
                     <!-- Claim: Basalt presentation and disagreement table narrow rather than solve the dispute -->
-                    <div id="key-os-dependent" class="card rounded-lg p-6 border-l-4 border-amber-500" style="margin-top:16px;">
+                    <div id="key-os-dependent" class="card rounded-lg p-6 border-l-4" style="margin-top:16px;border-left-color:var(--color-accent);">
                         <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-full bg-amber-900/50 flex items-center justify-center flex-shrink-0">
-                                <svg style="width:18px;height:18px;" fill="none" stroke="#f59e0b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6m3 6V7m3 10v-4m5 8H4a1 1 0 01-1-1V4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1z"/></svg>
+                            <div class="w-10 h-10 flex items-center justify-center flex-shrink-0" style="border-radius:8px;background:rgba(200,93,39,0.18);">
+                                <svg style="width:18px;height:18px;" fill="none" stroke="var(--color-accent)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6m3 6V7m3 10v-4m5 8H4a1 1 0 01-1-1V4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1z"/></svg>
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-3">
                                     <h3 class="text-lg font-semibold text-white">Презентация Базальта и таблица разногласий не снимают замечания по существу</h3>
-                                    <span style="padding:2px 8px;background:rgba(245,158,11,0.18);border:1px solid rgba(245,158,11,0.4);border-radius:12px;font-size:11px;color:#fcd34d;white-space:nowrap;">Смысл материалов Минцифры</span>
+                                    <span style="padding:2px 8px;background:rgba(200,93,39,0.14);border:1px solid rgba(200,93,39,0.28);border-radius:4px;font-size:11px;color:var(--color-accent-soft);white-space:nowrap;">Смысл материалов Минцифры</span>
                                 </div>
                                 <div class="space-y-3">
                                     <div class="p-3 bg-amber-900/20 rounded border border-amber-700/30">
@@ -3146,7 +3291,7 @@
                 <!-- Summary -->
                 <div class="summary-panel mt-8 p-6 rounded-lg">
                     <div class="flex items-start gap-4">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-950/20">
+                        <div class="w-12 h-12 flex items-center justify-center flex-shrink-0" style="border-radius:8px;background:var(--color-accent);box-shadow:0 4px 16px rgba(200,93,39,0.28);">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
@@ -3245,9 +3390,9 @@
                                 <p class="text-gray-500 text-xs mt-1">Официальный реестр Минцифры России</p>
                             </li>
                             <li>
-                                <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756" target="_blank" class="external-link text-blue-400">
+                                <a href="http://publication.pravo.gov.ru/document/0001201511200006" target="_blank" class="external-link text-blue-400">
                                     Постановление Правительства РФ № 1236<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
-                                <p class="text-gray-500 text-xs mt-1">Требования к включению ПО в реестр (normativ.kontur.ru)</p>
+                                <p class="text-gray-500 text-xs mt-1">Требования к включению ПО в реестр (publication.pravo.gov.ru)</p>
                             </li>
                             <li>
                                 <a href="https://digital.gov.ru/" target="_blank" class="external-link text-blue-400">
@@ -3426,22 +3571,445 @@
                 «О ситуации с офисными пакетами в РФ 2026»
             </p>
             <p class="text-gray-600 text-xs mt-2">
-                Источники: <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=504756" target="_blank" class="external-link">Постановление Правительства РФ № 1236<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>,
-                <a href="https://normativ.kontur.ru/document?moduleId=1&documentId=309965" target="_blank" class="external-link">№ 325<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>, методические рекомендации ЦКИТ, 
+                Источники: <a href="http://publication.pravo.gov.ru/document/0001201511200006" target="_blank" class="external-link">Постановление Правительства РФ № 1236<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>,
+                <a href="https://publication.pravo.gov.ru/document/0001202511280069" target="_blank" class="external-link">№ 1937<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>,
+                <a href="https://publication.pravo.gov.ru/document/0001202511280066" target="_blank" class="external-link">№ 1931<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>,
+                <a href="https://ru-ikt.ru/metodic" target="_blank" class="external-link">методические рекомендации ЦКИТ<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>,
                 <a href="https://blog.documentfoundation.org/blog/2022/02/28/the-document-foundation-suspends-rusbitech-from-its-advisory-board/" target="_blank" class="external-link">открытые материалы по делу AlterOffice<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="inline w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
             </p>
         </div>
     </footer>
 
     <script>
+        const AI_REVIEW_CONFIG = {
+            geminiEndpoint: localStorage.getItem('libreoffice-analysis-gemini-endpoint') || 'http://127.0.0.1:8123/api/gemini',
+            perplexityEndpoint: localStorage.getItem('libreoffice-analysis-perplexity-endpoint') || ''
+        };
+
+        function normalizeReportText(text) {
+            return (text || '')
+                .replace(/\u00a0/g, ' ')
+                .replace(/[ \t]+\n/g, '\n')
+                .replace(/\n[ \t]+/g, '\n')
+                .replace(/[ \t]{2,}/g, ' ')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+        }
+
+        function escapeMarkdownInline(text) {
+            return normalizeReportText(text).replace(/([\\`*_{}[\]()#+\-.!>])/g, '\\$1');
+        }
+
+        function renderInlineMarkdown(node) {
+            if (!node) return '';
+            if (node.nodeType === Node.TEXT_NODE) {
+                return node.textContent || '';
+            }
+            if (node.nodeType !== Node.ELEMENT_NODE) {
+                return '';
+            }
+
+            const tag = node.tagName.toLowerCase();
+            if (['svg', 'script', 'style', 'button'].includes(tag)) {
+                return '';
+            }
+            if (tag === 'br') {
+                return '\n';
+            }
+            if (tag === 'code') {
+                return '`' + normalizeReportText(node.textContent || '') + '`';
+            }
+
+            const inner = Array.from(node.childNodes).map(renderInlineMarkdown).join('');
+            const normalizedInner = normalizeReportText(inner);
+
+            if (tag === 'a') {
+                const label = escapeMarkdownInline(normalizedInner || node.getAttribute('href') || 'ссылка');
+                const href = node.getAttribute('href') || '';
+                return href ? `[${label}](${href})` : label;
+            }
+            if (tag === 'strong' || tag === 'b') {
+                return normalizedInner ? `**${normalizedInner}**` : '';
+            }
+            if (tag === 'em' || tag === 'i' || tag === 'cite') {
+                return normalizedInner ? `*${normalizedInner}*` : '';
+            }
+
+            return inner;
+        }
+
+        function appendMarkdownFromNode(node, lines, listDepth = 0) {
+            if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
+
+            const tag = node.tagName.toLowerCase();
+            if (['script', 'style', 'svg', 'button'].includes(tag)) return;
+            if (node.id === 'theme-toggle' || node.id === 'export-report-btn' || node.id === 'export-report-status') return;
+
+            const text = normalizeReportText(renderInlineMarkdown(node));
+
+            if (tag === 'h2') {
+                if (text) lines.push(`## ${text}`, '');
+                return;
+            }
+            if (tag === 'h3') {
+                if (text) lines.push(`### ${text}`, '');
+                return;
+            }
+            if (tag === 'h4') {
+                if (text) lines.push(`#### ${text}`, '');
+                return;
+            }
+            if (tag === 'blockquote') {
+                if (text) {
+                    lines.push(...text.split('\n').map(line => `> ${line}`), '');
+                }
+                return;
+            }
+            if (tag === 'p') {
+                const headingLike = node.classList.contains('elevator-card-title');
+                if (text) {
+                    lines.push(headingLike ? `### ${text}` : text, '');
+                }
+                return;
+            }
+            if (tag === 'ul' || tag === 'ol') {
+                Array.from(node.children).forEach((child, index) => {
+                    if (child.tagName && child.tagName.toLowerCase() === 'li') {
+                        const marker = tag === 'ol' ? `${index + 1}.` : '-';
+                        const liText = normalizeReportText(renderInlineMarkdown(child));
+                        if (liText) {
+                            lines.push(`${'  '.repeat(listDepth)}${marker} ${liText}`);
+                        }
+                        Array.from(child.children).forEach(grandChild => {
+                            if (['ul', 'ol'].includes((grandChild.tagName || '').toLowerCase())) {
+                                appendMarkdownFromNode(grandChild, lines, listDepth + 1);
+                            }
+                        });
+                    }
+                });
+                lines.push('');
+                return;
+            }
+
+            Array.from(node.children).forEach(child => appendMarkdownFromNode(child, lines, listDepth));
+        }
+
+        function uniqueSources() {
+            const seen = new Set();
+            return Array.from(document.querySelectorAll('#content-sources a[href]'))
+                .map(anchor => {
+                    const href = anchor.href;
+                    const label = normalizeReportText(anchor.textContent || '');
+                    if (!href || !label || seen.has(href)) return null;
+                    seen.add(href);
+                    return `- [${escapeMarkdownInline(label)}](${href})`;
+                })
+                .filter(Boolean);
+        }
+
+        function collectMetricCards() {
+            return Array.from(document.querySelectorAll('.metric-card')).map(card => {
+                const value = normalizeReportText(card.querySelector('.metric-value')?.textContent || '');
+                const label = normalizeReportText(card.querySelector('.uppercase')?.textContent || '');
+                return value && label ? `- **${escapeMarkdownInline(value)}** — ${escapeMarkdownInline(label)}` : null;
+            }).filter(Boolean);
+        }
+
+        function collectSummaryBullets() {
+            return Array.from(document.querySelectorAll('.summary-panel li')).map(item => {
+                const text = normalizeReportText(renderInlineMarkdown(item));
+                return text ? `- ${text}` : null;
+            }).filter(Boolean);
+        }
+
+        function collectSectionDigest() {
+            return Array.from(document.querySelectorAll('.tab-content')).map(section => {
+                const heading = normalizeReportText(section.querySelector('h2')?.textContent || '');
+                const intro = normalizeReportText(section.querySelector('p')?.textContent || '');
+                const highlights = Array.from(section.querySelectorAll('h3')).slice(0, 5).map(el => normalizeReportText(el.textContent || '')).filter(Boolean);
+                return {
+                    heading,
+                    intro,
+                    highlights
+                };
+            }).filter(section => section.heading);
+        }
+
+        function buildAiReviewDigest() {
+            const title = normalizeReportText(document.querySelector('h1')?.textContent || 'LibreOffice analysis');
+            const subtitle = normalizeReportText(document.querySelector('header p')?.textContent || '');
+            const metrics = collectMetricCards().map(item => item.replace(/^- /, ''));
+            const summary = collectSummaryBullets().map(item => item.replace(/^- /, ''));
+            const sections = collectSectionDigest();
+
+            const lines = [
+                `Название: ${title}`,
+                `Описание: ${subtitle}`,
+                '',
+                'Ключевые тезисы:',
+                ...metrics.map(item => `- ${item}`),
+                '',
+                'Итоговые выводы:',
+                ...summary.map(item => `- ${item}`),
+                '',
+                'Разделы дешборда:'
+            ];
+
+            sections.forEach(section => {
+                lines.push(`- ${section.heading}: ${section.intro}`);
+                section.highlights.forEach(item => {
+                    lines.push(`  - ${item}`);
+                });
+            });
+
+            return normalizeReportText(lines.join('\n')).slice(0, 12000);
+        }
+
+        async function postJson(url, payload) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                let details = '';
+                try {
+                    const body = await response.json();
+                    details = body.details || body.error || JSON.stringify(body);
+                } catch {
+                    details = await response.text();
+                }
+                throw new Error(`HTTP ${response.status}: ${String(details).slice(0, 300)}`);
+            }
+            return response.json();
+        }
+
+        function normalizeAiJson(raw) {
+            if (!raw) return null;
+            if (typeof raw === 'string') {
+                try {
+                    return JSON.parse(raw);
+                } catch {
+                    return null;
+                }
+            }
+            return raw;
+        }
+
+        async function requestGeminiReview(digest) {
+            if (!AI_REVIEW_CONFIG.geminiEndpoint) return null;
+
+            const prompt = [
+                'Ниже краткая выжимка аналитического дешборда о правовых, технических и экономических рисках LibreOffice-based решения для реестра российского ПО.',
+                'Проверь верность и достаточность аргументации.',
+                'Если у тебя нет веб-доступа или свежих новостей, прямо это укажи.',
+                'Верни только JSON с полями:',
+                '- assessment',
+                '- confirmed_points[]',
+                '- weak_points[]',
+                '- additions[]',
+                '- fresh_news[]',
+                '- sources[]',
+                '',
+                digest
+            ].join('\n');
+
+            const result = await postJson(AI_REVIEW_CONFIG.geminiEndpoint, {
+                prompt,
+                isJson: true,
+                sysInstruction: 'Ты проверяешь аналитическую аргументацию по теме включения ПО в реестр. Верни только валидный JSON без markdown.'
+            });
+
+            return normalizeAiJson(result.text);
+        }
+
+        async function requestPerplexityReview(digest) {
+            if (!AI_REVIEW_CONFIG.perplexityEndpoint) return null;
+
+            const prompt = [
+                'Проверь верность и достаточность аргументации аналитического дешборда по теме включения LibreOffice-based решения в реестр российского ПО.',
+                'Нужны свежие подтверждения из интернета и, если возможно, официальные или первичные источники.',
+                'Верни только JSON с полями:',
+                '- assessment',
+                '- confirmed_points[]',
+                '- weak_points[]',
+                '- additions[]',
+                '- fresh_news[]',
+                '- sources[]',
+                '',
+                digest
+            ].join('\n');
+
+            const result = await postJson(AI_REVIEW_CONFIG.perplexityEndpoint, {
+                prompt,
+                isJson: true,
+                systemPrompt: 'Ты проверяешь аналитическую аргументацию по теме реестра российского ПО. Нужны свежие новости и верифицируемые источники. Верни только JSON.'
+            });
+
+            return normalizeAiJson(result.text || result);
+        }
+
+        function renderAiSection(provider, data) {
+            if (!data) return '';
+
+            const lines = [`### ${provider}`, ''];
+
+            if (data.assessment) {
+                lines.push(data.assessment, '');
+            }
+            if (Array.isArray(data.confirmed_points) && data.confirmed_points.length) {
+                lines.push('Подтверждённые точки:', '', ...data.confirmed_points.map(item => `- ${item}`), '');
+            }
+            if (Array.isArray(data.weak_points) && data.weak_points.length) {
+                lines.push('Слабые места:', '', ...data.weak_points.map(item => `- ${item}`), '');
+            }
+            if (Array.isArray(data.additions) && data.additions.length) {
+                lines.push('Что стоит добавить:', '', ...data.additions.map(item => `- ${item}`), '');
+            }
+            if (Array.isArray(data.fresh_news) && data.fresh_news.length) {
+                lines.push('Свежие сигналы / новости:', '', ...data.fresh_news.map(item => `- ${item}`), '');
+            }
+            if (Array.isArray(data.sources) && data.sources.length) {
+                lines.push('Источники модели:', '');
+                data.sources.forEach(source => {
+                    if (typeof source === 'string') {
+                        lines.push(`- ${source}`);
+                        return;
+                    }
+                    const title = escapeMarkdownInline(source.title || source.label || source.url || 'Источник');
+                    const url = source.url || source.href || '';
+                    const note = normalizeReportText(source.note || source.snippet || '');
+                    lines.push(url ? `- [${title}](${url})${note ? ` — ${note}` : ''}` : `- ${title}${note ? ` — ${note}` : ''}`);
+                });
+                lines.push('');
+            }
+
+            return lines.join('\n');
+        }
+
+        function renderAiConsensus(geminiData, perplexityData) {
+            const lines = ['## AI-согласование аргументации', ''];
+            const providers = [];
+            if (geminiData) providers.push('Gemini');
+            if (perplexityData) providers.push('Perplexity');
+
+            if (!providers.length) {
+                lines.push('AI-согласование не выполнено: локальные endpoint’ы Gemini / Perplexity недоступны.', '');
+                return lines.join('\n');
+            }
+
+            lines.push(`Получены ответы моделей: ${providers.join(', ')}.`, '');
+            if (geminiData) lines.push(renderAiSection('Gemini', geminiData));
+            if (perplexityData) lines.push(renderAiSection('Perplexity', perplexityData));
+            return normalizeReportText(lines.join('\n')) + '\n';
+        }
+
+        function buildDashboardReportMarkdown() {
+            const title = normalizeReportText(document.querySelector('h1')?.textContent || 'Аналитический отчёт');
+            const subtitle = normalizeReportText(document.querySelector('header p')?.textContent || '');
+            const today = new Date().toISOString().slice(0, 10);
+            const lines = [
+                `# ${escapeMarkdownInline(title)}`,
+                '',
+                `Дата выгрузки: ${today}`,
+                '',
+                subtitle,
+                '',
+                '## Ключевые тезисы',
+                ''
+            ];
+
+            lines.push(...collectMetricCards(), '');
+
+            const tabButtons = Array.from(document.querySelectorAll('nav [id^="tab-"]'));
+            tabButtons.forEach(button => {
+                const tabId = button.id.replace('tab-', '');
+                const section = document.getElementById(`content-${tabId}`);
+                const tabLabel = normalizeReportText(button.textContent || tabId);
+                if (!section) return;
+
+                lines.push(`## ${escapeMarkdownInline(tabLabel)}`, '');
+                Array.from(section.children).forEach(child => appendMarkdownFromNode(child, lines));
+                lines.push('');
+            });
+
+            lines.push('## Источники', '', ...uniqueSources(), '');
+
+            return normalizeReportText(lines.join('\n')).replace(/\n{3,}/g, '\n\n') + '\n';
+        }
+
+        async function downloadDashboardReport() {
+            const button = document.getElementById('export-report-btn');
+            const status = document.getElementById('export-report-status');
+            const previousText = status ? status.textContent : '';
+
+            try {
+                if (button) button.disabled = true;
+                if (status) status.textContent = 'Собираю материалы дешборда…';
+
+                let markdown = buildDashboardReportMarkdown();
+                const digest = buildAiReviewDigest();
+
+                let geminiData = null;
+                let perplexityData = null;
+
+                if (AI_REVIEW_CONFIG.geminiEndpoint) {
+                    if (status) status.textContent = 'Проверяю тезисы через Gemini…';
+                    try {
+                        geminiData = await requestGeminiReview(digest);
+                    } catch (error) {
+                        console.warn('Gemini review skipped:', error);
+                    }
+                }
+
+                if (AI_REVIEW_CONFIG.perplexityEndpoint) {
+                    if (status) status.textContent = 'Проверяю тезисы и свежие сигналы через Perplexity…';
+                    try {
+                        perplexityData = await requestPerplexityReview(digest);
+                    } catch (error) {
+                        console.warn('Perplexity review skipped:', error);
+                    }
+                }
+
+                if (geminiData || perplexityData) {
+                    markdown += '\n' + renderAiConsensus(geminiData, perplexityData);
+                }
+
+                if (status && !geminiData && !perplexityData) {
+                    status.textContent = 'AI-проверка недоступна, выгружаю локальный отчёт…';
+                }
+
+                const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                const dateSuffix = new Date().toISOString().slice(0, 10);
+                link.href = url;
+                link.download = `libreoffice-analysis-report-${dateSuffix}.md`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                if (status) status.textContent = geminiData || perplexityData ? 'Отчёт с AI-согласованием скачан.' : 'Отчёт скачан.';
+            } catch (error) {
+                console.error(error);
+                if (status) status.textContent = 'Не удалось сформировать отчёт.';
+            } finally {
+                if (button) button.disabled = false;
+                if (status) {
+                    setTimeout(() => {
+                        status.textContent = previousText;
+                    }, 3500);
+                }
+            }
+        }
+
         function applyTheme(theme, persist = true) {
             document.documentElement.setAttribute('data-theme', theme);
             document.body.setAttribute('data-theme', theme);
             document.documentElement.style.colorScheme = theme;
-            const label = document.getElementById('theme-toggle-label');
-            if (label) {
-                label.textContent = theme === 'dark' ? 'Тёмная тема' : 'Светлая тема';
-            }
+            const btn = document.getElementById('theme-toggle');
+            if (btn) btn.setAttribute('aria-label', theme === 'dark' ? 'Переключить на светлую тему' : 'Переключить на тёмную тему');
             if (persist) {
                 localStorage.setItem('libreoffice-analysis-theme', theme);
             }
@@ -3449,6 +4017,14 @@
 
         function toggleTheme() {
             const current = document.body.getAttribute('data-theme') || 'dark';
+            const btn = document.getElementById('theme-toggle');
+            // Пульс-анимация при клике
+            if (btn) {
+                btn.classList.remove('switching');
+                void btn.offsetWidth; // reflow для перезапуска анимации
+                btn.classList.add('switching');
+                btn.addEventListener('animationend', () => btn.classList.remove('switching'), { once: true });
+            }
             applyTheme(current === 'dark' ? 'light' : 'dark');
         }
 
