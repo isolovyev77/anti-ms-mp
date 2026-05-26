@@ -3133,6 +3133,19 @@
                 </div>
             </div>
 
+            <!-- ПРЕСЕТЫ СОРТИРОВКИ -->
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:#f5f7fa;border:1px solid #e0e6ed;border-radius:8px;margin-bottom:12px;">
+                <span style="font-size:12px;font-weight:700;color:#555;letter-spacing:0.5px;">СОРТИРОВКА:</span>
+                <div id="monSortPresetBtns" style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button class="mon-filter-btn active" data-preset="default" onclick="monSetPreset('default',this)" title="Дисконт ↓ → Цена ↑ → Название ↑">📊 По умолчанию</button>
+                    <button class="mon-filter-btn" data-preset="score" onclick="monSetPreset('score',this)" title="Индекс подозрительности (дисконт + флажки + аномально низкая цена)">🔥 Самые подозрительные</button>
+                    <button class="mon-filter-btn" data-preset="loss" onclick="monSetPreset('loss',this)" title="Абсолютная недоплата = Офиц. цена − Цена. Сверху товары, где потери Microsoft в рублях наибольшие">💸 Крупнейшие потери</button>
+                    <button class="mon-filter-btn" data-preset="family" onclick="monSetPreset('family',this)" title="Группировка карточек по нормализованному названию (например, «Office 2021 Pro Plus»). Сверху самые массовые виды контрафакта">👥 Группы товаров</button>
+                    <button class="mon-filter-btn" data-preset="pl" onclick="monSetPreset('pl',this)" title="Группировать по площадке. Внутри — дисконт ↓, цена ↑">🏪 По площадкам</button>
+                    <button class="mon-filter-btn" data-preset="recent" onclick="monSetPreset('recent',this)" title="Сначала самые свежие карточки (когда появится timeseries из Supabase)">🆕 Свежие</button>
+                </div>
+            </div>
+
             <!-- ТАБЛИЦА -->
             <div style="overflow-x:auto;">
                 <table id="monTable" style="font-size:13px;">
@@ -5198,10 +5211,11 @@
         MON_QUERIES = MON_QUERIES_DEFAULT.slice();
     }
 
-    // Сортировка по умолчанию — по убыванию дисконта (sortDir = -1).
-    // Совпадает с предсортировкой в Python merge_mon_raw.py, JS просто синхронизирует
-    // индикатор «▼» рядом с заголовком «Дисконт».
-    let monState = {pl:'all', disc:0, flag:0, search:'', query:'', page:0, pageSize:50, sortCol:'disc', sortDir:-1};
+    // Сортировка по умолчанию — пресет 'default' (дисконт ↓ → цена ↑ → название ↑).
+    // Совпадает с предсортировкой в Python merge_mon_raw.py. Клик по заголовку
+    // колонки переключает на режим 'col' (sortPreset='col', sortCol заполнен).
+    let monState = {pl:'all', disc:0, flag:0, search:'', query:'', page:0, pageSize:50,
+                    sortCol:'', sortDir:1, sortPreset:'default'};
     let monFiltered = [...MON_DATA];
 
     function monSaveQueries() {
@@ -5354,12 +5368,19 @@
             monState.sortCol = col;
             monState.sortDir = 1;
         }
+        // Клик по колонке выходит из режима пресета и снимает активную кнопку.
+        monState.sortPreset = 'col';
+        document.querySelectorAll('#monSortPresetBtns .mon-filter-btn').forEach(b => b.classList.remove('active'));
         monApplySortToFiltered();
         monState.page = 0;
         monUpdateSortIndicators();
         monRender();
     }
     function monApplySortToFiltered() {
+        // Если выбран пресет (а не клик по колонке) — он перехватывает сортировку.
+        if(monState.sortPreset && monState.sortPreset !== 'col') {
+            return monApplyPreset();
+        }
         const col = monState.sortCol;
         if(!col) return;
         const dir = monState.sortDir;
@@ -5387,6 +5408,101 @@
             if(a.flags.disc !== b.flags.disc) return b.flags.disc - a.flags.disc;
             return String(a.title||'').localeCompare(String(b.title||''),'ru');
         });
+    }
+
+    // Нормализация заголовка для группировки в «семьи» товаров.
+    // Убираем мусор и оставляем сигнатуру: версия Office + редакция.
+    function monFamilyKey(title) {
+        let s = String(title||'').toLowerCase();
+        // Версии года и редакции — основа кластера
+        const m = s.match(/(office\s+(?:365|2024|2021|2019|2016|2013|2010))\s*(pro\s*plus|home\s*and\s*business|home\s*and\s*student|professional\s*plus|professional|personal|family|standard|ltsc)?/i);
+        if(m) return (m[1] + ' ' + (m[2]||'')).replace(/\s+/g,' ').trim();
+        if(s.includes('365') && s.includes('microsoft')) return 'microsoft 365';
+        return 'прочее';
+    }
+
+    // Score «подозрительности»: чем выше — тем нагляднее нарушение.
+    // disc 0-100 + бонусы за низкую абсолютную цену и количество флажков.
+    function monScore(r) {
+        const f = r.flags || monComputeFlags(r);
+        let s = Math.max(0, f.disc);                          // 0..100
+        s += monFlagCount(f) * 3;                             // до +18
+        if(r.price < 100) s += 10;
+        else if(r.price < 300) s += 5;
+        // Аномально-низкая цена при высокой op = «приманка»
+        if(r.op > 10000 && r.price < r.op * 0.01) s += 5;
+        return s;
+    }
+
+    // Применить выбранный пресет сортировки.
+    function monApplyPreset() {
+        const preset = monState.sortPreset || 'default';
+        // Подсчитываем размеры «семей» один раз, если нужен family-режим
+        let famCount = null;
+        if(preset === 'family') {
+            famCount = new Map();
+            monFiltered.forEach(r => {
+                const k = monFamilyKey(r.title);
+                famCount.set(k, (famCount.get(k)||0) + 1);
+            });
+        }
+        const titleCmp = (a, b) => String(a.title||'').localeCompare(String(b.title||''),'ru');
+        monFiltered.sort((a, b) => {
+            const da = a.flags.disc, db = b.flags.disc;
+            if(preset === 'default') {
+                if(da !== db) return db - da;          // дисконт ↓
+                if(a.price !== b.price) return a.price - b.price;  // цена ↑
+                return titleCmp(a, b);                              // название ↑
+            }
+            if(preset === 'score') {
+                const sa = monScore(a), sb = monScore(b);
+                if(sa !== sb) return sb - sa;          // score ↓
+                if(a.price !== b.price) return a.price - b.price;
+                return titleCmp(a, b);
+            }
+            if(preset === 'loss') {
+                const la = (a.op||0) - a.price, lb = (b.op||0) - b.price;
+                if(la !== lb) return lb - la;          // потери ↓
+                if(da !== db) return db - da;
+                return titleCmp(a, b);
+            }
+            if(preset === 'family') {
+                const ka = monFamilyKey(a.title), kb = monFamilyKey(b.title);
+                const ca = famCount.get(ka)||0, cb = famCount.get(kb)||0;
+                if(ca !== cb) return cb - ca;          // массовость семьи ↓
+                if(ka !== kb) return ka.localeCompare(kb);
+                if(da !== db) return db - da;
+                return a.price - b.price;
+            }
+            if(preset === 'pl') {
+                if(a.pl !== b.pl) return String(a.pl).localeCompare(String(b.pl));
+                if(da !== db) return db - da;
+                if(a.price !== b.price) return a.price - b.price;
+                return titleCmp(a, b);
+            }
+            if(preset === 'recent') {
+                // Когда появится timeseries из Supabase, date будет содержать
+                // реальную дату появления карточки. Сейчас падаем обратно на default.
+                const d = String(b.date||'').localeCompare(String(a.date||''));
+                if(d !== 0) return d;                   // дата ↓
+                if(da !== db) return db - da;
+                return a.price - b.price;
+            }
+            return 0;
+        });
+    }
+
+    function monSetPreset(preset, btn) {
+        monState.sortPreset = preset;
+        // При выборе пресета сбрасываем явный sortCol — индикаторы колонок гаснут
+        monState.sortCol = '';
+        monState.sortDir = 1;
+        document.querySelectorAll('#monSortPresetBtns .mon-filter-btn').forEach(b => b.classList.remove('active'));
+        if(btn) btn.classList.add('active');
+        monState.page = 0;
+        monApplySortToFiltered();
+        monUpdateSortIndicators();
+        monRender();
     }
     function monUpdateSortIndicators() {
         ['date','pl','title','price','op','disc','flags'].forEach(c => {
