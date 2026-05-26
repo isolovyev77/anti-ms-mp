@@ -5213,9 +5213,10 @@
 
     // Сортировка по умолчанию — пресет 'default' (дисконт ↓ → цена ↑ → название ↑).
     // Совпадает с предсортировкой в Python merge_mon_raw.py. Клик по заголовку
-    // колонки переключает на режим 'col' (sortPreset='col', sortCol заполнен).
+    // колонки переключает на режим 'col' (sortPreset='col').
+    // sortCol/sortDir выставлены под пресет 'default' — индикатор ▼ на колонке «Дисконт».
     let monState = {pl:'all', disc:0, flag:0, search:'', query:'', page:0, pageSize:50,
-                    sortCol:'', sortDir:1, sortPreset:'default'};
+                    sortCol:'disc', sortDir:-1, sortPreset:'default'};
     let monFiltered = [...MON_DATA];
 
     function monSaveQueries() {
@@ -5492,11 +5493,24 @@
         });
     }
 
+    // Маппинг пресет → "эффективная" первичная колонка + направление.
+    // Используется для отображения стрелочки ▼/▲ на колонке, по которой
+    // пресет фактически сортирует (чтобы пользователь видел, что происходит).
+    const MON_PRESET_COLUMN = {
+        default: {col: 'disc', dir: -1},   // дисконт ↓
+        score:   {col: 'disc', dir: -1},   // приближённо: score сильно коррелирует с disc
+        loss:    {col: 'op',   dir: -1},   // (op-price)↓ — ближайшая колонка op↓
+        family:  {col: 'title', dir: 1},   // приближённо: внутри семьи — алфавит
+        pl:      {col: 'pl',   dir: 1},    // площадка ↑
+        recent:  {col: 'date', dir: -1},   // дата ↓
+    };
+
     function monSetPreset(preset, btn) {
         monState.sortPreset = preset;
-        // При выборе пресета сбрасываем явный sortCol — индикаторы колонок гаснут
-        monState.sortCol = '';
-        monState.sortDir = 1;
+        // Выставляем sortCol/sortDir по маппингу — стрелка ▼/▲ появится на нужной колонке.
+        const mapping = MON_PRESET_COLUMN[preset] || {col: '', dir: 1};
+        monState.sortCol = mapping.col;
+        monState.sortDir = mapping.dir;
         document.querySelectorAll('#monSortPresetBtns .mon-filter-btn').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
         monState.page = 0;
