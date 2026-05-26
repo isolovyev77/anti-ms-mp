@@ -5198,7 +5198,10 @@
         MON_QUERIES = MON_QUERIES_DEFAULT.slice();
     }
 
-    let monState = {pl:'all', disc:0, flag:0, search:'', query:'', page:0, pageSize:50, sortCol:'', sortDir:1};
+    // Сортировка по умолчанию — по убыванию дисконта (sortDir = -1).
+    // Совпадает с предсортировкой в Python merge_mon_raw.py, JS просто синхронизирует
+    // индикатор «▼» рядом с заголовком «Дисконт».
+    let monState = {pl:'all', disc:0, flag:0, search:'', query:'', page:0, pageSize:50, sortCol:'disc', sortDir:-1};
     let monFiltered = [...MON_DATA];
 
     function monSaveQueries() {
@@ -5373,8 +5376,15 @@
         ['date','pl','title','price','op','disc','flags'].forEach(c => {
             const el = document.getElementById('mts-'+c);
             if(!el) return;
-            if(monState.sortCol===c) el.textContent = monState.sortDir===1 ? ' ▲' : ' ▼';
-            else el.textContent = '';
+            if(monState.sortCol===c) {
+                // Активная сортировка: контрастный треугольник
+                el.innerHTML = monState.sortDir===1
+                    ? ' <span style="color:#1a3a6b;font-weight:700;">▲</span>'
+                    : ' <span style="color:#1a3a6b;font-weight:700;">▼</span>';
+            } else {
+                // Подсказка что колонка сортируема (приглушённый ↕)
+                el.innerHTML = ' <span style="color:#ccc;font-size:10px;">↕</span>';
+            }
         });
     }
     function monPrev() { if(monState.page>0){monState.page--;monRender();} }
