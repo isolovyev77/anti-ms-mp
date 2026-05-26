@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мониторинг нелицензионного ПО Microsoft на маркетплейсах</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --ozon-blue: #1a3a6b;
+            --ozon-dark: #0f2240;
+            --danger: #e53935;
+            --warning: #f57c00;
+            --success: #2e7d32;
+            --light-gray: #f5f5f5;
+            --dark-gray: #333;
+            --border-gray: #e0e0e0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #fafafa; color: var(--dark-gray); line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--ozon-dark) 0%, var(--ozon-blue) 100%);
+            color: white; padding: 30px 20px; text-align: center;
+            box-shadow: 0 2px 8px rgba(0,26,110,0.15);
+        }
+        .header h1 { font-size: 24px; margin-bottom: 8px; font-weight: 700; }
+        .header p { font-size: 14px; opacity: 0.9; max-width: 900px; margin: 0 auto; }
+        .header a { color: #90caf9; text-decoration: underline; }
+        .content { max-width: 1280px; margin: 0 auto; padding: 24px 20px; }
+        .alert {
+            padding: 14px 16px; border-radius: 8px; margin-bottom: 20px;
+            border-left: 4px solid; background-color: #f9f9f9;
+        }
+        .alert-warning { border-color: var(--warning); background-color: #fff3e0; }
+        .alert-info { border-color: var(--ozon-blue); background-color: #e3f2fd; }
+        .alert-title { font-weight: 600; margin-bottom: 6px; color: var(--dark-gray); }
+        .alert p { margin: 0; font-size: 13px; line-height: 1.45; }
+        .alert a { color: var(--ozon-blue); text-decoration: none; font-weight: 500; }
+        .alert a:hover { text-decoration: underline; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-gray); }
+        th { font-size: 12px; text-transform: uppercase; }
+        tbody tr:hover { background-color: #fafafa; }
+        .mon-filter-btn {
+            padding: 5px 12px; border: 1px solid var(--border-gray); border-radius: 20px;
+            background: white; color: #666; font-size: 12px; cursor: pointer; transition: all 0.2s;
+        }
+        .mon-filter-btn.active {
+            background: var(--ozon-blue); color: white; border-color: var(--ozon-blue);
+        }
+        .mon-filter-btn:hover:not(.active) {
+            border-color: var(--ozon-blue); color: var(--ozon-blue);
+        }
+        .flag-pill-mon {
+            display: inline-block; padding: 2px 6px; border-radius: 3px;
+            font-size: 11px; font-weight: 600; margin: 1px;
+        }
+        .fp-red { background:#ffebee; color:#c62828; }
+        .fp-yellow { background:#fffde7; color:#f57f17; }
+        .fp-orange { background:#fff3e0; color:#e65100; }
+        .fp-gray { background:#f5f5f5; color:#999; }
+        .skeleton {
+            background: linear-gradient(90deg, #eee 0%, #f5f5f5 50%, #eee 100%);
+            background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 4px;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .loading-row td { padding: 14px 12px; }
+        .preview-banner {
+            background: #fffde7; border: 1px solid #fbc02d; color: #6d4c00;
+            padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 13px;
+        }
+        .preview-banner a { color: #6d4c00; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Мониторинг нелицензионного ПО Microsoft на маркетплейсах</h1>
+        <p>Автоматическое сканирование Ozon, Wildberries, Яндекс.Маркет, Авито. Данные из Supabase, обновляются парсером на VDSina каждые 6 часов.
+          <a href="index.html">← полная версия дашборда</a></p>
+    </div>
+    <div class="content">
+        <div class="preview-banner">
+            🧪 <strong>Превью новой системы.</strong> Текущий дашборд по адресу <a href="index.html">/index.html</a> остаётся как есть, пока эта версия не приживётся. Источник данных — Supabase (<code id="srcRef">yqfdbuiyfkzhkhpiknob</code>).
+        </div>
+
+        <div id="monitoring">
+            <div class="alert alert-warning" style="margin-bottom:20px;">
+                <div class="alert-title">🔍 Системный мониторинг нелицензионного ПО</div>
+                <p>Таблица карточек с признаками контрафакта на маркетплейсах. Красные флажки (F1–F6) вычисляются автоматически по п. 2.2 <a href="https://fas.gov.ru/news/34360" target="_blank" rel="noopener">Модельных практик ФАС/МСАП СНГ 2025 ↗</a>. Мониторинг АРПП «Отечественный софт», НП «РУССОФТ», НП ППП.</p>
+            </div>
+
+            <!-- СТАТУС СКАНИРОВАНИЯ -->
+            <div style="display:flex;align-items:center;gap:16px;padding:14px 18px;background:#f5f5f5;border-radius:8px;margin-bottom:20px;flex-wrap:wrap;">
+                <div><strong>Последний прогон парсера:</strong> <span id="scanLastTime" style="margin-left:6px;color:#666;">загрузка...</span></div>
+                <div id="scanStatus" style="padding:4px 12px;border-radius:20px;background:#e0e0e0;color:#666;font-weight:600;font-size:13px;">⏳ Загрузка...</div>
+                <div id="scanRunTrigger" style="font-size:12px;color:#888;"></div>
+                <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+                    <button onclick="runScan()" style="padding:8px 16px;background:var(--ozon-blue);color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">🔄 Обновить</button>
+                    <button onclick="exportMonCSV()" style="padding:8px 16px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">📥 CSV</button>
+                    <button onclick="exportMonXLSX()" style="padding:8px 16px;background:#1565c0;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">📊 XLSX</button>
+                </div>
+            </div>
+
+            <!-- ЛЕГЕНДА ФЛАЖКОВ -->
+            <details style="margin-bottom:20px;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
+                <summary style="padding:12px 16px;cursor:pointer;font-weight:600;background:#f5f5f5;">🚩 Легенда красных флажков (п. 2.2 Модельных практик ФАС/МСАП СНГ 2025)</summary>
+                <div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:10px;">
+                    <div style="padding:10px;background:#ffebee;border-radius:6px;font-size:13px;"><strong>🔴 F1 — Аномальная цена:</strong> цена ниже официальной на ≥50%.</div>
+                    <div style="padding:10px;background:#ffebee;border-radius:6px;font-size:13px;"><strong>🔴 F2 — Критический дисконт:</strong> цена ниже официальной на ≥80%.</div>
+                    <div style="padding:10px;background:#fffde7;border-radius:6px;font-size:13px;"><strong>🟡 F3 — Новый продавец:</strong> зарегистрирован менее 30 дней назад.</div>
+                    <div style="padding:10px;background:#fffde7;border-radius:6px;font-size:13px;"><strong>🟡 F4 — Нет статуса партнёра:</strong> не в реестре авторизованных реселлеров Microsoft.</div>
+                    <div style="padding:10px;background:#fffde7;border-radius:6px;font-size:13px;"><strong>🟡 F5 — Ключ неактивируемый:</strong> телефонная активация в РФ отключена с декабря 2025 г.</div>
+                    <div style="padding:10px;background:#fff3e0;border-radius:6px;font-size:13px;"><strong>🟠 F6 — Использование ТЗ без «совместимо»:</strong> нарушение Постановление СИП №С01-1261/2024.</div>
+                </div>
+            </details>
+
+            <!-- ПОИСКОВЫЕ ЗАПРОСЫ -->
+            <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+                    <div style="font-size:13px;font-weight:700;color:#333;">🔎 Поисковые запросы:</div>
+                    <div id="monQueryTags" style="display:flex;flex-wrap:wrap;gap:6px;flex:1;"></div>
+                </div>
+                <div style="font-size:11px;color:#888;">Запросы зашиты в парсере на VDSina. Чтобы изменить — отредактируй <code>QUERIES</code> в <code>parser_runner.py</code>.</div>
+            </div>
+
+            <!-- ФИЛЬТРЫ -->
+            <div style="background:#f5f5f5;border-radius:8px;padding:16px;margin-bottom:16px;">
+                <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;">
+                    <div>
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Запрос</div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="monQueryFilterBtns">
+                            <button class="mon-filter-btn active" onclick="monToggleQuery('',this)">Все</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Площадка</div>
+                        <div style="display:flex;gap:6px;" id="monPlatBtns">
+                            <button class="mon-filter-btn active" onclick="monTogglePlat('all',this)">Все</button>
+                            <button class="mon-filter-btn" onclick="monTogglePlat('ozon',this)">OZON</button>
+                            <button class="mon-filter-btn" onclick="monTogglePlat('wildberries',this)">Wildberries</button>
+                            <button class="mon-filter-btn" onclick="monTogglePlat('yandex',this)">Яндекс.Маркет</button>
+                            <button class="mon-filter-btn" onclick="monTogglePlat('avito',this)">Авито</button>
+                            <button class="mon-filter-btn" onclick="monTogglePlat('aliexpress',this)">AliExpress</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Дисконт</div>
+                        <div style="display:flex;gap:6px;" id="monDiscBtns">
+                            <button class="mon-filter-btn active" onclick="monToggleDisc(0,this)">Любой</button>
+                            <button class="mon-filter-btn" onclick="monToggleDisc(50,this)">&gt;50%</button>
+                            <button class="mon-filter-btn" onclick="monToggleDisc(80,this)">&gt;80%</button>
+                            <button class="mon-filter-btn" onclick="monToggleDisc(95,this)">&gt;95%</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Флажков</div>
+                        <div style="display:flex;gap:6px;" id="monFlagBtns">
+                            <button class="mon-filter-btn active" onclick="monToggleFlag(0,this)">Любое</button>
+                            <button class="mon-filter-btn" onclick="monToggleFlag(2,this)">2+</button>
+                            <button class="mon-filter-btn" onclick="monToggleFlag(3,this)">3+</button>
+                        </div>
+                    </div>
+                    <div style="flex:1;min-width:180px;">
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Поиск по названию</div>
+                        <input type="text" id="monSearch" placeholder="Введите название..." oninput="monApplyFilters()"
+                            style="width:100%;padding:8px 12px;border:1px solid #e0e0e0;border-radius:6px;font-size:14px;">
+                    </div>
+                    <div style="font-size:13px;color:#666;align-self:flex-end;padding-bottom:4px;">
+                        Показано: <strong id="monCount">0</strong> из <strong id="monTotal">0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ТАБЛИЦА -->
+            <div style="overflow-x:auto;">
+                <table id="monTable" style="font-size:13px;">
+                    <thead style="background:var(--ozon-dark);color:white;">
+                        <tr>
+                            <th onclick="monSortBy('date')" id="mth-date" style="cursor:pointer;user-select:none;white-space:nowrap;">Дата <span id="mts-date"></span></th>
+                            <th onclick="monSortBy('pl')" id="mth-pl" style="cursor:pointer;user-select:none;white-space:nowrap;">Площадка <span id="mts-pl"></span></th>
+                            <th onclick="monSortBy('title')" id="mth-title" style="cursor:pointer;user-select:none;white-space:nowrap;">Название товара <span id="mts-title"></span></th>
+                            <th>Ссылка</th>
+                            <th onclick="monSortBy('price')" id="mth-price" style="cursor:pointer;user-select:none;white-space:nowrap;">Цена <span id="mts-price"></span></th>
+                            <th onclick="monSortBy('op')" id="mth-op" style="cursor:pointer;user-select:none;white-space:nowrap;">Офиц. цена <span id="mts-op"></span></th>
+                            <th onclick="monSortBy('disc')" id="mth-disc" style="cursor:pointer;user-select:none;white-space:nowrap;">Дисконт <span id="mts-disc"></span></th>
+                            <th onclick="monSortBy('flags')" id="mth-flags" style="cursor:pointer;user-select:none;white-space:nowrap;">Флажки <span id="mts-flags"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="monTableBody">
+                        <tr class="loading-row"><td colspan="8"><div class="skeleton" style="height:14px;width:60%;margin:6px 0;"></div></td></tr>
+                        <tr class="loading-row"><td colspan="8"><div class="skeleton" style="height:14px;width:90%;margin:6px 0;"></div></td></tr>
+                        <tr class="loading-row"><td colspan="8"><div class="skeleton" style="height:14px;width:75%;margin:6px 0;"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px;">
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <div style="font-size:13px;color:#666;">Стр. <span id="monPageNum">1</span> / <span id="monPageTotal">1</span></div>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span style="font-size:12px;color:#888;">Показывать:</span>
+                        <div id="monPageSizeBtns" style="display:flex;gap:4px;">
+                            <button class="mon-filter-btn" onclick="monSetPageSize(10,this)">10</button>
+                            <button class="mon-filter-btn active" onclick="monSetPageSize(50,this)">50</button>
+                            <button class="mon-filter-btn" onclick="monSetPageSize(100,this)">100</button>
+                            <button class="mon-filter-btn" onclick="monSetPageSize(500,this)">500</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button onclick="monPrev()" style="padding:6px 14px;border:1px solid #e0e0e0;background:white;border-radius:6px;cursor:pointer;">← Назад</button>
+                    <button onclick="monNext()" style="padding:6px 14px;border:1px solid #e0e0e0;background:white;border-radius:6px;cursor:pointer;">Вперёд →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === Supabase config ===
+        const SUPABASE_URL = "https://yqfdbuiyfkzhkhpiknob.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_nZNZLCqx4e_7La8pfQmsjA_RSw0zT9t";
+
+        // === Bizlogic ===
+        const TM_KW = ['microsoft','office','windows'];
+        function monComputeFlags(item) {
+            const op = item.op || 9990;
+            const price = item.price || 0;
+            const disc = op > 0 ? Math.floor((op - price) / op * 100) : 0;
+            const tl = (item.title||'').toLowerCase();
+            const hasTM = TM_KW.some(k => tl.includes(k));
+            const hasCompat = tl.includes('совместимо') || tl.includes('compat');
+            return {
+                F1: disc >= 50, F2: disc >= 80,
+                F3: item.regDays !== null && item.regDays !== undefined ? item.regDays < 30 : null,
+                F4: item.auth !== null && item.auth !== undefined ? !item.auth : null,
+                F5: true,
+                F6: hasTM && !hasCompat,
+                disc
+            };
+        }
+        function monFlagCount(f) {
+            return [f.F1,f.F2,f.F3===true,f.F4===true,f.F5,f.F6].filter(Boolean).length;
+        }
+        function monFlagPills(f) {
+            const parts = [];
+            if(f.F2) parts.push('<span class="flag-pill-mon fp-red" title="F2: Цена ниже официальной на '+f.disc+'%">🔴F2</span>');
+            else if(f.F1) parts.push('<span class="flag-pill-mon fp-red" title="F1: Цена ниже официальной на '+f.disc+'%">🔴F1</span>');
+            if(f.F3===true) parts.push('<span class="flag-pill-mon fp-yellow" title="F3: Продавец &lt;30 дней">🟡F3</span>');
+            else if(f.F3===null) parts.push('<span class="flag-pill-mon fp-gray" title="F3: требует проверки">F3?</span>');
+            if(f.F4===true) parts.push('<span class="flag-pill-mon fp-yellow" title="F4: Нет статуса авт. реселлера">🟡F4</span>');
+            else if(f.F4===null) parts.push('<span class="flag-pill-mon fp-gray" title="F4: требует проверки">F4?</span>');
+            if(f.F5) parts.push('<span class="flag-pill-mon fp-yellow" title="F5: Телефонная активация отключена с дек.2025">🟡F5</span>');
+            if(f.F6) parts.push('<span class="flag-pill-mon fp-orange" title="F6: ТЗ без пометки совместимо">🟠F6</span>');
+            return parts.join('') || '<span style="color:#999;font-size:11px;">нет</span>';
+        }
+
+        const MON_PL_LABEL = {ozon:'OZON',wildberries:'Wildberries',yandex:'Яндекс.Маркет',avito:'Авито',aliexpress:'AliExpress'};
+        const MON_PL_STYLE = {ozon:'background:#e3f2fd;color:#1565c0',wildberries:'background:#f3e5f5;color:#6a1b9a',yandex:'background:#fff3e0;color:#e65100',avito:'background:#e8f5e9;color:#2e7d32',aliexpress:'background:#fff8e1;color:#e65100'};
+
+        // === Состояние ===
+        let MON_DATA = [];
+        let MON_QUERIES = [];
+        let monState = {pl:'all', disc:0, flag:0, search:'', query:'', page:0, pageSize:50, sortCol:'', sortDir:1};
+        let monFiltered = [];
+
+        // === Загрузка из Supabase ===
+        async function supabaseGet(path) {
+            const r = await fetch(SUPABASE_URL + path, {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+            });
+            if (!r.ok) throw new Error('Supabase ' + r.status + ': ' + await r.text());
+            return r.json();
+        }
+
+        async function loadListings() {
+            // Supabase ограничивает по умолчанию 1000 строк → пагинируем через range
+            let all = [];
+            let from = 0;
+            const PAGE = 1000;
+            while (true) {
+                const r = await fetch(SUPABASE_URL + '/rest/v1/listings?select=*&order=last_seen.desc.nullslast', {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                        'Range-Unit': 'items',
+                        'Range': from + '-' + (from + PAGE - 1),
+                    },
+                });
+                if (!r.ok) throw new Error('listings ' + r.status);
+                const chunk = await r.json();
+                all = all.concat(chunk);
+                if (chunk.length < PAGE) break;
+                from += PAGE;
+                if (from > 100000) break;
+            }
+            return all;
+        }
+
+        async function loadLatestParserRun() {
+            const arr = await supabaseGet('/rest/v1/parser_runs?select=*&order=started_at.desc&limit=1');
+            return arr[0] || null;
+        }
+
+        function fmtRunStatus(run) {
+            const tsEl = document.getElementById('scanLastTime');
+            const stEl = document.getElementById('scanStatus');
+            const trEl = document.getElementById('scanRunTrigger');
+            if (!run) {
+                tsEl.textContent = 'нет данных';
+                stEl.style.background = '#ffe0b2'; stEl.style.color = '#bf360c';
+                stEl.textContent = '⚠ Парсер ещё не запускался';
+                return;
+            }
+            const d = new Date(run.started_at);
+            tsEl.textContent = d.toLocaleDateString('ru') + ', ' + d.toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'});
+            if (run.status === 'ok') { stEl.style.background='#e8f5e9'; stEl.style.color='#2e7d32'; stEl.textContent='✓ Актуально'; }
+            else if (run.status === 'running') { stEl.style.background='#fff9c4'; stEl.style.color='#f57f17'; stEl.textContent='⏳ Сейчас идёт парсинг'; }
+            else if (run.status === 'partial') { stEl.style.background='#fff3e0'; stEl.style.color='#e65100'; stEl.textContent='⚠ Частично'; }
+            else { stEl.style.background='#ffebee'; stEl.style.color='#c62828'; stEl.textContent='✗ Ошибка: ' + run.status; }
+            trEl.textContent = '(' + run.trigger + ', host=' + (run.host||'?') + ')';
+        }
+
+        // Маппинг Supabase → внутренний формат фронта
+        function mapRow(r) {
+            return {
+                date: r.last_seen || r.date,
+                pl: r.pl,
+                id: r.product_id,
+                query: r.query,
+                title: r.title,
+                url: r.url,
+                price: r.price || 0,
+                op: r.op || 9990,
+                regDays: r.reg_days,
+                auth: r.auth,
+            };
+        }
+
+        // === UI: фильтры/сортировка/рендер ===
+        function monRenderQueryTags() {
+            const c = document.getElementById('monQueryTags');
+            if(!c) return;
+            c.innerHTML = MON_QUERIES.map(q => {
+                const active = monState.query===q;
+                const bg = active ? '#1565c0' : '#e3f2fd';
+                const col = active ? '#fff' : '#1565c0';
+                return `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:${bg};color:${col};border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #90caf9;"
+                    onclick="monToggleQueryTag('${q.replace(/'/g,"\\'")}')">${q}</span>`;
+            }).join('');
+            if(!MON_QUERIES.length) c.innerHTML = '<span style="font-size:12px;color:#999;font-style:italic;">Запросы не определены</span>';
+        }
+        function monToggleQueryTag(q) {
+            monState.query = (monState.query===q) ? '' : q;
+            monRenderQueryTags();
+            document.querySelectorAll('#monQueryFilterBtns .mon-filter-btn').forEach(b=>{
+                b.classList.toggle('active', b.dataset.q===(monState.query||''));
+            });
+            monState.page=0; monApplyFilters();
+        }
+        function monToggleQuery(v, btn) {
+            monState.query=v; monState.page=0;
+            document.querySelectorAll('#monQueryFilterBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            monRenderQueryTags();
+            monApplyFilters();
+        }
+        function monRebuildQueryFilterBtns() {
+            const c = document.getElementById('monQueryFilterBtns');
+            if(!c) return;
+            c.innerHTML = `<button class="mon-filter-btn${monState.query===''?' active':''}" data-q="" onclick="monToggleQuery('',this)">Все</button>`
+                + MON_QUERIES.map(q => `<button class="mon-filter-btn${monState.query===q?' active':''}" data-q="${q}" onclick="monToggleQuery('${q.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',this)">${q.length>25?q.slice(0,25)+'…':q}</button>`).join('');
+        }
+        function monTogglePlat(v, btn) {
+            monState.pl=v; monState.page=0;
+            document.querySelectorAll('#monPlatBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active'); monApplyFilters();
+        }
+        function monToggleDisc(v, btn) {
+            monState.disc=v; monState.page=0;
+            document.querySelectorAll('#monDiscBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active'); monApplyFilters();
+        }
+        function monToggleFlag(v, btn) {
+            monState.flag=v; monState.page=0;
+            document.querySelectorAll('#monFlagBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active'); monApplyFilters();
+        }
+        function monApplyFilters() {
+            const s = (document.getElementById('monSearch')?.value||'').toLowerCase();
+            monFiltered = MON_DATA.filter(r => {
+                if(monState.pl!=='all' && r.pl!==monState.pl) return false;
+                if(r.flags.disc < monState.disc) return false;
+                if(monFlagCount(r.flags) < monState.flag) return false;
+                if(s && !r.title.toLowerCase().includes(s)) return false;
+                if(monState.query && r.query && !r.query.toLowerCase().includes(monState.query.toLowerCase()) && !r.title.toLowerCase().includes(monState.query.toLowerCase())) return false;
+                return true;
+            }).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+            if(monState.sortCol) monApplySortToFiltered();
+            document.getElementById('monCount').textContent = monFiltered.length;
+            const tot = document.getElementById('monTotal');
+            if(tot) tot.textContent = MON_DATA.length;
+            monState.page = 0;
+            monUpdateSortIndicators();
+            monRender();
+        }
+        function monRender() {
+            const tbody = document.getElementById('monTableBody');
+            if(!tbody) return;
+            const start = monState.page * monState.pageSize;
+            const items = monFiltered.slice(start, start + monState.pageSize);
+            const totalPages = Math.max(1, Math.ceil(monFiltered.length / monState.pageSize));
+            document.getElementById('monPageNum').textContent = monState.page+1;
+            const pt = document.getElementById('monPageTotal'); if(pt) pt.textContent = totalPages;
+            tbody.innerHTML = items.map(r => {
+                const f = r.flags;
+                const dc = f.disc>=95?'color:#c62828':f.disc>=80?'color:#e65100':'color:#f57c00';
+                const d = (r.date||'').split('-').reverse().join('.');
+                const qLabel = r.query ? `<div style="font-size:10px;color:#888;margin-top:2px;">🔎 ${r.query}</div>` : '';
+                const t = r.title || '';
+                const url = r.url || '#';
+                return `<tr>
+                    <td style="white-space:nowrap;font-size:12px;">${d}</td>
+                    <td><span style="display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;${MON_PL_STYLE[r.pl]||''}">${MON_PL_LABEL[r.pl]||r.pl}</span></td>
+                    <td style="max-width:240px;" title="${t.replace(/"/g,'&quot;')}"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.length>55?t.slice(0,55)+'…':t}</div>${qLabel}</td>
+                    <td><a href="${url}" target="_blank" rel="noopener" style="color:var(--ozon-blue);font-size:12px;white-space:nowrap;">Открыть ↗</a></td>
+                    <td style="font-weight:700;">${(r.price||0).toLocaleString('ru')} ₽</td>
+                    <td style="color:#666;">${(r.op||0).toLocaleString('ru')} ₽</td>
+                    <td style="font-weight:700;${dc}">${f.disc}%</td>
+                    <td style="white-space:nowrap;">${monFlagPills(f)}</td>
+                </tr>`;
+            }).join('') || '<tr><td colspan="8" style="text-align:center;color:#999;padding:30px;">Нет данных под фильтр</td></tr>';
+        }
+        function monSortBy(col) {
+            if(monState.sortCol === col) monState.sortDir = -monState.sortDir;
+            else { monState.sortCol = col; monState.sortDir = 1; }
+            monApplySortToFiltered();
+            monState.page = 0;
+            monUpdateSortIndicators();
+            monRender();
+        }
+        function monApplySortToFiltered() {
+            const col = monState.sortCol;
+            if(!col) return;
+            const dir = monState.sortDir;
+            monFiltered.sort((a,b) => {
+                let va, vb;
+                if(col==='disc') { va=a.flags.disc; vb=b.flags.disc; }
+                else if(col==='flags') { va=monFlagCount(a.flags); vb=monFlagCount(b.flags); }
+                else { va=a[col]; vb=b[col]; }
+                if(typeof va==='number') return (va-vb)*dir;
+                return String(va||'').localeCompare(String(vb||''),'ru')*dir;
+            });
+        }
+        function monUpdateSortIndicators() {
+            ['date','pl','title','price','op','disc','flags'].forEach(c => {
+                const el = document.getElementById('mts-'+c);
+                if(!el) return;
+                if(monState.sortCol===c) el.textContent = monState.sortDir===1 ? ' ▲' : ' ▼';
+                else el.textContent = '';
+            });
+        }
+        function monPrev() { if(monState.page>0){monState.page--;monRender();} }
+        function monNext() { if((monState.page+1)*monState.pageSize<monFiltered.length){monState.page++;monRender();} }
+        function monSetPageSize(n, btn) {
+            monState.pageSize = n; monState.page = 0;
+            document.querySelectorAll('#monPageSizeBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            monRender();
+        }
+
+        // Кнопка «Обновить»: перезагрузить данные из Supabase (Phase 5 — добавим webhook trigger парсера)
+        async function runScan() {
+            const s = document.getElementById('scanStatus');
+            s.style.background='#fff9c4'; s.style.color='#f57f17'; s.textContent='⏳ Загружаю...';
+            try {
+                await loadAll();
+                s.style.background='#e8f5e9'; s.style.color='#2e7d32'; s.textContent='✓ Обновлено';
+            } catch(e) {
+                s.style.background='#ffebee'; s.style.color='#c62828'; s.textContent='✗ Ошибка: ' + e.message;
+            }
+        }
+
+        function exportMonCSV() {
+            const d=new Date().toISOString().slice(0,10);
+            let csv='﻿'+'Площадка,ID,Название,URL,Цена (руб.),Офиц. цена (руб.),Дисконт (%),Флажки,Дата обнаружения,Дата выгрузки\n';
+            monFiltered.forEach(r=>{
+                const f=r.flags;
+                const flags=[f.F1?'F1':'',f.F2?'F2':'',f.F3===true?'F3':f.F3===null?'F3?':'',f.F4===true?'F4':f.F4===null?'F4?':'',f.F5?'F5':'',f.F6?'F6':''].filter(Boolean).join(';');
+                csv+=`${MON_PL_LABEL[r.pl]||r.pl},${r.id},"${(r.title||'').replace(/"/g,'""')}",${r.url||''},${r.price||0},${r.op||0},${f.disc},"${flags}",${r.date||''},${d}\n`;
+            });
+            const a=document.createElement('a');
+            a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+            a.download=`monitoring_${d}.csv`;a.click();
+        }
+        function exportMonXLSX() {
+            if(typeof XLSX==='undefined'){alert('SheetJS не загружен');return;}
+            const d=new Date().toISOString().slice(0,10);
+            const hdr=['Площадка','ID','Название','URL','Цена (руб.)','Офиц. цена (руб.)','Дисконт (%)','Флажки','Дата обнаружения','Дата выгрузки'];
+            const rows=monFiltered.map(r=>{
+                const f=r.flags;
+                const flags=[f.F1?'F1':'',f.F2?'F2':'',f.F3===true?'F3':f.F3===null?'F3?':'',f.F4===true?'F4':f.F4===null?'F4?':'',f.F5?'F5':'',f.F6?'F6':''].filter(Boolean).join(';');
+                return [MON_PL_LABEL[r.pl]||r.pl,r.id,r.title,r.url,r.price,r.op,f.disc,flags,r.date,d];
+            });
+            const ws=XLSX.utils.aoa_to_sheet([hdr,...rows]);
+            ws['!cols']=[12,18,50,45,10,12,10,20,12,12].map(w=>({wch:w}));
+            const wb=XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb,ws,'Мониторинг');
+            XLSX.writeFile(wb,`monitoring_${d}.xlsx`);
+        }
+
+        async function loadAll() {
+            const [listings, lastRun] = await Promise.all([loadListings(), loadLatestParserRun()]);
+            MON_DATA = listings.map(mapRow).map(r => ({...r, flags: monComputeFlags(r)}));
+            // Уникальные запросы для тегов
+            MON_QUERIES = [...new Set(MON_DATA.map(r => r.query).filter(Boolean))].sort();
+            fmtRunStatus(lastRun);
+            monRenderQueryTags();
+            monRebuildQueryFilterBtns();
+            monApplyFilters();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAll().catch(e => {
+                document.getElementById('monTableBody').innerHTML =
+                    '<tr><td colspan="8" style="text-align:center;color:#c62828;padding:30px;">Не удалось загрузить данные: ' + e.message + '</td></tr>';
+                console.error(e);
+            });
+        });
+    </script>
+</body>
+</html>
