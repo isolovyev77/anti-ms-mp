@@ -1,2 +1,4 @@
 .DS_Store
 cloakbrowser-lab/
+.env
+.env.local
