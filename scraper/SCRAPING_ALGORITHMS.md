@@ -195,7 +195,15 @@ def scrape_ozon(query: str, max_pages: int = 20) -> list[dict]:
 
 ### Особенности и антиблокировка
 
-**ВАЖНОЕ ОБНОВЛЕНИЕ (март 2026):** Playwright headless **работает на Ozon** при запуске с локальной машины с российским IP. Ключевые условия:
+**ОБНОВЛЕНИЕ (май 2026):** VDSina-прокси (datacenter IP `94.103.89.251`) **не работает** ни для Ozon, ни для Avito. Они отдают «Доступ ограничен: проблема с IP» / «fab_chlg» вне зависимости от того, российский IP или иностранный, — антибот режет datacenter ASN. Wildberries и Яндекс.Маркет через VDSina парсятся стабильно. См. `AI-Sessions/anti-ms-mp/2026-05-26.md`.
+
+Подъём SOCKS5-туннеля (для WB/ЯМ):
+```bash
+ssh -D 1080 -fN -i ~/.ssh/VDSina -o ServerAliveInterval=30 root@94.103.89.251
+SCRAPER_PROXY=socks5://127.0.0.1:1080 node scrape-marketplaces.js --platforms wildberries,yandex --pages 5
+```
+
+**ВАЖНОЕ ОБНОВЛЕНИЕ (март 2026):** Playwright headless **работает на Ozon** при запуске с локальной машины с российским residential IP. Ключевые условия:
 
 1. **Флаги запуска браузера** — обязательны:
    ```javascript
