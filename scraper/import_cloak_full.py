@@ -33,11 +33,59 @@ SOURCES = {
 }
 
 OFFICIAL_PRICES = {
-    'office365':         6990,
-    'office2021home':   14990,
-    'office2021homebus': 22990,
-    'default':           9990,
+    # Microsoft 365 — годовые подписки
+    'm365_personal':       2790,   # 1 устройство, 1 ТБ OneDrive
+    'm365_family':         5290,   # до 6 пользователей, по 1 ТБ
+    # Office 365 (коробочные одноразовые покупки, исторические)
+    'office365_box':       6990,   # старая коробка Office 365 Pro Plus
+    # Office 2019/2021/2024 — бессрочные лицензии (Box / ESD)
+    'office_home_student': 14990,  # Home & Student 1 ПК
+    'office_home_bus':     22990,  # Home & Business 1 ПК
+    'office_pro':          39990,  # Professional / Pro Plus / Professional Plus LTSC (B2B-only)
+    # Дефолт — берётся когда тип не угадан
+    'default':              9990,
 }
+
+
+def official_price(title: str) -> int:
+    """Подбор официальной цены Microsoft по типу продукта в названии.
+
+    Уточнённая логика (вместо 4 общих корзин) — учитывает:
+    - подписка vs бессрочная лицензия
+    - количество устройств / пользователей
+    - Pro Plus / LTSC = B2B (выше)
+    """
+    t = title.lower()
+
+    # B2B Professional Plus / LTSC — самый дорогой класс
+    if any(k in t for k in ('pro plus', 'professional plus', 'pro+', 'ltsc')):
+        return OFFICIAL_PRICES['office_pro']
+
+    # Microsoft 365 Family (несколько пользователей)
+    if 'family' in t or 'семь' in t or 'для семьи' in t or 'family pack' in t:
+        return OFFICIAL_PRICES['m365_family']
+
+    # Microsoft 365 Personal (1 пользователь) — обычно отмечен явно
+    if 'personal' in t or 'персональн' in t or ('m365' in t.replace(' ', '')) or '1тб onedrive' in t.replace(' ', ''):
+        return OFFICIAL_PRICES['m365_personal']
+
+    # Office Home & Business (1 ПК, для работы)
+    if 'home and business' in t or 'home & business' in t or 'для работы' in t or ' h&b' in t:
+        return OFFICIAL_PRICES['office_home_bus']
+
+    # Office Home & Student / для дома и учёбы
+    if 'home and student' in t or 'home & student' in t or 'для дома и учёбы' in t or 'для дома и учебы' in t:
+        return OFFICIAL_PRICES['office_home_student']
+
+    # Office 365 box (когда нет 'personal'/'family' маркера, но есть Office + 365)
+    if '365' in t and ('office' in t or 'microsoft' in t):
+        return OFFICIAL_PRICES['office365_box']
+
+    # Бессрочные Office 2019/2021/2024 без уточнений — приравниваем к Home & Student
+    if any(y in t for y in ('2024', '2021', '2019', '2016')):
+        return OFFICIAL_PRICES['office_home_student']
+
+    return OFFICIAL_PRICES['default']
 
 
 def title_ok(title: str) -> bool:
@@ -65,17 +113,6 @@ def title_ok(title: str) -> bool:
     )
 
 
-def official_price(title: str) -> int:
-    t = title.lower()
-    if '365' in t or 'personal' in t:
-        return OFFICIAL_PRICES['office365']
-    if 'home and business' in t or 'home & business' in t:
-        return OFFICIAL_PRICES['office2021homebus']
-    if any(y in t for y in ('2021', '2024', '2019', '2016', 'professional', 'pro plus', 'pro 365')):
-        return OFFICIAL_PRICES['office2021home']
-    return OFFICIAL_PRICES['default']
-
-
 PL_PREFIX = {'ozon': 'OZ', 'avito': 'AV', 'wildberries': 'WB', 'yandex': 'YM'}
 
 
@@ -90,6 +127,11 @@ def normalize_item(pl: str, it: dict, today: str) -> dict | None:
     if not title_ok(title):
         return None
     if price < 10 or price > 100000:
+        return None
+    op = official_price(title)
+    # Карточки с ценой >= 50% от официальной — это легальные товары, не контрафакт.
+    # Мониторим только аномально-низкие цены (≥50% скидка от op = F1+).
+    if price >= op * 0.5:
         return None
     url = it.get('url') or ''
     return {
