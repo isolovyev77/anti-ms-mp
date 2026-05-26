@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мониторинг нелицензионного ПО на маркетплейсах — Microsoft Office</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -1084,7 +1087,8 @@
 
     <div class="nav-container">
         <ul class="nav-tabs">
-            <li class="nav-tab"><button class="nav-btn active" data-tab="overview">Обзор</button></li>
+            <li class="nav-tab"><button class="nav-btn active" data-tab="monitoring" style="color:#1a3a6b; font-weight:700;">🔍 Мониторинг</button></li>
+            <li class="nav-tab"><button class="nav-btn" data-tab="overview">Обзор</button></li>
             <li class="nav-tab"><button class="nav-btn" data-tab="elevator" style="color: #e53935; font-weight:700;">⚡ Лифтовой тест</button></li>
             <li class="nav-tab"><button class="nav-btn" data-tab="legal">Правовые риски</button></li>
             <li class="nav-tab"><button class="nav-btn" data-tab="regulatory">Регуляторика</button></li>
@@ -1092,14 +1096,13 @@
             <li class="nav-tab"><button class="nav-btn" data-tab="comparison">Сравнение товаров</button></li>
             <li class="nav-tab"><button class="nav-btn" data-tab="counter">Контраргументы</button></li>
             <li class="nav-tab"><button class="nav-btn" data-tab="demands">Предложения</button></li>
-            <li class="nav-tab"><button class="nav-btn" data-tab="monitoring" style="color:#1a3a6b; font-weight:700;">🔍 Мониторинг</button></li>
             <li class="nav-tab"><button class="nav-btn" data-tab="sources">Источники</button></li>
         </ul>
     </div>
 
     <div class="content">
         <!-- TAB 1: OVERVIEW -->
-        <div id="overview" class="tab-content active">
+        <div id="overview" class="tab-content">
             <div class="kpi-grid">
                 <div class="kpi-card danger">
                     <div class="kpi-value">от 25 ₽</div>
@@ -1152,7 +1155,7 @@
 
             <div class="card">
                 <h3 class="card-title">📊 Сводная таблица: реальные данные мониторинга (январь-март 2026)</h3>
-                <p style="font-size:13px;color:#666;margin-bottom:12px;">Запрос: «office 365 ключ активации» на каждой площадке. Источник: АРПП «Отечественный софт», НП «РУССОФТ», НП ППП.</p>
+                <p style="font-size:13px;color:#666;margin-bottom:12px;">Запрос: «office 365 ключ активации» на каждой площадке. Источник: <a href="https://apkit.ru/" target="_blank" rel="noopener">АПКИТ</a>, АРПП «Отечественный софт», НП «РУССОФТ», НП ППП.</p>
                 <div class="table-container">
                     <table>
                         <thead>
@@ -2488,7 +2491,7 @@
                             </tr>
                             <tr>
                                 <td>Позиция отрасли</td>
-                                <td>АРПП, РУСОФТ, НП ППП - защита интересов легального ПО</td>
+                                <td>АПКИТ, АРПП, РУСОФТ, НП ППП - защита интересов легального ПО</td>
                                 <td>Отраслевые ассоциации</td>
                             </tr>
                         </tbody>
@@ -2499,7 +2502,7 @@
             <div class="benefits-card">
                 <div class="benefits-title">✓ Потенциальные выгоды от реализации</div>
                 <ul class="benefits-list">
-                    <li>Предотвращение публичного конфликта с отраслевыми ассоциациями (АРПП, РУСОФТ, НП ППП)</li>
+                    <li>Предотвращение публичного конфликта с отраслевыми ассоциациями (АПКИТ, АРПП, РУСОФТ, НП ППП)</li>
                     <li>Укрепление репутации перед инвесторами, партнёрами и потребителями</li>
                     <li>Снижение технических рисков от ограничений со стороны IT-инфраструктурных провайдеров</li>
                     <li>Соответствие собственным обязательствам по меморандуму о досрочном соблюдении ФЗ-289</li>
@@ -2524,7 +2527,7 @@
                         <tbody>
                             <tr>
                                 <td><strong>Ближайшие месяцы</strong></td>
-                                <td>Подготовка и направление коллективного письма от АРПП, РУСОФТ, НП ППП с изложением позиции отрасли по вопросу продажи нелицензионного ПО на маркетплейсах</td>
+                                <td>Подготовка и направление коллективного письма от АПКИТ, АРПП, РУСОФТ, НП ППП с изложением позиции отрасли по вопросу продажи нелицензионного ПО на маркетплейсах</td>
                                 <td>Публичное обсуждение в профильных СМИ и отраслевых сообществах</td>
                             </tr>
                             <tr>
@@ -3029,10 +3032,10 @@
         </div>
 
         <!-- TAB: MONITORING - СИСТЕМНЫЙ МОНИТОРИНГ (последний) -->
-        <div id="monitoring" class="tab-content">
+        <div id="monitoring" class="tab-content active">
             <div class="alert alert-warning" style="margin-bottom:20px;">
                 <div class="alert-title">🔍 Системный мониторинг нелицензионного ПО</div>
-                <p>Таблица карточек с признаками контрафакта, найденных на маркетплейсах. Красные флажки (F1–F6) вычисляются автоматически по п. 2.2 <a href="https://fas.gov.ru/news/34360" target="_blank" rel="noopener">Модельных практик ФАС/МСАП СНГ 2025 ↗</a>. Данные за январь-май 2026 г. — мониторинг АРПП «Отечественный софт», НП «РУССОФТ», НП ППП.</p>
+                <p>Таблица карточек с признаками контрафакта, найденных на маркетплейсах. Красные флажки (F1–F6) вычисляются автоматически по п. 2.2 <a href="https://fas.gov.ru/news/34360" target="_blank" rel="noopener">Модельных практик ФАС/МСАП СНГ 2025 ↗</a>. Данные за январь-май 2026 г. — мониторинг <a href="https://apkit.ru/" target="_blank" rel="noopener">АПКИТ</a>, АРПП «Отечественный софт», НП «РУССОФТ», НП ППП.</p>
             </div>
 
             <!-- СТАТУС СКАНИРОВАНИЯ -->
