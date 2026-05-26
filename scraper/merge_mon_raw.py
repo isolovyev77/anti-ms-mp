@@ -186,8 +186,16 @@ def main() -> int:
             by_key[(r['pl'], r['id'])] = r
 
     merged = list(by_key.values())
-    # Сортируем по площадке и id для детерминированного diff'а
-    merged.sort(key=lambda r: (r['pl'], r['id']))
+    # Сортировка по умолчанию для дашборда:
+    #   1) по убыванию дисконта (сначала самые подозрительные 99%+)
+    #   2) по площадке (алфавит) — стабильный порядок при одинаковом дисконте
+    #   3) по id — финальный tiebreaker для детерминированного diff'а
+    def disc_pct(r):
+        op = r.get('op') or 0
+        if op <= 0:
+            return 0
+        return round((1 - r['price'] / op) * 100)
+    merged.sort(key=lambda r: (-disc_pct(r), r['pl'], r['id']))
 
     by_pl = {}
     for r in merged:
