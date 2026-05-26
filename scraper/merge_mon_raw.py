@@ -18,6 +18,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DASHBOARD = ROOT / 'anti-ms-dashboard' / 'index.html'
 MON_DATA = ROOT / 'scraper' / 'mon_data.json'
+MON_DATA_CAPTCHA = ROOT / 'scraper' / 'mon_data_captcha.json'
+
+# Какие площадки в каждом источнике считать «свежими» (заменяющими старый снапшот).
+# WB+ЯМ парсятся через VDSina-прокси (mon_data.json).
+# Ozon+Avito парсятся headful через scrape-with-captcha.js (mon_data_captcha.json).
+FRESH_PLATFORMS = {
+    MON_DATA: {'wildberries', 'yandex'},
+    MON_DATA_CAPTCHA: {'ozon', 'avito'},
+}
 
 # Парсим объекты MON_RAW из index.html через regex - формат стабильный JS-литерал.
 # Каждая запись: {date:'...',pl:'...',id:'...',query:'...',title:'...',url:'...',price:N,op:N,regDays:null,auth:null}
@@ -98,9 +107,11 @@ def load_old_mon_raw(html: str) -> list[dict]:
     return items
 
 
-def load_fresh() -> list[dict]:
-    data = json.loads(MON_DATA.read_text(encoding='utf-8'))
-    return data['data']
+def load_fresh_for(source: Path) -> list[dict]:
+    if not source.exists():
+        return []
+    data = json.loads(source.read_text(encoding='utf-8'))
+    return data.get('data', [])
 
 
 def normalize(entry: dict) -> dict:
@@ -143,27 +154,36 @@ def format_record(r: dict) -> str:
 def main() -> int:
     html = DASHBOARD.read_text(encoding='utf-8')
     old = load_old_mon_raw(html)
-    fresh = load_fresh()
-
     print(f'Старых записей: {len(old)}')
-    fresh_normalized = [normalize(x) for x in fresh]
-    print(f'Свежих записей (WB+YM): {len(fresh_normalized)}')
 
-    # Сохраняем по площадкам:
-    # - WB и YM полностью заменяем свежими
-    # - Ozon и Avito берём из старого снапшота (datacenter IP блокируется)
+    # Собираем все «свежие» площадки из всех источников.
+    # Платформа считается «свежей» только если в её источнике реально есть записи для неё.
+    # Иначе мы оставим её из старого снапшота — иначе платформа потерялась бы при частичном
+    # обновлении (например, парсили только Ozon — Avito не теряется).
+    fresh_platforms_all = set()
+    fresh_by_source: dict[Path, list[dict]] = {}
+    for source, platforms in FRESH_PLATFORMS.items():
+        items = [normalize(x) for x in load_fresh_for(source)]
+        # фильтруем — берём только те платформы, что декларированы для источника
+        items = [x for x in items if x['pl'] in platforms]
+        fresh_by_source[source] = items
+        # «свежими» считаем только те платформы, для которых реально есть данные
+        present_pls = {x['pl'] for x in items}
+        fresh_platforms_all.update(present_pls)
+        label = source.name
+        print(f'  {label}: {len(items)} записей ({", ".join(sorted(present_pls)) or "—"})')
+
     by_key = {}
-
-    # сначала Ozon+Avito из старого (с одной актуальной датой)
+    # Площадки без свежего источника — оставляем из старого снапшота.
     for r in old:
-        if r['pl'] in ('ozon', 'avito'):
-            key = (r['pl'], r['id'])
-            by_key[key] = r
+        if r['pl'] in fresh_platforms_all:
+            continue
+        by_key[(r['pl'], r['id'])] = r
 
-    # затем WB+YM из свежего
-    for r in fresh_normalized:
-        key = (r['pl'], r['id'])
-        by_key[key] = r
+    # Перекрываем свежими (в порядке источников)
+    for items in fresh_by_source.values():
+        for r in items:
+            by_key[(r['pl'], r['id'])] = r
 
     merged = list(by_key.values())
     # Сортируем по площадке и id для детерминированного diff'а
@@ -194,18 +214,19 @@ def main() -> int:
     end_full = end + len('\n    ];')
     new_html = html[:start] + new_block + html[end_full:]
 
-    # Обновим строку-комментарий перед MON_RAW
-    new_html = re.sub(
-        r"// \d+ карточек из реального мониторинга[^\n]*",
-        f"// {len(merged)} карточек мониторинга — WB+ЯМ свежие, Ozon+Avito от 2026-03-19",
-        new_html,
-        count=1,
+    # Какие площадки получили свежие данные — указываем в комментарии
+    fresh_label = ', '.join(sorted({p for p in fresh_platforms_all})) or 'нет'
+    stale_pls = sorted({r['pl'] for r in old if r['pl'] not in fresh_platforms_all})
+    stale_label = ', '.join(stale_pls) if stale_pls else 'нет'
+    comment = (
+        f"// {len(merged)} карточек мониторинга — свежий парсинг: {fresh_label}; "
+        f"из прошлого снапшота: {stale_label}"
     )
     new_html = re.sub(
-        r"// \d+ карточек мониторинга[^\n]*",
-        f"// {len(merged)} карточек мониторинга — WB+ЯМ свежие, Ozon+Avito от 2026-03-19",
-        new_html,
-        count=1,
+        r"// \d+ карточек из реального мониторинга[^\n]*", comment, new_html, count=1,
+    )
+    new_html = re.sub(
+        r"// \d+ карточек мониторинга[^\n]*", comment, new_html, count=1,
     )
 
     # Обновим штамп «Последнее сканирование» в шапке раздела мониторинга
