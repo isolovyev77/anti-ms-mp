@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -197,6 +198,21 @@ def main() -> int:
     new_html = re.sub(
         r"// \d+ карточек из реального мониторинга[^\n]*",
         f"// {len(merged)} карточек мониторинга — WB+ЯМ свежие, Ozon+Avito от 2026-03-19",
+        new_html,
+        count=1,
+    )
+    new_html = re.sub(
+        r"// \d+ карточек мониторинга[^\n]*",
+        f"// {len(merged)} карточек мониторинга — WB+ЯМ свежие, Ozon+Avito от 2026-03-19",
+        new_html,
+        count=1,
+    )
+
+    # Обновим штамп «Последнее сканирование» в шапке раздела мониторинга
+    now = datetime.now().strftime('%d.%m.%Y, %H:%M')
+    new_html = re.sub(
+        r'(<span id="scanLastTime"[^>]*>)[^<]*(</span>)',
+        rf'\g<1>{now}\g<2>',
         new_html,
         count=1,
     )
