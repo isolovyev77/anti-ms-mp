@@ -53,12 +53,18 @@ const CONFIG = {
 };
 
 // ========== ПАРСИНГ АРГУМЕНТОВ ==========
+// SOCKS5/HTTP прокси (для обхода блокировок маркетплейсов с иностранных IP).
+// По умолчанию подхватываем из env (SCRAPER_PROXY / HTTPS_PROXY) — туннель
+// поднимается командой: ssh -D 1080 -fN -i ~/.ssh/VDSina root@94.103.89.251
+CONFIG.proxy = process.env.SCRAPER_PROXY || process.env.HTTPS_PROXY || null;
+
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--query' && args[i+1]) { CONFIG.queries = [args[i+1]]; i++; }
   if (args[i] === '--pages' && args[i+1]) { CONFIG.maxPages = parseInt(args[i+1]); i++; }
   if (args[i] === '--platforms' && args[i+1]) { CONFIG.platforms = args[i+1].split(','); i++; }
   if (args[i] === '--output' && args[i+1]) { CONFIG.outputFile = args[i+1]; i++; }
+  if (args[i] === '--proxy' && args[i+1]) { CONFIG.proxy = args[i+1]; i++; }
   if (args[i] === '--headful') { CONFIG.headless = false; }
 }
 
@@ -211,67 +217,93 @@ async function scrapeOzon(page, query, maxPages) {
  */
 async function scrapeWildberries(page, query, maxPages) {
   const results = [];
-  const baseUrl = `https://www.wildberries.ru/catalog/0/search.aspx?search=${encodeURIComponent(query)}&sort=popular`;
-  console.log(`  [WB] Запрос: "${query}"`);
+  console.log(`  [WB] Запрос: "${query}" (DOM)`);
+  const baseUrl = `https://www.wildberries.ru/catalog/0/search.aspx?search=${encodeURIComponent(query)}`;
 
   for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
     const url = pageNum === 1 ? baseUrl : `${baseUrl}&page=${pageNum}`;
     console.log(`    Страница ${pageNum}`);
 
     try {
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-      await delay();
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 40000 });
+      await sleep(rand(2500, 4500));
+      // Прогружаем lazy-load
+      for (let s = 1; s <= 6; s++) {
+        await page.evaluate(p => window.scrollTo(0, document.body.scrollHeight * p / 6), s);
+        await sleep(rand(500, 900));
+      }
 
-      // WB грузит товары через JS - ждём появления карточек
+      let items;
       try {
-        await page.waitForSelector('.product-card', { timeout: 8000 });
-      } catch {
-        console.log(`    Нет карточек на стр.${pageNum}`);
+        items = await page.evaluate(() => {
+          const out = [];
+          const cards = document.querySelectorAll('article.product-card, .product-card');
+          cards.forEach(card => {
+            // ID карточки: data-nm-id или из href
+            let id = card.getAttribute('data-nm-id');
+            const a = card.querySelector('a.product-card__link, a[href*="/catalog/"]');
+            const href = a ? a.getAttribute('href') : '';
+            if (!id) {
+              const m = (href || '').match(/\/catalog\/(\d+)\/?/);
+              if (m) id = m[1];
+            }
+            // Заголовок: aria-label у ссылки самый чистый
+            let title = a ? (a.getAttribute('aria-label') || '').trim() : '';
+            if (!title) {
+              const img = card.querySelector('img.j-thumbnail');
+              if (img && img.alt) title = img.alt.trim();
+            }
+            // Цена: первое число с ₽ в innerText
+            const txt = (card.innerText || '').replace(/ /g, ' ');
+            const priceMatch = txt.match(/([\d ]{2,7})\s*₽/);
+            const price = priceMatch ? parseInt(priceMatch[1].replace(/\s/g, '')) : null;
+            if (!id || !title || !price) return;
+            const url = href && href.startsWith('http') ? href.split('?')[0] : `https://www.wildberries.ru/catalog/${id}/detail.aspx`;
+            out.push({ id, title, price, url });
+          });
+          return out;
+        });
+      } catch (e) {
+        console.error(`    DOM ошибка: ${e.message}`);
+        if (pageNum === 1) break;
+        continue;
+      }
+
+      if (!items || !items.length) {
+        console.log(`    Пустая страница`);
+        break;
+      }
+      // Конвертируем под общий формат
+      items = items.map(it => ({ id: it.id, price: it.price, title: it.title }));
+
+      if (!items || !items.length) {
+        console.log(`    Пустой ответ`);
         break;
       }
 
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-      await sleep(1000);
-
-      const items = await page.evaluate(() => {
-        const cards = document.querySelectorAll('.product-card');
-        const result = [];
-        cards.forEach(card => {
-          const priceEl = card.querySelector('.price-block__final-price');
-          const titleEl = card.querySelector('.product-card__name');
-          const linkEl = card.querySelector('a.product-card__link');
-
-          const priceText = priceEl?.innerText || '';
-          const price = parseInt(priceText.replace(/\D/g, ''));
-          const title = titleEl?.innerText?.trim();
-          const href = linkEl?.href;
-
-          if (!price || !title || price > 2000 || price < 10) return;
-          result.push({ price, title: title.slice(0, 120), url: href || null });
-        });
-        return result;
-      });
-
-      if (!items.length) break;
-
+      let added = 0;
       items.forEach((item, i) => {
+        if (!item.price || item.price < 10 || item.price > 5000) return;
+        if (!item.title || item.title.length < 5) return;
         if (!titleOk(item.title)) return;
         const op = detectOfficialPrice(item.title);
         results.push({
           date: today(),
           pl: 'wildberries',
-          id: makeId('wildberries', results.length + i, query),
+          id: `WB-${item.id}`,
           query,
-          title: item.title,
-          url: item.url || `https://www.wildberries.ru/catalog/0/search.aspx?search=${encodeURIComponent(query)}`,
+          title: item.title.slice(0, 120),
+          url: item.url || `https://www.wildberries.ru/catalog/${item.id}/detail.aspx`,
           price: item.price,
           op,
           regDays: null,
           auth: null,
         });
+        added++;
       });
 
-      console.log(`    +${items.length} товаров (итого: ${results.length})`);
+      console.log(`    +${added} товаров (всего сырых: ${items.length}, итого: ${results.length})`);
+      if (items.length < 10) break;
       await delay();
     } catch (e) {
       console.error(`    Ошибка: ${e.message}`);
@@ -299,55 +331,53 @@ async function scrapeYandexMarket(page, query, maxPages) {
 
     try {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 40000 });
-
-      // Человеческая пауза + случайная прокрутка
-      await sleep(rand(2000, 4000));
-      await page.mouse.move(rand(300, 800), rand(200, 500));
-      await page.evaluate(() => window.scrollTo(0, rand(200, 600)));
-      await sleep(rand(800, 1500));
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight * 0.7));
-      await sleep(rand(600, 1200));
-
-      // Парсим через innerText всей страницы - обходим блокировки querySelectorAll
-      const rawText = await page.evaluate(() => document.body.innerText);
-
-      // Паттерн: цена в начале строки, затем название
-      // Формат ЯМ: "124 ₽\nПэй\nMicrosoft Office 2024..."
-      const items = [];
-      const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
-
-      for (let i = 0; i < lines.length - 2; i++) {
-        const priceMatch = lines[i].match(/^([\d\s]{2,6})\s*₽$/);
-        if (!priceMatch) continue;
-        const price = parseInt(priceMatch[1].replace(/\s/g, ''));
-        if (price < 10 || price > 2000) continue;
-
-        // Ищем название в следующих 3 строках
-        for (let j = i+1; j <= Math.min(i+4, lines.length-1); j++) {
-          const titleCandidate = lines[j];
-          if (
-            titleCandidate.length > 15 &&
-            !titleCandidate.match(/^[\d\s₽%]+$/) &&
-            !titleCandidate.includes('купили') &&
-            !titleCandidate.includes('Пэй') &&
-            !titleCandidate.includes('Корзин') &&
-            (titleCandidate.toLowerCase().includes('office') ||
-             titleCandidate.toLowerCase().includes('windows') ||
-             titleCandidate.toLowerCase().includes('microsoft') ||
-             titleCandidate.toLowerCase().includes('ключ'))
-          ) {
-            items.push({ price, title: titleCandidate.slice(0, 120) });
-            break;
-          }
-        }
+      await sleep(rand(3000, 5000));
+      // прокрутка для подгрузки lazy
+      for (let s = 1; s <= 8; s++) {
+        await page.evaluate(p => window.scrollTo(0, document.body.scrollHeight * p / 8), s);
+        await sleep(rand(600, 1000));
       }
 
-      // Дедупликация по заголовку
+      const items = await page.evaluate(() => {
+        const out = [];
+        const cards = document.querySelectorAll('article[data-auto="searchOrganic"], article[id]');
+        cards.forEach(card => {
+          const a = card.querySelector('a[href*="/card/"], a[href*="/product"]');
+          const href = a ? a.getAttribute('href') : null;
+          if (!href) return;
+          let id = null;
+          let m = href.match(/\/card\/[^/]+\/(\d+)/);
+          if (m) id = m[1];
+          if (!id) { m = href.match(/\/product[^/]*\/(\d+)/); if (m) id = m[1]; }
+          if (!id) return;
+
+          const txt = (card.innerText || '').replace(/[  ]/g, ' ');
+          const priceMatch = txt.match(/([\d ]{2,7})\s*₽/);
+          const price = priceMatch ? parseInt(priceMatch[1].replace(/\s/g, '')) : null;
+          if (!price) return;
+
+          // Заголовок: первая «осмысленная» строка не равная цене / категории
+          const lines = txt.split('\n').map(l => l.trim()).filter(Boolean);
+          let title = '';
+          for (const line of lines) {
+            if (/^([\d ]{2,7})\s*₽/.test(line)) continue;
+            if (line.length < 10) continue;
+            if (/^Язык|^Категория|^Активация|^Количество|^Цена|^Бесплатная|^Доставка|^Купили|^Спонсор|^Рейтинг|^В корз/i.test(line)) continue;
+            title = line;
+            break;
+          }
+          if (!title) return;
+          const cleanHref = href.split('?')[0];
+          out.push({ id, title: title.slice(0, 120), price, url: `https://market.yandex.ru${cleanHref}` });
+        });
+        return out;
+      });
+
+      // Дедупликация по id внутри страницы
       const seen = new Set();
       const unique = items.filter(item => {
-        const key = item.title.slice(0, 40).toLowerCase();
-        if (seen.has(key)) return false;
-        seen.add(key);
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
         return true;
       });
 
@@ -356,24 +386,27 @@ async function scrapeYandexMarket(page, query, maxPages) {
         break;
       }
 
-      unique.forEach((item, i) => {
+      let added = 0;
+      unique.forEach((item) => {
+        if (!item.price || item.price < 10 || item.price > 5000) return;
         if (!titleOk(item.title)) return;
         const op = detectOfficialPrice(item.title);
         results.push({
           date: today(),
           pl: 'yandex',
-          id: makeId('yandex', results.length + i, query),
+          id: `YM-${item.id}`,
           query,
           title: item.title,
-          url: `https://market.yandex.ru/search?text=${encodeURIComponent(query)}&page=${pageNum}`,
+          url: item.url,
           price: item.price,
           op,
           regDays: null,
           auth: null,
         });
+        added++;
       });
 
-      console.log(`    +${unique.length} товаров (итого: ${results.length})`);
+      console.log(`    +${added} товаров (сырых ${unique.length}, итого: ${results.length})`);
       await delay();
     } catch (e) {
       console.error(`    Ошибка: ${e.message}`);
@@ -469,7 +502,7 @@ async function run() {
   console.log(`Страниц на площадку: ${CONFIG.maxPages}`);
   console.log('='.repeat(60));
 
-  const browser = await chromium.launch({
+  const launchOptions = {
     headless: CONFIG.headless,
     args: [
       '--no-sandbox',
@@ -477,7 +510,12 @@ async function run() {
       '--disable-blink-features=AutomationControlled',
       '--lang=ru-RU',
     ],
-  });
+  };
+  if (CONFIG.proxy) {
+    launchOptions.proxy = { server: CONFIG.proxy };
+    console.log(`Прокси: ${CONFIG.proxy}`);
+  }
+  const browser = await chromium.launch(launchOptions);
 
   // Эмулируем обычный браузер
   const context = await browser.newContext({
