@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мониторинг нелицензионного ПО Microsoft на маркетплейсах</title>
+    <title>Мониторинг (новая версия на Supabase) — Microsoft Office</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -16,87 +20,1090 @@
             --dark-gray: #333;
             --border-gray: #e0e0e0;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #fafafa; color: var(--dark-gray); line-height: 1.6;
+            background-color: #fafafa;
+            color: var(--dark-gray);
+            line-height: 1.6;
         }
+
         .header {
             background: linear-gradient(135deg, var(--ozon-dark) 0%, var(--ozon-blue) 100%);
-            color: white; padding: 30px 20px; text-align: center;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
             box-shadow: 0 2px 8px rgba(0,26,110,0.15);
         }
-        .header h1 { font-size: 24px; margin-bottom: 8px; font-weight: 700; }
-        .header p { font-size: 14px; opacity: 0.9; max-width: 900px; margin: 0 auto; }
-        .header a { color: #90caf9; text-decoration: underline; }
-        .content { max-width: 1280px; margin: 0 auto; padding: 24px 20px; }
-        .alert {
-            padding: 14px 16px; border-radius: 8px; margin-bottom: 20px;
-            border-left: 4px solid; background-color: #f9f9f9;
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
         }
-        .alert-warning { border-color: var(--warning); background-color: #fff3e0; }
-        .alert-info { border-color: var(--ozon-blue); background-color: #e3f2fd; }
-        .alert-title { font-weight: 600; margin-bottom: 6px; color: var(--dark-gray); }
-        .alert p { margin: 0; font-size: 13px; line-height: 1.45; }
-        .alert a { color: var(--ozon-blue); text-decoration: none; font-weight: 500; }
-        .alert a:hover { text-decoration: underline; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-gray); }
-        th { font-size: 12px; text-transform: uppercase; }
-        tbody tr:hover { background-color: #fafafa; }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-container {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-gray);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .search-input-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 16px;
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--ozon-blue);
+            box-shadow: 0 0 0 3px rgba(0, 91, 255, 0.1);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-gray);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 500px;
+            overflow-y: auto;
+            display: none;
+            z-index: 101;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-gray);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .search-result-item:hover {
+            background-color: var(--light-gray);
+        }
+
+        .search-result-title {
+            font-weight: 600;
+            color: var(--ozon-blue);
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .search-result-category {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .search-result-preview {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .nav-container {
+            background: white;
+            border-bottom: 2px solid var(--border-gray);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            position: sticky;
+            top: 70px;
+            z-index: 99;
+            scrollbar-width: none;
+        }
+        .nav-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tabs {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            list-style: none;
+            padding: 0 8px;
+            flex-wrap: nowrap;
+        }
+
+        .nav-tab {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .nav-tab button {
+            padding: 14px 8px;
+            background: none;
+            border: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .nav-tab button:hover {
+            color: var(--ozon-blue);
+        }
+
+        .nav-tab button.active {
+            color: var(--ozon-blue);
+            border-bottom-color: var(--ozon-blue);
+        }
+
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+            background-color: #f9f9f9;
+        }
+
+        .alert-danger {
+            border-color: var(--danger);
+            background-color: #ffebee;
+        }
+
+        .alert-warning {
+            border-color: var(--warning);
+            background-color: #fff3e0;
+        }
+
+        .alert-info {
+            border-color: var(--ozon-blue);
+            background-color: #e3f2fd;
+        }
+
+        .alert-success {
+            border-color: var(--success);
+            background-color: #e8f5e9;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark-gray);
+        }
+
+        .alert p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .alert a {
+            color: var(--ozon-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .alert a:hover {
+            text-decoration: underline;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            padding: 20px;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .kpi-card.danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #c62828 100%);
+        }
+
+        .kpi-card.warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #e65100 100%);
+        }
+
+        .kpi-card.info {
+            background: linear-gradient(135deg, var(--ozon-blue) 0%, var(--ozon-dark) 100%);
+        }
+
+        .kpi-card.success {
+            background: linear-gradient(135deg, var(--success) 0%, #1b5e20 100%);
+        }
+
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .kpi-label {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .kpi-source {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-top: 8px;
+        }
+
+        .kpi-source a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
+            height: 400px;
+        }
+
+        .chart-container h3 {
+            margin-bottom: 20px;
+            color: var(--dark-gray);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--dark-gray);
+        }
+
+        .expandable-card {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .expandable-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--light-gray);
+            border-radius: 8px;
+        }
+
+        .card-title-section {
+            flex: 1;
+        }
+
+        .card-title-main {
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .card-toggle-icon {
+            font-size: 20px;
+            transition: transform 0.3s;
+            color: var(--ozon-blue);
+        }
+
+        .expandable-card.expanded .card-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .card-body {
+            display: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-gray);
+        }
+
+        .expandable-card.expanded .card-body {
+            display: block;
+        }
+
+        .card-body ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .card-body li {
+            padding: 8px 0 8px 24px;
+            position: relative;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .card-body li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--ozon-blue);
+            font-weight: bold;
+        }
+
+        .legal-basis {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f0f4ff;
+            border-left: 3px solid var(--ozon-blue);
+            border-radius: 4px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .legal-basis strong {
+            color: var(--ozon-blue);
+        }
+
+        .source-link-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--ozon-blue);
+            text-decoration: none;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .source-link-inline:hover {
+            text-decoration: underline;
+        }
+
+        .counter-arg-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .counter-arg-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .counter-arg-card-header {
+            padding: 16px;
+            background: var(--ozon-blue);
+            color: white;
+            font-weight: 600;
+        }
+
+        .counter-arg-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .counter-arg-section:last-child {
+            border-bottom: none;
+        }
+
+        .counter-arg-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .ozon-says {
+            background: #f0f0f0;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .our-answer {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .sources-list {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .source-link {
+            font-size: 13px;
+            color: var(--ozon-blue);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+
+        .external-icon {
+            font-size: 12px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        th {
+            background: var(--light-gray);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark-gray);
+            border-bottom: 2px solid var(--border-gray);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .timeline-marker {
+            flex: 0 0 40px;
+            width: 40px;
+            height: 40px;
+            background: var(--ozon-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .timeline-item:not(:last-child) .timeline-marker:after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 30px;
+            background: var(--border-gray);
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 3px solid var(--ozon-blue);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .timeline-date {
+            font-weight: 600;
+            color: var(--ozon-blue);
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 8px;
+        }
+
+        .timeline-description {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #666;
+        }
+
+        .timeline-sources {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-gray);
+        }
+
+        .timeline-sources a {
+            font-size: 12px;
+            color: var(--ozon-blue);
+            text-decoration: none;
+            margin-right: 12px;
+        }
+
+        .timeline-sources a:hover {
+            text-decoration: underline;
+        }
+
+        .demand-card {
+            background: linear-gradient(135deg, var(--ozon-blue) 0%, var(--ozon-dark) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .demand-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .demand-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .demand-step {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 3px solid white;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: white;
+            color: var(--ozon-blue);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .step-description {
+            font-size: 13px;
+            opacity: 0.95;
+            line-height: 1.4;
+        }
+
+        .benefits-card {
+            background: linear-gradient(135deg, var(--success) 0%, #1b5e20 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .benefits-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .benefits-list {
+            list-style: none;
+            display: grid;
+            gap: 12px;
+        }
+
+        .benefits-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+        }
+
+        .benefits-list li:before {
+            content: "✓";
+            font-weight: 700;
+            font-size: 18px;
+            flex: 0 0 auto;
+        }
+
+        .regulatory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .regulatory-block {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-top: 3px solid var(--ozon-blue);
+        }
+
+        .regulatory-block h3 {
+            margin-bottom: 12px;
+            color: var(--ozon-blue);
+            font-size: 16px;
+        }
+
+        .regulatory-block p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: #666;
+        }
+
+        .regulatory-block a {
+            color: var(--ozon-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .regulatory-block a:hover {
+            text-decoration: underline;
+        }
+
+        .comparison-table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .comparison-table th {
+            background: var(--ozon-blue);
+            color: white;
+        }
+
+        .comparison-table td {
+            padding: 14px;
+            font-size: 14px;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .risk-high {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .risk-medium {
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        .risk-low {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .search-tab-input-wrapper {
+            max-width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .search-tab-input {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 16px;
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        .search-tab-input:focus {
+            outline: none;
+            border-color: var(--ozon-blue);
+            box-shadow: 0 0 0 3px rgba(0, 91, 255, 0.1);
+        }
+
+        .placeholder-text {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+
+        .counter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 20px;
+        }
+
+        .counter-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .counter-card-title {
+            background: var(--ozon-blue);
+            color: white;
+            padding: 16px;
+            font-weight: 600;
+        }
+
+        .counter-card-body {
+            padding: 16px;
+        }
+
+        .arg-section {
+            margin-bottom: 16px;
+        }
+
+        .arg-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .arg-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .arg-text {
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .arg-ozon {
+            background: #efefef;
+            border-left: 3px solid #999;
+        }
+
+        .arg-counter {
+            background: #e3f2fd;
+            border-left: 3px solid var(--ozon-blue);
+        }
+
+        .legal-badge {
+            display: inline-block;
+            background: #f0f4ff;
+            color: var(--ozon-blue);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+
+        .sources {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-gray);
+        }
+
+        .sources-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .source-item {
+            margin-bottom: 6px;
+        }
+
+        .source-item a {
+            color: var(--ozon-blue);
+            text-decoration: none;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .source-item a:hover {
+            text-decoration: underline;
+        }
+
+        .news-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--ozon-blue);
+        }
+
+        .news-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 6px;
+        }
+
+        .news-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 8px;
+            color: var(--dark-gray);
+        }
+
+        .news-source {
+            font-size: 12px;
+            color: var(--ozon-blue);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .highlight-box-title {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .header p {
+                font-size: 14px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .nav-tabs {
+                padding: 0;
+                width: max-content;
+                min-width: 100%;
+            }
+
+            .nav-tab {
+                flex: 0 0 auto;
+            }
+
+            .nav-tab button {
+                padding: 10px 14px;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            .counter-arg-container {
+                grid-template-columns: 1fr;
+            }
+
+            .demand-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .counter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .regulatory-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 13px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+
         .mon-filter-btn {
-            padding: 5px 12px; border: 1px solid var(--border-gray); border-radius: 20px;
-            background: white; color: #666; font-size: 12px; cursor: pointer; transition: all 0.2s;
+            padding: 5px 12px;
+            border: 1px solid var(--border-gray);
+            border-radius: 20px;
+            background: white;
+            color: #666;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
         .mon-filter-btn.active {
-            background: var(--ozon-blue); color: white; border-color: var(--ozon-blue);
+            background: var(--ozon-blue);
+            color: white;
+            border-color: var(--ozon-blue);
         }
         .mon-filter-btn:hover:not(.active) {
-            border-color: var(--ozon-blue); color: var(--ozon-blue);
+            border-color: var(--ozon-blue);
+            color: var(--ozon-blue);
         }
         .flag-pill-mon {
-            display: inline-block; padding: 2px 6px; border-radius: 3px;
-            font-size: 11px; font-weight: 600; margin: 1px;
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin: 1px;
         }
         .fp-red { background:#ffebee; color:#c62828; }
         .fp-yellow { background:#fffde7; color:#f57f17; }
         .fp-orange { background:#fff3e0; color:#e65100; }
         .fp-gray { background:#f5f5f5; color:#999; }
-        .skeleton {
-            background: linear-gradient(90deg, #eee 0%, #f5f5f5 50%, #eee 100%);
-            background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 4px;
-        }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        .loading-row td { padding: 14px 12px; }
-        .preview-banner {
-            background: #fffde7; border: 1px solid #fbc02d; color: #6d4c00;
-            padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 13px;
-        }
-        .preview-banner a { color: #6d4c00; font-weight: 600; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Мониторинг нелицензионного ПО Microsoft на маркетплейсах</h1>
-        <p>Автоматическое сканирование Ozon, Wildberries, Яндекс.Маркет, Авито. Данные из Supabase, обновляются парсером на VDSina каждые 6 часов.
-          <a href="index.html">← полная версия дашборда</a></p>
+        <h1>Нелицензионное ПО Microsoft на маркетплейсах</h1>
+        <p>Аналитическая база для переговоров и системной работы — Ozon, Wildberries, Яндекс.Маркет, Авито</p>
     </div>
+
+    <div class="search-container">
+        <div class="search-input-wrapper">
+            <input type="text" class="search-input" id="mainSearch" placeholder="🔍 Поиск по аргументам, законам, рискам... (например: 'посредник', 'ФЗ-289', 'меморандум')">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <div class="nav-container">
+    </div>
+
     <div class="content">
-        <div class="preview-banner">
-            🧪 <strong>Превью новой системы.</strong> Текущий дашборд по адресу <a href="index.html">/index.html</a> остаётся как есть, пока эта версия не приживётся. Источник данных — Supabase (<code id="srcRef">yqfdbuiyfkzhkhpiknob</code>).
+        <div style="background:#fffde7;border:1px solid #fbc02d;color:#6d4c00;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:13px;">
+            🧪 <strong>Превью новой системы.</strong> Данные подгружаются из Supabase (<code>yqfdbuiyfkzhkhpiknob</code>). Текущий дашборд по адресу <a href="index.html" style="color:#6d4c00;font-weight:600;">/index.html</a> остаётся как есть, пока эта версия не приживётся.
         </div>
 
-        <div id="monitoring">
+        <!-- TAB 1: OVERVIEW -->
+        <div id="monitoring" class="tab-content active">
             <div class="alert alert-warning" style="margin-bottom:20px;">
                 <div class="alert-title">🔍 Системный мониторинг нелицензионного ПО</div>
-                <p>Таблица карточек с признаками контрафакта на маркетплейсах. Красные флажки (F1–F6) вычисляются автоматически по п. 2.2 <a href="https://fas.gov.ru/news/34360" target="_blank" rel="noopener">Модельных практик ФАС/МСАП СНГ 2025 ↗</a>. Мониторинг АРПП «Отечественный софт», НП «РУССОФТ», НП ППП.</p>
+                <p>Таблица карточек с признаками контрафакта, найденных на маркетплейсах. Красные флажки (F1–F6) вычисляются автоматически по п. 2.2 <a href="https://fas.gov.ru/news/34360" target="_blank" rel="noopener">Модельных практик ФАС/МСАП СНГ 2025 ↗</a>. Данные за январь-май 2026 г. — мониторинг <a href="https://apkit.ru/" target="_blank" rel="noopener">АПКИТ</a>, <a href="https://arppsoft.ru/" target="_blank" rel="noopener">АРПП «Отечественный софт»</a>, <a href="https://russoft.org/" target="_blank" rel="noopener">НП «РУССОФТ»</a>, <a href="https://npppp.ru/" target="_blank" rel="noopener">НП ППП</a>.</p>
             </div>
 
             <!-- СТАТУС СКАНИРОВАНИЯ -->
             <div style="display:flex;align-items:center;gap:16px;padding:14px 18px;background:#f5f5f5;border-radius:8px;margin-bottom:20px;flex-wrap:wrap;">
-                <div><strong>Последний прогон парсера:</strong> <span id="scanLastTime" style="margin-left:6px;color:#666;">загрузка...</span></div>
-                <div id="scanStatus" style="padding:4px 12px;border-radius:20px;background:#e0e0e0;color:#666;font-weight:600;font-size:13px;">⏳ Загрузка...</div>
-                <div id="scanRunTrigger" style="font-size:12px;color:#888;"></div>
+                <div><strong>Последнее сканирование:</strong> <span id="scanLastTime" style="margin-left:6px;color:#666;">27.05.2026, 01:43</span></div>
+                <div id="scanStatus" style="padding:4px 12px;border-radius:20px;background:#e8f5e9;color:#2e7d32;font-weight:600;font-size:13px;">✓ Актуально</div>
                 <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
                     <button onclick="runScan()" style="padding:8px 16px;background:var(--ozon-blue);color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">🔄 Обновить</button>
                     <button onclick="exportMonCSV()" style="padding:8px 16px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">📥 CSV</button>
@@ -108,22 +1115,36 @@
             <details style="margin-bottom:20px;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
                 <summary style="padding:12px 16px;cursor:pointer;font-weight:600;background:#f5f5f5;">🚩 Легенда красных флажков (п. 2.2 Модельных практик ФАС/МСАП СНГ 2025)</summary>
                 <div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:10px;">
-                    <div style="padding:10px;background:#ffebee;border-radius:6px;font-size:13px;"><strong>🔴 F1 — Аномальная цена:</strong> цена ниже официальной на ≥50%.</div>
-                    <div style="padding:10px;background:#ffebee;border-radius:6px;font-size:13px;"><strong>🔴 F2 — Критический дисконт:</strong> цена ниже официальной на ≥80%.</div>
-                    <div style="padding:10px;background:#fffde7;border-radius:6px;font-size:13px;"><strong>🟡 F3 — Новый продавец:</strong> зарегистрирован менее 30 дней назад.</div>
-                    <div style="padding:10px;background:#fffde7;border-radius:6px;font-size:13px;"><strong>🟡 F4 — Нет статуса партнёра:</strong> не в реестре авторизованных реселлеров Microsoft.</div>
-                    <div style="padding:10px;background:#fffde7;border-radius:6px;font-size:13px;"><strong>🟡 F5 — Ключ неактивируемый:</strong> телефонная активация в РФ отключена с декабря 2025 г.</div>
+                    <div style="padding:10px;background:#ffebee;border-radius:6px;font-size:13px;"><strong>🔴 F1 — Аномальная цена:</strong> цена ниже официальной на ≥50%. <a href="https://fas.gov.ru/news/34360" target="_blank">п. 2.2 Модельных практик ФАС ↗</a></div>
+                    <div style="padding:10px;background:#ffebee;border-radius:6px;font-size:13px;"><strong>🔴 F2 — Критический дисконт:</strong> цена ниже официальной на ≥80%. Подкатегория F1.</div>
+                    <div style="padding:10px;background:#fffde7;border-radius:6px;font-size:13px;"><strong>🟡 F3 — Новый продавец:</strong> зарегистрирован менее 30 дней назад. п. 2.2.</div>
+                    <div style="padding:10px;background:#fffde7;border-radius:6px;font-size:13px;"><strong>🟡 F4 — Нет статуса партнёра:</strong> не в реестре авторизованных реселлеров Microsoft. п. 2.7.</div>
+                    <div style="padding:10px;background:#fffde7;border-radius:6px;font-size:13px;"><strong>🟡 F5 — Ключ неактивируемый:</strong> продукт Microsoft — телефонная активация в РФ отключена с декабря 2025 г.</div>
                     <div style="padding:10px;background:#fff3e0;border-radius:6px;font-size:13px;"><strong>🟠 F6 — Использование ТЗ без «совместимо»:</strong> нарушение Постановление СИП №С01-1261/2024.</div>
                 </div>
             </details>
 
-            <!-- ПОИСКОВЫЕ ЗАПРОСЫ -->
+            <!-- ПОИСКОВЫЕ ЗАПРОСЫ НА МОНИТОРИНГЕ -->
             <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
-                    <div style="font-size:13px;font-weight:700;color:#333;">🔎 Поисковые запросы:</div>
+                    <div style="font-size:13px;font-weight:700;color:#333;">🔎 Поисковые запросы на мониторинге:</div>
                     <div id="monQueryTags" style="display:flex;flex-wrap:wrap;gap:6px;flex:1;"></div>
+                    <button onclick="monQueryFormToggle()" style="padding:6px 14px;background:#1565c0;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;">+ Добавить запрос</button>
                 </div>
-                <div style="font-size:11px;color:#888;">Запросы зашиты в парсере на VDSina. Чтобы изменить — отредактируй <code>QUERIES</code> в <code>parser_runner.py</code>.</div>
+                <div id="monQueryForm" style="display:none;padding:12px;background:#f5f5f5;border-radius:6px;">
+                    <div style="font-size:12px;color:#666;margin-bottom:8px;">Новый поисковый запрос для постановки на мониторинг (будет искаться на всех площадках):</div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <input type="text" id="monQueryInput" placeholder="Напр.: Windows 11 ключ активации"
+                            style="flex:1;min-width:220px;padding:8px 12px;border:1px solid #bdbdbd;border-radius:6px;font-size:14px;"
+                            onkeydown="if(event.key==='Enter')monQueryAdd()">
+                        <button onclick="monQueryAdd()" style="padding:8px 16px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">Добавить</button>
+                        <button onclick="monQueryFormToggle()" style="padding:8px 12px;background:#e0e0e0;color:#333;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Отмена</button>
+                    </div>
+                    <div style="margin-top:10px;">
+                        <div style="font-size:11px;color:#888;margin-bottom:6px;">Рекомендуемые запросы (нажмите, чтобы добавить):</div>
+                        <div id="monQuerySuggest" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- ФИЛЬТРЫ -->
@@ -174,6 +1195,19 @@
                 </div>
             </div>
 
+            <!-- ПРЕСЕТЫ СОРТИРОВКИ -->
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:#f5f7fa;border:1px solid #e0e6ed;border-radius:8px;margin-bottom:12px;">
+                <span style="font-size:12px;font-weight:700;color:#555;letter-spacing:0.5px;">СОРТИРОВКА:</span>
+                <div id="monSortPresetBtns" style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button class="mon-filter-btn active" data-preset="default" onclick="monSetPreset('default',this)" title="Дисконт ↓ → Цена ↑ → Название ↑">📊 По умолчанию</button>
+                    <button class="mon-filter-btn" data-preset="score" onclick="monSetPreset('score',this)" title="Индекс подозрительности (дисконт + флажки + аномально низкая цена)">🔥 Самые подозрительные</button>
+                    <button class="mon-filter-btn" data-preset="loss" onclick="monSetPreset('loss',this)" title="Абсолютная недоплата = Офиц. цена − Цена. Сверху товары, где потери Microsoft в рублях наибольшие">💸 Крупнейшие потери</button>
+                    <button class="mon-filter-btn" data-preset="family" onclick="monSetPreset('family',this)" title="Группировка карточек по нормализованному названию (например, «Office 2021 Pro Plus»). Сверху самые массовые виды контрафакта">👥 Группы товаров</button>
+                    <button class="mon-filter-btn" data-preset="pl" onclick="monSetPreset('pl',this)" title="Группировать по площадке. Внутри — дисконт ↓, цена ↑">🏪 По площадкам</button>
+                    <button class="mon-filter-btn" data-preset="recent" onclick="monSetPreset('recent',this)" title="Сначала самые свежие карточки (когда появится timeseries из Supabase)">🆕 Свежие</button>
+                </div>
+            </div>
+
             <!-- ТАБЛИЦА -->
             <div style="overflow-x:auto;">
                 <table id="monTable" style="font-size:13px;">
@@ -189,11 +1223,7 @@
                             <th onclick="monSortBy('flags')" id="mth-flags" style="cursor:pointer;user-select:none;white-space:nowrap;">Флажки <span id="mts-flags"></span></th>
                         </tr>
                     </thead>
-                    <tbody id="monTableBody">
-                        <tr class="loading-row"><td colspan="8"><div class="skeleton" style="height:14px;width:60%;margin:6px 0;"></div></td></tr>
-                        <tr class="loading-row"><td colspan="8"><div class="skeleton" style="height:14px;width:90%;margin:6px 0;"></div></td></tr>
-                        <tr class="loading-row"><td colspan="8"><div class="skeleton" style="height:14px;width:75%;margin:6px 0;"></div></td></tr>
-                    </tbody>
+                    <tbody id="monTableBody"></tbody>
                 </table>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px;">
@@ -205,7 +1235,6 @@
                             <button class="mon-filter-btn" onclick="monSetPageSize(10,this)">10</button>
                             <button class="mon-filter-btn active" onclick="monSetPageSize(50,this)">50</button>
                             <button class="mon-filter-btn" onclick="monSetPageSize(100,this)">100</button>
-                            <button class="mon-filter-btn" onclick="monSetPageSize(500,this)">500</button>
                         </div>
                     </div>
                 </div>
@@ -218,316 +1247,1331 @@
     </div>
 
     <script>
-        // === Supabase config ===
-        const SUPABASE_URL = "https://yqfdbuiyfkzhkhpiknob.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_nZNZLCqx4e_7La8pfQmsjA_RSw0zT9t";
+        // ========== GLOBAL DATA: OZON COUNTER-ARGUMENTS ==========
+        const OZON_ARGS = [
+            {
+                id: 'intermediary',
+                title: 'Мы - информационный посредник',
+                keywords: ['посредник', 'информационный', 'safe harbor', 'не отвечаем', 'не несём', '1253', 'техническ'],
+                ozon_says: 'По ст. 1253.1 ГК РФ мы - информационный посредник и не несём ответственности за действия продавцов.',
+                counter: 'Защита посредника действует ТОЛЬКО до получения официального уведомления с конкретными карточками. После этого письма OZON обязан принять меры - иначе статус утрачивается. Суды 2024-2025 дополнительно применяют "тест на очевидность": отклонение цены на 99% само по себе должно было вызвать проверку.',
+                legal: 'ст. 1253.1 ГК РФ; дело А76-26921/2021 (СИП)',
+                sources: [
+                    { label: 'Ст. 1253.1 ГК РФ - КонсультантПлюс', url: 'https://www.consultant.ru/document/cons_doc_LAW_64629/' },
+                    { label: 'Ответственность маркетплейсов за ИС - Zuykov', url: 'https://zuykov.com/en/about/articles/liability-of-marketplaces-for-infringement-of-intellectual-property-rights/' }
+                ]
+            },
+            {
+                id: 'parallel',
+                title: 'Параллельный импорт разрешён',
+                keywords: ['параллельный', 'импорт', 'исчерпание', 'ввезли', 'зарубеж', 'постановление 506'],
+                ozon_says: 'Продавцы ввезли ключи через параллельный импорт, разрешённый Постановлением Правительства РФ.',
+                counter: 'Параллельный импорт применяется только к физическим товарам, легально введённым в оборот. Цифровая передача кода ≠ "ввод в оборот". VL/MSDN-ключи не предназначались для розничной продажи физлицам и никогда не вводились в оборот как отдельный продукт. При цене 200 руб. продавец физически не может доказать легальную цепочку приобретения.',
+                legal: 'Пост. Пр-ва РФ №506 от 29.03.2022; ст. 1487 ГК РФ',
+                sources: [
+                    { label: 'CNews о цепочке происхождения товаров', url: 'https://www.cnews.ru/news/top/2025-12-15_tovary_na_markeplejsah_poluchat' }
+                ]
+            },
+            {
+                id: 'sellers',
+                title: 'Ответственность лежит на продавцах',
+                keywords: ['продавцы', 'третьи лица', 'не наша вина', 'продавец сам', 'ответственность продавца'],
+                ozon_says: 'Ответственность лежит на продавцах. Мы лишь предоставляем техническую платформу.',
+                counter: 'Коллегия Роспотребнадзора (20.02.2026) официально: маркетплейсы несут СОЛИДАРНУЮ ответственность за ложную информацию в карточках. Покупатель вправе предъявить иск напрямую к владельцу площадки. После получения уведомления с перечнем карточек площадка утрачивает любую защиту в отношении этих товаров.',
+                legal: 'ст. 1080 ГК РФ; Коллегия Роспотребнадзора 20.02.2026',
+                sources: [
+                    { label: 'Роспотребнадзор об ответственности - Фонтанка', url: 'https://www.fontanka.ru/2026/02/20/76276776/' },
+                    { label: 'Изменения в работе маркетплейсов 2026 - Главбух', url: 'https://www.glavbukh.ru/art/392176-izmeneniya-v-rabote-marketpleysov-s-1-oktyabrya-2026-goda' }
+                ]
+            },
+            {
+                id: 'brand_protection',
+                title: 'У нас есть программа Brand Protection',
+                keywords: ['brand protection', 'брэнд', 'инструменты защиты', 'жалобу', 'уже боремся'],
+                ozon_says: 'У нас есть программа Brand Protection - правообладатель может подать жалобу через официальный канал.',
+                counter: 'Brand Protection - реактивный инструмент (жалоба на каждую карточку). Модельные практики ФАС (ноябрь 2025) требуют ПРОАКТИВНОГО мониторинга: аномальная цена - это обязательный триггер для самостоятельной проверки платформой. Brand Protection не отменяет обязанность реагировать на очевидные признаки нарушений.',
+                legal: 'Модельные практики ФАС, ноябрь 2025; ст. 14.8 ФЗ-135',
+                sources: [
+                    { label: 'Модельные практики ФАС - ФАС', url: 'https://fas.gov.ru/news/34360' },
+                    { label: 'New-Retail о модельных практиках', url: 'https://new-retail.ru/business/e_commerce/kak_rabotayut_modelnye_praktiki_sng_novye_pravila_borby_s_kontrafaktom_na_marketpleysakh/' }
+                ]
+            },
+            {
+                id: 'law_not_force',
+                title: 'ФЗ-289 ещё не вступил в силу',
+                keywords: ['289', 'не вступил', 'не действует', 'рано', 'октябрь 2026', 'ещё нет'],
+                ozon_says: 'ФЗ-289 вступает в силу только 1 октября 2026. Эти требования пока на нас не распространяются.',
+                counter: 'OZON подписал меморандум о ДОСРОЧНОМ соблюдении требований ФЗ-289 (ноябрь 2025). Текущие нормы уже применяются: ст. 1253.1 ГК РФ, ФЗ-135 (ФАС), ЗоЗПП - все активны прямо сейчас. ФАС и Роспотребнадзор уже ведут мониторинг маркетплейсов по действующим основаниям.',
+                legal: 'Меморандум OZON/WB/АВИТО ноябрь 2025; ст. 1253.1 ГК РФ',
+                sources: [
+                    { label: 'Меморандум - ТАСС', url: 'https://tass.ru/ekonomika/25590381' },
+                    { label: 'OZON досрочно соблюдает ФЗ-289 - Expert.ru', url: 'https://expert.ru/news/rvb-ozon-i-avito-dosrochno-nachali-soblyudat-zakon-o-platformennoy-ekonomike/' },
+                    { label: 'ФЗ-289 - официальный текст', url: 'http://publication.pravo.gov.ru/Document/View/0001202507310020' }
+                ]
+            },
+            {
+                id: 'prices',
+                title: 'Мы не контролируем цены продавцов',
+                keywords: ['не контролируем', 'цены продавец', 'свободное', 'ценообразование', 'цена продавца'],
+                ozon_says: 'Мы не устанавливаем цены продавцов - это их собственное коммерческое решение.',
+                counter: 'По Модельным практикам ФАС аномально низкая цена (отклонение 50-70%+) - обязательный триггер проверки. Цена 80-400 руб. при рыночной 15 000 руб. - отклонение 99,5%. Обязанность маркетплейса - не устанавливать цену, а реагировать на очевидные признаки нелегальности.',
+                legal: 'Модельные практики ФАС 2025; "Белая книга" ФАС',
+                sources: [
+                    { label: 'Модельные практики ФАС', url: 'https://fas.gov.ru/news/34360' },
+                    { label: 'ФАС проверит правила OZON и WB - RBC', url: 'https://www.rbc.ru/business/05/11/2025/690b29419a7947f530bb8d4e' }
+                ]
+            },
+            {
+                id: 'legal_keys',
+                title: 'Ключи оригинальные, не поддельные',
+                keywords: ['оригинальные', 'легальные', 'не контрафакт', 'настоящие', 'подлинные', 'законный товар'],
+                ozon_says: 'Ключи являются оригинальными ключами Microsoft, а не поддельными.',
+                counter: 'Подлинность ключа не означает законности продажи. Корпоративный VL-ключ, проданный физлицу = нарушение лицензионного соглашения. MSDN-ключ для коммерческого покупателя = то же самое. Кейген-ключи нарушают ст. 1299 ГК РФ. При цене 80 руб. покупатель не получает никакого законного правового титула на использование ПО.',
+                legal: 'ст. 1299 ГК РФ (ТСЗАП); ст. 1235 ГК РФ (лицензионный договор)',
+                sources: [
+                    { label: 'Известия: риски покупки ключей Windows', url: 'https://iz.ru/1331102/ivan-chernousov/okonnaia-drama-chem-grozit-pokupka-kliuchei-ustanovki-windows-s-ruk' }
+                ]
+            },
+            {
+                id: 'microsoft_left',
+                title: 'Microsoft ушла из России',
+                keywords: ['ушла', 'не работает', 'санкции', 'нет в России', 'ушли с рынка', 'недоступна'],
+                ozon_says: 'Microsoft ушла из России. Применение её лицензионной политики нецелесообразно в текущих условиях.',
+                counter: 'Уход Microsoft делает ситуацию ХУЖЕ: ст. 6 ЗоЗПП - при отсутствии сервисных центров продавец обязан сам обеспечить 2-летний гарантийный срок. Ни один продавец ключей за 200 руб. этого не делает. Именно уход MS привёл к отключению телефонной активации (декабрь 2025) - ключи теперь технически нефункциональны.',
+                legal: 'ст. 6 Закона о ЗПП №2300-1; Пост. Пр-ва РФ №2463',
+                sources: [
+                    { label: 'Microsoft отключила телефонную активацию - CNews', url: 'https://www.cnews.ru/news/top/2025-12-24_microsoft_vvela_sanktsii_protiv' },
+                    { label: 'Heise: Microsoft disabled phone activation (EN)', url: 'https://www.heise.de/en/news/Microsoft-has-disabled-phone-activation-for-Windows-11135942.html' }
+                ]
+            },
+            {
+                id: 'kyc',
+                title: 'Мы тщательно проверяем продавцов',
+                keywords: ['проверяем', 'верификация', 'kyc', 'паспорт', 'инн', 'проверка продавца'],
+                ozon_says: 'Мы верифицируем продавцов: проверяем ИНН, паспорт, банковский счёт.',
+                counter: 'KYC идентифицирует ЛИЧНОСТЬ, но не лицензионную цепочку ТОВАРОВ. ФЗ-289 ст. 7 и Модельные практики ФАС требуют верификации именно содержимого карточек: документов, подтверждающих право на перепродажу лицензионного ПО. Верификация личности не снимает ответственность за нелегальный товар.',
+                legal: 'ФЗ-289 ст. 7; Модельные практики ФАС 2025',
+                sources: [
+                    { label: 'Модельные практики СНГ - new-retail.ru', url: 'https://new-retail.ru/business/e_commerce/kak_rabotayut_modelnye_praktiki_sng_novye_pravila_borby_s_kontrafaktom_na_marketpleysakh/' }
+                ]
+            },
+            {
+                id: 'court',
+                title: 'Судебная практика на нашей стороне',
+                keywords: ['суды', 'судебная практика', 'прецедент', 'суд', 'выиграли', 'дело а76'],
+                ozon_says: 'Дело А76-26921/2021 подтверждает: OZON - технический посредник и не несёт ответственности.',
+                counter: 'Дело А76-26921/2021 выиграно именно потому, что уведомления не было. После этого письма та же защита не сработает: ст. 1253.1 ГК РФ прямо требует принять меры после уведомления. Прецедент «Невская косметика» vs Wildberries (2024): правообладатель выиграл, потому что WB не принял достаточных мер после уведомления. Прецедент Hobby World vs Wildberries: WB выиграл именно потому, что немедленно заблокировал карточки. Логика работает в обе стороны - у OZON сейчас есть выбор, в какую категорию попасть.',
+                legal: 'ст. 1253.1 ГК РФ; дело А76-26921/2021; «Невская косметика» vs WB (2024); Hobby World vs WB (2023-2024)',
+                sources: [
+                    { label: 'Ответственность маркетплейсов за ИС - Zuykov & Partners', url: 'https://zuykov.com/en/about/articles/liability-of-marketplaces-for-infringement-of-intellectual-property-rights/' },
+                    { label: '«Невская косметика» выиграла суд - Shoppers.media', url: 'https://shoppers.media/news/20492_nevskaia-kosmetika-vyigrala-sud-s-wildberries-iz-za-prodazi-poddelok' },
+                    { label: 'Hobby World vs Wildberries - E-pepper', url: 'https://e-pepper.ru/news/hobby-world-proigral-sud-wildberries-iz-za-kontrafaktnoy-mafii.html' }
+                ]
+            }
+        ];
 
-        // === Bizlogic ===
-        const TM_KW = ['microsoft','office','windows'];
-        function monComputeFlags(item) {
-            const op = item.op || 9990;
-            const price = item.price || 0;
-            const disc = op > 0 ? Math.floor((op - price) / op * 100) : 0;
-            const tl = (item.title||'').toLowerCase();
-            const hasTM = TM_KW.some(k => tl.includes(k));
-            const hasCompat = tl.includes('совместимо') || tl.includes('compat');
-            return {
-                F1: disc >= 50, F2: disc >= 80,
-                F3: item.regDays !== null && item.regDays !== undefined ? item.regDays < 30 : null,
-                F4: item.auth !== null && item.auth !== undefined ? !item.auth : null,
-                F5: true,
-                F6: hasTM && !hasCompat,
-                disc
-            };
-        }
-        function monFlagCount(f) {
-            return [f.F1,f.F2,f.F3===true,f.F4===true,f.F5,f.F6].filter(Boolean).length;
-        }
-        function monFlagPills(f) {
-            const parts = [];
-            if(f.F2) parts.push('<span class="flag-pill-mon fp-red" title="F2: Цена ниже официальной на '+f.disc+'%">🔴F2</span>');
-            else if(f.F1) parts.push('<span class="flag-pill-mon fp-red" title="F1: Цена ниже официальной на '+f.disc+'%">🔴F1</span>');
-            if(f.F3===true) parts.push('<span class="flag-pill-mon fp-yellow" title="F3: Продавец &lt;30 дней">🟡F3</span>');
-            else if(f.F3===null) parts.push('<span class="flag-pill-mon fp-gray" title="F3: требует проверки">F3?</span>');
-            if(f.F4===true) parts.push('<span class="flag-pill-mon fp-yellow" title="F4: Нет статуса авт. реселлера">🟡F4</span>');
-            else if(f.F4===null) parts.push('<span class="flag-pill-mon fp-gray" title="F4: требует проверки">F4?</span>');
-            if(f.F5) parts.push('<span class="flag-pill-mon fp-yellow" title="F5: Телефонная активация отключена с дек.2025">🟡F5</span>');
-            if(f.F6) parts.push('<span class="flag-pill-mon fp-orange" title="F6: ТЗ без пометки совместимо">🟠F6</span>');
-            return parts.join('') || '<span style="color:#999;font-size:11px;">нет</span>';
-        }
+        // ========== INITIALIZATION & UTILITIES ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            /* initTabs removed */
+            initSearch();
+            initLegalSearch();
+            initExpandableCards();
+            initCounterGrid();
+            initCharts();
+        });
 
-        const MON_PL_LABEL = {ozon:'OZON',wildberries:'Wildberries',yandex:'Яндекс.Маркет',avito:'Авито',aliexpress:'AliExpress'};
-        const MON_PL_STYLE = {ozon:'background:#e3f2fd;color:#1565c0',wildberries:'background:#f3e5f5;color:#6a1b9a',yandex:'background:#fff3e0;color:#e65100',avito:'background:#e8f5e9;color:#2e7d32',aliexpress:'background:#fff8e1;color:#e65100'};
+        // ========== TAB SWITCHING ==========
 
-        // === Состояние ===
-        let MON_DATA = [];
-        let MON_QUERIES = [];
-        let monState = {pl:'all', disc:0, flag:0, search:'', query:'', page:0, pageSize:50, sortCol:'', sortDir:1};
-        let monFiltered = [];
+        // ========== MAIN SEARCH BAR ==========
+        function initSearch() {
+            const searchInput = document.getElementById('mainSearch');
+            const searchResults = document.getElementById('searchResults');
 
-        // === Загрузка из Supabase ===
-        async function supabaseGet(path) {
-            const r = await fetch(SUPABASE_URL + path, {
-                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
-            });
-            if (!r.ok) throw new Error('Supabase ' + r.status + ': ' + await r.text());
-            return r.json();
-        }
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
 
-        async function loadListings() {
-            // Supabase ограничивает по умолчанию 1000 строк → пагинируем через range
-            let all = [];
-            let from = 0;
-            const PAGE = 1000;
-            while (true) {
-                const r = await fetch(SUPABASE_URL + '/rest/v1/listings?select=*&order=last_seen.desc.nullslast', {
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-                        'Range-Unit': 'items',
-                        'Range': from + '-' + (from + PAGE - 1),
-                    },
+                if (query.length === 0) {
+                    searchResults.classList.remove('active');
+                    searchResults.innerHTML = '';
+                    return;
+                }
+
+                const matches = [];
+
+                // Search in counter-arguments
+                OZON_ARGS.forEach(arg => {
+                    const titleMatch = arg.title.toLowerCase().includes(query);
+                    const keywordMatch = arg.keywords.some(kw => kw.includes(query));
+                    const counterMatch = arg.counter.toLowerCase().includes(query);
+                    if (titleMatch || keywordMatch || counterMatch) {
+                        matches.push({
+                            type: 'counter',
+                            id: arg.id,
+                            title: arg.title,
+                            preview: arg.counter.substring(0, 100) + '...',
+                            category: 'Контраргумент'
+                        });
+                    }
                 });
-                if (!r.ok) throw new Error('listings ' + r.status);
-                const chunk = await r.json();
-                all = all.concat(chunk);
-                if (chunk.length < PAGE) break;
-                from += PAGE;
-                if (from > 100000) break;
+
+                // Search in legal risks (card titles, keywords AND body content)
+                const legalCards = document.querySelectorAll('#legalCards .expandable-card');
+                legalCards.forEach((card, index) => {
+                    const title = card.querySelector('.card-title-main').textContent;
+                    const keywords = card.getAttribute('data-keywords') || '';
+                    const subtitle = card.querySelector('.card-subtitle').textContent;
+                    
+                    // Search in card body content
+                    const cardBody = card.querySelector('.card-body');
+                    let bodyText = '';
+                    let bodyPreview = '';
+                    if (cardBody) {
+                        bodyText = cardBody.textContent.toLowerCase();
+                        // Create preview from body text around the match
+                        const queryIndex = bodyText.indexOf(query);
+                        if (queryIndex !== -1) {
+                            const start = Math.max(0, queryIndex - 40);
+                            const end = Math.min(bodyText.length, queryIndex + query.length + 40);
+                            bodyPreview = '...' + bodyText.substring(start, end) + '...';
+                        }
+                    }
+                    
+                    if (title.toLowerCase().includes(query) || 
+                        keywords.includes(query) || 
+                        subtitle.toLowerCase().includes(query) ||
+                        bodyText.includes(query)) {
+                        matches.push({
+                            type: 'legal',
+                            element: card,
+                            title: title,
+                            preview: bodyPreview || ('Правовой риск: ' + subtitle),
+                            category: 'Правовой риск'
+                        });
+                    }
+                });
+
+                if (matches.length === 0) {
+                    searchResults.classList.remove('active');
+                    searchResults.innerHTML = '';
+                    return;
+                }
+
+                searchResults.classList.add('active');
+                searchResults.innerHTML = matches.slice(0, 8).map(match => `
+                    <div class="search-result-item" onclick="handleSearchResult('${match.type}', '${match.id || ''}')">
+                        <div class="search-result-category">${match.category}</div>
+                        <div class="search-result-title">${match.title}</div>
+                        <div class="search-result-preview">${match.preview}</div>
+                    </div>
+                `).join('');
+            });
+
+            // Close search results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.search-input-wrapper')) {
+                    searchResults.classList.remove('active');
+                }
+            });
+        }
+
+        function handleSearchResult(type, id) {
+            if (type === 'counter') {
+                scrollToCounterArg(id);
+            } else if (type === 'legal') {
+                // Switch to legal tab and highlight the card
+<!-- removed nav:                 /* tab click removed */ -->
+                setTimeout(() => {
+                    const card = document.querySelector(`#legalCards [data-keywords*="${id}"]`);
+                    if (card) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        card.classList.add('expanded');
+                        card.style.backgroundColor = '#fff9e6';
+                        setTimeout(() => {
+                            card.style.transition = 'background-color 0.5s';
+                            card.style.backgroundColor = 'white';
+                        }, 1000);
+                    }
+                }, 300);
             }
-            return all;
+            document.getElementById('searchResults').classList.remove('active');
         }
 
-        async function loadLatestParserRun() {
-            const arr = await supabaseGet('/rest/v1/parser_runs?select=*&order=started_at.desc&limit=1');
-            return arr[0] || null;
+        // ========== LEGAL SEARCH ==========
+        function initLegalSearch() {
+            const searchInput = document.getElementById('legalSearch');
+            if (!searchInput) return;
+
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                const cards = document.querySelectorAll('#legalCards .expandable-card');
+
+                cards.forEach(card => {
+                    const keywords = card.getAttribute('data-keywords') || '';
+                    const title = card.querySelector('.card-title-main').textContent.toLowerCase();
+                    const subtitle = card.querySelector('.card-subtitle').textContent.toLowerCase();
+                    
+                    // Search in card body content (li items and legal basis)
+                    const cardBody = card.querySelector('.card-body');
+                    let bodyText = '';
+                    if (cardBody) {
+                        bodyText = cardBody.textContent.toLowerCase();
+                    }
+
+                    if (query === '' || 
+                        keywords.includes(query) || 
+                        title.includes(query) || 
+                        subtitle.includes(query) ||
+                        bodyText.includes(query)) {
+                        card.style.display = 'block';
+                        // Expand card if search matches body content
+                        if (bodyText.includes(query) && query !== '') {
+                            card.classList.add('expanded');
+                        }
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
         }
 
-        function fmtRunStatus(run) {
-            const tsEl = document.getElementById('scanLastTime');
-            const stEl = document.getElementById('scanStatus');
-            const trEl = document.getElementById('scanRunTrigger');
-            if (!run) {
-                tsEl.textContent = 'нет данных';
-                stEl.style.background = '#ffe0b2'; stEl.style.color = '#bf360c';
-                stEl.textContent = '⚠ Парсер ещё не запускался';
-                return;
+        // ========== EXPANDABLE CARDS ==========
+        function initExpandableCards() {
+            const cards = document.querySelectorAll('.expandable-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // Don't toggle if clicking on a link
+                    if (e.target.tagName === 'A') return;
+                    this.classList.toggle('expanded');
+                });
+            });
+        }
+
+        // ========== COUNTER ARGUMENTS TAB ==========
+        function initCounterGrid() {
+            renderCounterGrid(OZON_ARGS);
+            initCounterSearch();
+        }
+
+        // Legal references with URLs for linking
+        const LEGAL_LINKS = {
+            'ст. 1253.1 ГК РФ': 'https://www.consultant.ru/document/cons_doc_LAW_64629/',
+            'ст. 1299 ГК РФ': 'https://www.consultant.ru/document/cons_doc_LAW_64629/',
+            'ст. 1235 ГК РФ': 'https://www.consultant.ru/document/cons_doc_LAW_64629/',
+            'ст. 1080 ГК РФ': 'https://www.consultant.ru/document/cons_doc_LAW_64629/',
+            'ст. 1487 ГК РФ': 'https://www.consultant.ru/document/cons_doc_LAW_64629/',
+            'ст. 6 Закона о ЗПП': 'https://www.consultant.ru/document/cons_doc_LAW_64629/',
+            'ст. 6 ЗоЗПП': 'https://www.consultant.ru/document/cons_doc_LAW_64629/',
+            'ЗоЗПП': 'https://www.consultant.ru/document/cons_doc_LAW_64629/',
+            'ст. 18, 25 ЗоЗПП': 'https://www.consultant.ru/document/cons_doc_LAW_64629/',
+            'ст. 14.8 ФЗ-135': 'http://www.consultant.ru/document/cons_doc_LAW_61829/',
+            'ФЗ-135': 'http://www.consultant.ru/document/cons_doc_LAW_61829/',
+            'ст. 7 ФЗ-289': 'http://publication.pravo.gov.ru/Document/View/0001202507310020',
+            'ФЗ-289': 'http://publication.pravo.gov.ru/Document/View/0001202507310020',
+            'Пост. Пр-ва РФ №506': 'http://www.consultant.ru/document/cons_doc_LAW_61829/',
+            'Пост. Пр-ва РФ №2463': 'http://www.consultant.ru/document/cons_doc_LAW_61829/',
+            'Модельные практики ФАС': 'https://fas.gov.ru/news/34360',
+            'Коллегия Роспотребнадзора 20.02.2026': 'https://www.fontanka.ru/2026/02/20/76276776/',
+            'дело А76-26921/2021': 'https://zuykov.com/en/about/articles/liability-of-marketplaces-for-infringement-of-intellectual-property-rights/',
+            'дело Hobby World': 'https://zuykov.com/en/about/articles/liability-of-marketplaces-for-infringement-of-intellectual-property-rights/'
+        };
+
+        function makeLegalLinksClickable(text) {
+            let result = text;
+            for (const [ref, url] of Object.entries(LEGAL_LINKS)) {
+                const regex = new RegExp(ref.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                result = result.replace(regex, `<a href="${url}" target="_blank" rel="noopener" style="color: var(--ozon-blue); text-decoration: underline;">${ref}</a>`);
             }
-            const d = new Date(run.started_at);
-            tsEl.textContent = d.toLocaleDateString('ru') + ', ' + d.toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'});
-            if (run.status === 'ok') { stEl.style.background='#e8f5e9'; stEl.style.color='#2e7d32'; stEl.textContent='✓ Актуально'; }
-            else if (run.status === 'running') { stEl.style.background='#fff9c4'; stEl.style.color='#f57f17'; stEl.textContent='⏳ Сейчас идёт парсинг'; }
-            else if (run.status === 'partial') { stEl.style.background='#fff3e0'; stEl.style.color='#e65100'; stEl.textContent='⚠ Частично'; }
-            else { stEl.style.background='#ffebee'; stEl.style.color='#c62828'; stEl.textContent='✗ Ошибка: ' + run.status; }
-            trEl.textContent = '(' + run.trigger + ', host=' + (run.host||'?') + ')';
+            return result;
         }
 
-        // Маппинг Supabase → внутренний формат фронта
-        function mapRow(r) {
-            return {
-                date: r.last_seen || r.date,
-                pl: r.pl,
-                id: r.product_id,
-                query: r.query,
-                title: r.title,
-                url: r.url,
-                price: r.price || 0,
-                op: r.op || 9990,
-                regDays: r.reg_days,
-                auth: r.auth,
+        function renderCounterGrid(args) {
+            const grid = document.getElementById('counterGrid');
+            grid.innerHTML = args.map(arg => `
+                <div class="counter-card" id="counter-${arg.id}">
+                    <div class="counter-card-title">${arg.title}</div>
+                    <div class="counter-card-body">
+                        <div class="arg-section">
+                            <div class="arg-label">Позиция площадки</div>
+                            <div class="arg-text arg-ozon">"${arg.ozon_says}"</div>
+                        </div>
+                        <div class="arg-section">
+                            <div class="arg-label">Наш ответ</div>
+                            <div class="arg-text arg-counter">${arg.counter}</div>
+                        </div>
+                        <div>
+                            <div class="legal-badge">📋 ${makeLegalLinksClickable(arg.legal)}</div>
+                        </div>
+                        <div class="sources">
+                            <div class="sources-title">Источники:</div>
+                            ${arg.sources.map(src => `
+                                <div class="source-item">
+                                    <a href="${src.url}" target="_blank" rel="noopener">${src.label} <span class="external-icon">↗</span></a>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function initCounterSearch() {
+            const searchInput = document.getElementById('counterSearch');
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+
+                if (query.length === 0) {
+                    renderCounterGrid(OZON_ARGS);
+                    return;
+                }
+
+                const filtered = OZON_ARGS.filter(arg => {
+                    const titleMatch = arg.title.toLowerCase().includes(query);
+                    const keywordMatch = arg.keywords.some(kw => kw.includes(query));
+                    const ozonMatch = arg.ozon_says.toLowerCase().includes(query);
+                    const counterMatch = arg.counter.toLowerCase().includes(query);
+                    return titleMatch || keywordMatch || ozonMatch || counterMatch;
+                });
+
+                renderCounterGrid(filtered);
+            });
+        }
+
+        function scrollToCounterArg(argId) {
+            const element = document.getElementById(`counter-${argId}`);
+            if (element) {
+                // Switch to counter tab
+<!-- removed nav:                 /* tab click removed */ -->
+                setTimeout(function() {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    element.style.backgroundColor = '#fff9e6';
+                    setTimeout(function() {
+                        element.style.transition = 'background-color 0.5s';
+                        element.style.backgroundColor = 'white';
+                    }, 100);
+                }, 300);
+            }
+        }
+
+        // ========== CHARTS ==========
+        function initCharts() {
+            // Violations chart
+            setTimeout(function() {
+                const ctx1 = document.getElementById('violationsChart');
+                if (ctx1) {
+                    window.violationsChart = new Chart(ctx1, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['OEM/VL ключи', 'MSDN/Dev ключи', 'Кейген-ключи', 'Спорные'],
+                            datasets: [{
+                                data: [55, 20, 15, 10],
+                                backgroundColor: [
+                                    '#e53935',
+                                    '#f57c00',
+                                    '#fbc02d',
+                                    '#64b5f6'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 100);
+
+            // Price chart (overview)
+            setTimeout(function() {
+                const ctx2 = document.getElementById('priceChart');
+                if (ctx2) {
+                    window.priceChart = new Chart(ctx2, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Office 2021', 'Р7 офис', 'Office 365\n(1 год)', 'Ключ маркетплейса'],
+                            datasets: [{
+                                label: 'Цена (₽)',
+                                data: [14999, 3000, 4999, 250],
+                                backgroundColor: [
+                                    '#2e7d32',
+                                    '#1976d2',
+                                    '#f57c00',
+                                    '#e53935'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            indexAxis: 'x',
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value.toLocaleString('ru-RU') + ' ₽';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 100);
+
+            // Price comparison chart (comparison tab)
+            setTimeout(function() {
+                const ctx3 = document.getElementById('priceComparisonChart');
+                if (ctx3) {
+                    window.priceComparisonChart = new Chart(ctx3, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Office 2021\n(OEM)', 'Р7 офис', 'Office 365\n(1 год)', 'Ключ маркетплейса'],
+                            datasets: [{
+                                label: 'Цена (₽)',
+                                data: [14999, 3000, 4999, 250],
+                                backgroundColor: [
+                                    '#2e7d32',
+                                    '#1976d2',
+                                    '#f57c00',
+                                    '#e53935'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value.toLocaleString('ru-RU') + ' ₽';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 100);
+
+            // Lifecycle chart
+            setTimeout(function() {
+                const ctx4 = document.getElementById('lifecycleChart');
+                if (ctx4) {
+                    window.lifecycleChart = new Chart(ctx4, {
+                        type: 'bar',
+                        data: {
+                            labels: ['2021', '2022', '2023', '2024', '2025', '2026', '2027'],
+                            datasets: [
+                                {
+                                    label: 'Office 2021 (официальная поддержка)',
+                                    data: [100, 100, 100, 100, 80, 50, 0],
+                                    backgroundColor: '#2e7d32'
+                                },
+                                {
+                                    label: 'Ключ маркетплейса (функциональность)',
+                                    data: [100, 100, 100, 100, 50, 0, 0],
+                                    backgroundColor: '#e53935'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value + '%';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 100);
+
+            // Profit vs Risk chart (economic analysis)
+            setTimeout(function() {
+                const ctx5 = document.getElementById('profitVsRiskChart');
+                if (ctx5) {
+                    window.profitVsRiskChart = new Chart(ctx5, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Годовой доход\n(макс. оценка)', 'Судебные расходы\n(100 претензий)', 'Репутационные риски\n+ B2B отток'],
+                            datasets: [{
+                                label: 'Сумма (млн ₽)',
+                                data: [36, 7, 50],
+                                backgroundColor: [
+                                    '#4caf50',  // зелёный - доход
+                                    '#ff9800',  // оранжевый - судебные
+                                    '#f44336'   // красный - репутация
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const labels = [
+                                                'Комиссия 5-15% с продаж ключей',
+                                                'Госпошлины + юристы + нотариусы',
+                                                'Потеря B2B + PR-кампании + миграция'
+                                            ];
+                                            return context.parsed.y + ' млн ₽ - ' + labels[context.dataIndex];
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value + ' млн ₽';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 100);
+
+            // Initialize scenario switcher
+            initScenarioSwitcher();
+        }
+
+        // ========== SCENARIO SWITCHER ==========
+        function initScenarioSwitcher() {
+            const scenarioData = {
+                optimistic: {
+                    title: 'Оптимистичный сценарий',
+                    desc: '10 претензий, низкий объём продаж',
+                    income: 1.2,
+                    incomePercent: 15,
+                    expenses: 0.5,
+                    expensePercent: 8,
+                    courtCosts: '~0.5 млн ₽',
+                    courtPercent: 10,
+                    reputationCosts: 'минимальны',
+                    reputationPercent: 5,
+                    techCosts: 'не актуальны',
+                    techPercent: 0,
+                    netResult: '+0.7 млн ₽',
+                    netColor: 'var(--success)',
+                    netComment: '✓ Прибыль'
+                },
+                base: {
+                    title: 'Базовый сценарий',
+                    desc: '50 претензий, средний объём продаж',
+                    income: 12,
+                    incomePercent: 50,
+                    expenses: 5,
+                    expensePercent: 35,
+                    courtCosts: '~2.5 млн ₽',
+                    courtPercent: 35,
+                    reputationCosts: '~2 млн ₽',
+                    reputationPercent: 25,
+                    techCosts: 'низкие',
+                    techPercent: 10,
+                    netResult: '+7 млн ₽',
+                    netColor: 'var(--warning)',
+                    netComment: '⚠ Прибыль, но риски растут'
+                },
+                negative: {
+                    title: 'Негативный сценарий',
+                    desc: '100+ претензий, репутационный кризис',
+                    income: 36,
+                    incomePercent: 100,
+                    expenses: 55,
+                    expensePercent: 100,
+                    courtCosts: '~5 млн ₽',
+                    courtPercent: 50,
+                    reputationCosts: '~40 млн ₽',
+                    reputationPercent: 80,
+                    techCosts: '~10 млн ₽',
+                    techPercent: 40,
+                    netResult: '−19 млн ₽',
+                    netColor: 'var(--danger)',
+                    netComment: '✗ Убыток'
+                }
             };
-        }
 
-        // === UI: фильтры/сортировка/рендер ===
-        function monRenderQueryTags() {
-            const c = document.getElementById('monQueryTags');
-            if(!c) return;
-            c.innerHTML = MON_QUERIES.map(q => {
-                const active = monState.query===q;
-                const bg = active ? '#1565c0' : '#e3f2fd';
-                const col = active ? '#fff' : '#1565c0';
-                return `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:${bg};color:${col};border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #90caf9;"
-                    onclick="monToggleQueryTag('${q.replace(/'/g,"\\'")}')">${q}</span>`;
-            }).join('');
-            if(!MON_QUERIES.length) c.innerHTML = '<span style="font-size:12px;color:#999;font-style:italic;">Запросы не определены</span>';
-        }
-        function monToggleQueryTag(q) {
-            monState.query = (monState.query===q) ? '' : q;
-            monRenderQueryTags();
-            document.querySelectorAll('#monQueryFilterBtns .mon-filter-btn').forEach(b=>{
-                b.classList.toggle('active', b.dataset.q===(monState.query||''));
-            });
-            monState.page=0; monApplyFilters();
-        }
-        function monToggleQuery(v, btn) {
-            monState.query=v; monState.page=0;
-            document.querySelectorAll('#monQueryFilterBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
-            btn.classList.add('active');
-            monRenderQueryTags();
-            monApplyFilters();
-        }
-        function monRebuildQueryFilterBtns() {
-            const c = document.getElementById('monQueryFilterBtns');
-            if(!c) return;
-            c.innerHTML = `<button class="mon-filter-btn${monState.query===''?' active':''}" data-q="" onclick="monToggleQuery('',this)">Все</button>`
-                + MON_QUERIES.map(q => `<button class="mon-filter-btn${monState.query===q?' active':''}" data-q="${q}" onclick="monToggleQuery('${q.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',this)">${q.length>25?q.slice(0,25)+'…':q}</button>`).join('');
-        }
-        function monTogglePlat(v, btn) {
-            monState.pl=v; monState.page=0;
-            document.querySelectorAll('#monPlatBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
-            btn.classList.add('active'); monApplyFilters();
-        }
-        function monToggleDisc(v, btn) {
-            monState.disc=v; monState.page=0;
-            document.querySelectorAll('#monDiscBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
-            btn.classList.add('active'); monApplyFilters();
-        }
-        function monToggleFlag(v, btn) {
-            monState.flag=v; monState.page=0;
-            document.querySelectorAll('#monFlagBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
-            btn.classList.add('active'); monApplyFilters();
-        }
-        function monApplyFilters() {
-            const s = (document.getElementById('monSearch')?.value||'').toLowerCase();
-            monFiltered = MON_DATA.filter(r => {
-                if(monState.pl!=='all' && r.pl!==monState.pl) return false;
-                if(r.flags.disc < monState.disc) return false;
-                if(monFlagCount(r.flags) < monState.flag) return false;
-                if(s && !r.title.toLowerCase().includes(s)) return false;
-                if(monState.query && r.query && !r.query.toLowerCase().includes(monState.query.toLowerCase()) && !r.title.toLowerCase().includes(monState.query.toLowerCase())) return false;
-                return true;
-            }).sort((a,b) => (b.date||'').localeCompare(a.date||''));
-            if(monState.sortCol) monApplySortToFiltered();
-            document.getElementById('monCount').textContent = monFiltered.length;
-            const tot = document.getElementById('monTotal');
-            if(tot) tot.textContent = MON_DATA.length;
-            monState.page = 0;
-            monUpdateSortIndicators();
-            monRender();
-        }
-        function monRender() {
-            const tbody = document.getElementById('monTableBody');
-            if(!tbody) return;
-            const start = monState.page * monState.pageSize;
-            const items = monFiltered.slice(start, start + monState.pageSize);
-            const totalPages = Math.max(1, Math.ceil(monFiltered.length / monState.pageSize));
-            document.getElementById('monPageNum').textContent = monState.page+1;
-            const pt = document.getElementById('monPageTotal'); if(pt) pt.textContent = totalPages;
-            tbody.innerHTML = items.map(r => {
-                const f = r.flags;
-                const dc = f.disc>=95?'color:#c62828':f.disc>=80?'color:#e65100':'color:#f57c00';
-                const d = (r.date||'').split('-').reverse().join('.');
-                const qLabel = r.query ? `<div style="font-size:10px;color:#888;margin-top:2px;">🔎 ${r.query}</div>` : '';
-                const t = r.title || '';
-                const url = r.url || '#';
-                return `<tr>
-                    <td style="white-space:nowrap;font-size:12px;">${d}</td>
-                    <td><span style="display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;${MON_PL_STYLE[r.pl]||''}">${MON_PL_LABEL[r.pl]||r.pl}</span></td>
-                    <td style="max-width:240px;" title="${t.replace(/"/g,'&quot;')}"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.length>55?t.slice(0,55)+'…':t}</div>${qLabel}</td>
-                    <td><a href="${url}" target="_blank" rel="noopener" style="color:var(--ozon-blue);font-size:12px;white-space:nowrap;">Открыть ↗</a></td>
-                    <td style="font-weight:700;">${(r.price||0).toLocaleString('ru')} ₽</td>
-                    <td style="color:#666;">${(r.op||0).toLocaleString('ru')} ₽</td>
-                    <td style="font-weight:700;${dc}">${f.disc}%</td>
-                    <td style="white-space:nowrap;">${monFlagPills(f)}</td>
-                </tr>`;
-            }).join('') || '<tr><td colspan="8" style="text-align:center;color:#999;padding:30px;">Нет данных под фильтр</td></tr>';
-        }
-        function monSortBy(col) {
-            if(monState.sortCol === col) monState.sortDir = -monState.sortDir;
-            else { monState.sortCol = col; monState.sortDir = 1; }
-            monApplySortToFiltered();
-            monState.page = 0;
-            monUpdateSortIndicators();
-            monRender();
-        }
-        function monApplySortToFiltered() {
-            const col = monState.sortCol;
-            if(!col) return;
-            const dir = monState.sortDir;
-            monFiltered.sort((a,b) => {
-                let va, vb;
-                if(col==='disc') { va=a.flags.disc; vb=b.flags.disc; }
-                else if(col==='flags') { va=monFlagCount(a.flags); vb=monFlagCount(b.flags); }
-                else { va=a[col]; vb=b[col]; }
-                if(typeof va==='number') return (va-vb)*dir;
-                return String(va||'').localeCompare(String(vb||''),'ru')*dir;
+            const buttons = document.querySelectorAll('.scenario-btn');
+            
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const scenario = this.getAttribute('data-scenario');
+                    const data = scenarioData[scenario];
+                    
+                    // Update active button state
+                    buttons.forEach(b => {
+                        b.classList.remove('active');
+                        b.style.background = 'white';
+                        if (b.getAttribute('data-scenario') === 'optimistic') b.style.color = 'var(--success)';
+                        else if (b.getAttribute('data-scenario') === 'base') b.style.color = 'var(--warning)';
+                        else if (b.getAttribute('data-scenario') === 'negative') b.style.color = 'var(--danger)';
+                    });
+                    this.classList.add('active');
+                    this.style.background = this.style.borderColor;
+                    this.style.color = 'white';
+                    
+                    // Update title and description
+                    document.getElementById('scenario-title').textContent = data.title;
+                    document.getElementById('scenario-desc').textContent = data.desc;
+                    
+                    // Update income bar
+                    document.getElementById('income-value').textContent = data.income + ' млн ₽';
+                    document.getElementById('income-bar').style.width = data.incomePercent + '%';
+                    
+                    // Update expense bar
+                    document.getElementById('expense-value').textContent = data.expenses + ' млн ₽';
+                    document.getElementById('expense-bar').style.width = data.expensePercent + '%';
+                    
+                    // Update net result
+                    const netResultEl = document.getElementById('net-result');
+                    netResultEl.textContent = data.netResult;
+                    netResultEl.style.color = data.netColor;
+                    document.getElementById('net-comment').textContent = data.netComment;
+                    document.getElementById('net-comment').style.color = data.netColor;
+                    
+                    // Update expense details
+                    document.getElementById('court-costs').textContent = data.courtCosts;
+                    document.getElementById('court-bar').style.width = data.courtPercent + '%';
+                    
+                    document.getElementById('reputation-costs').textContent = data.reputationCosts;
+                    document.getElementById('reputation-bar').style.width = data.reputationPercent + '%';
+                    
+                    document.getElementById('tech-costs').textContent = data.techCosts;
+                    document.getElementById('tech-bar').style.width = data.techPercent + '%';
+                });
             });
         }
-        function monUpdateSortIndicators() {
-            ['date','pl','title','price','op','disc','flags'].forEach(c => {
-                const el = document.getElementById('mts-'+c);
-                if(!el) return;
-                if(monState.sortCol===c) el.textContent = monState.sortDir===1 ? ' ▲' : ' ▼';
-                else el.textContent = '';
-            });
-        }
-        function monPrev() { if(monState.page>0){monState.page--;monRender();} }
-        function monNext() { if((monState.page+1)*monState.pageSize<monFiltered.length){monState.page++;monRender();} }
-        function monSetPageSize(n, btn) {
-            monState.pageSize = n; monState.page = 0;
-            document.querySelectorAll('#monPageSizeBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
-            monRender();
-        }
+    
+    // ============================================================
+    // СИСТЕМНЫЙ МОНИТОРИНГ — данные и логика
+    // ============================================================
+    const MON_OFFICIAL = {
+        'MS365 Personal (12 мес.)': 6990,
+        'Office 2021 Home & Business': 14990,
+        'Office 2019 Home & Business': 8990,
+        'Windows 11 Home': 13990,
+        'Windows 11 Pro': 16990,
+        'Office 2021 Professional': 22990,
+    };
+    const TM_KW = ['microsoft','office','windows'];
+    
+    function monComputeFlags(item) {
+        const disc = Math.floor((item.op - item.price) / item.op * 100);
+        const tl = item.title.toLowerCase();
+        const hasTM = TM_KW.some(k => tl.includes(k));
+        const hasCompat = tl.includes('совместимо') || tl.includes('compat');
+        return {
+            F1: disc >= 50, F2: disc >= 80,
+            F3: item.regDays !== null ? item.regDays < 30 : null,
+            F4: item.auth !== null ? !item.auth : null,
+            F5: true, // все MS продукты — телефонная активация отключена
+            F6: hasTM && !hasCompat,
+            disc
+        };
+    }
+    function monFlagCount(f) {
+        return [f.F1,f.F2,f.F3===true,f.F4===true,f.F5,f.F6].filter(Boolean).length;
+    }
+    function monFlagPills(f) {
+        const parts = [];
+        if(f.F2) parts.push('<span class="flag-pill-mon fp-red" title="F2: Цена ниже официальной на '+f.disc+'%">🔴F2</span>');
+        else if(f.F1) parts.push('<span class="flag-pill-mon fp-red" title="F1: Цена ниже официальной на '+f.disc+'%">🔴F1</span>');
+        if(f.F3===true) parts.push('<span class="flag-pill-mon fp-yellow" title="F3: Продавец &lt;30 дней">🟡F3</span>');
+        else if(f.F3===null) parts.push('<span class="flag-pill-mon fp-gray" title="F3: требует проверки">F3?</span>');
+        if(f.F4===true) parts.push('<span class="flag-pill-mon fp-yellow" title="F4: Нет статуса авт. реселлера">🟡F4</span>');
+        else if(f.F4===null) parts.push('<span class="flag-pill-mon fp-gray" title="F4: требует проверки">F4?</span>');
+        if(f.F5) parts.push('<span class="flag-pill-mon fp-yellow" title="F5: Телефонная активация отключена с дек.2025">🟡F5</span>');
+        if(f.F6) parts.push('<span class="flag-pill-mon fp-orange" title="F6: ТЗ без пометки совместимо">🟠F6</span>');
+        return parts.join('') || '<span style="color:#999;font-size:11px;">нет</span>';
+    }
 
-        // Кнопка «Обновить»: перезагрузить данные из Supabase (Phase 5 — добавим webhook trigger парсера)
-        async function runScan() {
-            const s = document.getElementById('scanStatus');
-            s.style.background='#fff9c4'; s.style.color='#f57f17'; s.textContent='⏳ Загружаю...';
-            try {
-                await loadAll();
-                s.style.background='#e8f5e9'; s.style.color='#2e7d32'; s.textContent='✓ Обновлено';
-            } catch(e) {
-                s.style.background='#ffebee'; s.style.color='#c62828'; s.textContent='✗ Ошибка: ' + e.message;
+    // 23 карточки из реального мониторинга (январь-март 2026)
+    let MON_RAW = []; // загружается из Supabase, см. loadFromSupabase()
+    // ─────────────────────────────────────────────────────────────────────
+    // Supabase loader (заменяет inline MON_RAW из старой версии)
+    // ─────────────────────────────────────────────────────────────────────
+    const SUPABASE_URL = "https://yqfdbuiyfkzhkhpiknob.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_nZNZLCqx4e_7La8pfQmsjA_RSw0zT9t";
+
+    // titleOk на клиенте — точно как в scraper/import_cloak_full.py
+    function titleOkClient(title) {
+        const t = (title || '').toLowerCase();
+        // Включающие маркеры
+        const hasOffice = t.includes('office');
+        const has365MS = t.includes('365') && t.includes('microsoft');
+        const hasОфисMS = t.includes('офис') && t.includes('microsoft');
+        if (!(hasOffice || has365MS || hasОфисMS)) return false;
+        // Исключения: officesuite, российский софт
+        const excludes = ['officesuite', 'р7-', 'р7 офис', 'мойофис', 'redos', 'ред ос',
+                          'libreoffice', 'astra linux', 'базальт', 'rosa', 'кит офис'];
+        if (excludes.some(e => t.includes(e))) return false;
+        // Только Windows (не Office)
+        if (/^(код|ключ|лицензия)\s+windows\b/.test(t) || /^windows\s+\d/.test(t)) return false;
+        // Книги о Office
+        const bookKw = ['книга', 'руководство', 'учебник', 'самоучитель', 'шаг за шагом'];
+        if (bookKw.some(e => t.includes(e))) return false;
+        return true;
+    }
+
+    // Фильтр «не контрафакт»: price >= 0.5×op
+    function isCounterfeit(r) {
+        return r.op && r.price && r.price < 0.5 * r.op;
+    }
+
+    async function supabaseFetchAll() {
+        const PAGE = 1000;
+        let all = [];
+        let from = 0;
+        while (true) {
+            const r = await fetch(SUPABASE_URL + '/rest/v1/listings?select=*&order=last_seen.desc.nullslast', {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                    'Range-Unit': 'items',
+                    'Range': from + '-' + (from + PAGE - 1),
+                },
+            });
+            if (!r.ok) throw new Error('listings ' + r.status);
+            const chunk = await r.json();
+            all = all.concat(chunk);
+            if (chunk.length < PAGE) break;
+            from += PAGE;
+            if (from > 100000) break;
+        }
+        return all;
+    }
+
+    async function supabaseFetchLatestRun() {
+        const r = await fetch(SUPABASE_URL + '/rest/v1/parser_runs?select=*&order=started_at.desc&limit=1', {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+        });
+        if (!r.ok) return null;
+        const arr = await r.json();
+        return arr[0] || null;
+    }
+
+    // Маппинг Supabase row → формат MON_RAW
+    function mapSupabaseRow(r) {
+        return {
+            date: r.last_seen || r.date,
+            pl: r.pl,
+            id: r.product_id,
+            query: r.query,
+            title: r.title || '',
+            url: r.url || '',
+            price: r.price || 0,
+            op: r.op || 9990,
+            regDays: r.reg_days,
+            auth: r.auth,
+        };
+    }
+
+    async function loadFromSupabase() {
+        try {
+            const tsEl = document.getElementById('scanLastTime');
+            const statusEl = document.getElementById('scanStatus');
+            if (tsEl) tsEl.textContent = 'Загрузка…';
+            if (statusEl) { statusEl.style.background='#fff9c4'; statusEl.style.color='#f57f17'; statusEl.textContent='⏳ Загрузка…'; }
+
+            const [rows, lastRun] = await Promise.all([supabaseFetchAll(), supabaseFetchLatestRun()]);
+            console.log('Supabase: загружено', rows.length, 'строк');
+
+            // Маппинг + клиентский фильтр titleOk + price<0.5×op
+            let mapped = rows.map(mapSupabaseRow).filter(r => r.title && titleOkClient(r.title) && isCounterfeit(r));
+            console.log('После titleOk + 0.5×op:', mapped.length);
+
+            // Подменим MON_RAW и пересчитаем MON_DATA
+            MON_RAW = mapped;
+            MON_DATA = mapped.map(r => ({...r, flags: monComputeFlags(r)}));
+            monFiltered = [...MON_DATA];
+
+            // Обновим штамп «Последнее сканирование» из parser_runs
+            if (lastRun && tsEl) {
+                const d = new Date(lastRun.started_at);
+                tsEl.textContent = d.toLocaleDateString('ru') + ', ' + d.toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit'});
             }
-        }
+            if (lastRun && statusEl) {
+                if (lastRun.status === 'ok') { statusEl.style.background='#e8f5e9'; statusEl.style.color='#2e7d32'; statusEl.textContent='✓ Актуально'; }
+                else if (lastRun.status === 'running') { statusEl.style.background='#fff9c4'; statusEl.style.color='#f57f17'; statusEl.textContent='⏳ Парсинг идёт'; }
+                else if (lastRun.status === 'partial') { statusEl.style.background='#fff3e0'; statusEl.style.color='#e65100'; statusEl.textContent='⚠ Частично'; }
+                else if (lastRun.status === 'failed') { statusEl.style.background='#ffebee'; statusEl.style.color='#c62828'; statusEl.textContent='✗ Ошибка'; }
+            }
 
-        function exportMonCSV() {
-            const d=new Date().toISOString().slice(0,10);
-            let csv='﻿'+'Площадка,ID,Название,URL,Цена (руб.),Офиц. цена (руб.),Дисконт (%),Флажки,Дата обнаружения,Дата выгрузки\n';
-            monFiltered.forEach(r=>{
-                const f=r.flags;
-                const flags=[f.F1?'F1':'',f.F2?'F2':'',f.F3===true?'F3':f.F3===null?'F3?':'',f.F4===true?'F4':f.F4===null?'F4?':'',f.F5?'F5':'',f.F6?'F6':''].filter(Boolean).join(';');
-                csv+=`${MON_PL_LABEL[r.pl]||r.pl},${r.id},"${(r.title||'').replace(/"/g,'""')}",${r.url||''},${r.price||0},${r.op||0},${f.disc},"${flags}",${r.date||''},${d}\n`;
-            });
-            const a=document.createElement('a');
-            a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
-            a.download=`monitoring_${d}.csv`;a.click();
+            // Перерисуем
+            if (typeof monRenderQueryTags === 'function') monRenderQueryTags();
+            if (typeof monRebuildQueryFilterBtns === 'function') monRebuildQueryFilterBtns();
+            if (typeof monApplyFilters === 'function') monApplyFilters();
+        } catch (e) {
+            console.error('Supabase loader error:', e);
+            const tbody = document.getElementById('monTableBody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#c62828;padding:30px;">Не удалось загрузить из Supabase: ' + e.message + '</td></tr>';
         }
-        function exportMonXLSX() {
-            if(typeof XLSX==='undefined'){alert('SheetJS не загружен');return;}
-            const d=new Date().toISOString().slice(0,10);
-            const hdr=['Площадка','ID','Название','URL','Цена (руб.)','Офиц. цена (руб.)','Дисконт (%)','Флажки','Дата обнаружения','Дата выгрузки'];
-            const rows=monFiltered.map(r=>{
-                const f=r.flags;
-                const flags=[f.F1?'F1':'',f.F2?'F2':'',f.F3===true?'F3':f.F3===null?'F3?':'',f.F4===true?'F4':f.F4===null?'F4?':'',f.F5?'F5':'',f.F6?'F6':''].filter(Boolean).join(';');
-                return [MON_PL_LABEL[r.pl]||r.pl,r.id,r.title,r.url,r.price,r.op,f.disc,flags,r.date,d];
-            });
-            const ws=XLSX.utils.aoa_to_sheet([hdr,...rows]);
-            ws['!cols']=[12,18,50,45,10,12,10,20,12,12].map(w=>({wch:w}));
-            const wb=XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb,ws,'Мониторинг');
-            XLSX.writeFile(wb,`monitoring_${d}.xlsx`);
-        }
+    }
 
-        async function loadAll() {
-            const [listings, lastRun] = await Promise.all([loadListings(), loadLatestParserRun()]);
-            MON_DATA = listings.map(mapRow).map(r => ({...r, flags: monComputeFlags(r)}));
-            // Уникальные запросы для тегов
-            MON_QUERIES = [...new Set(MON_DATA.map(r => r.query).filter(Boolean))].sort();
-            fmtRunStatus(lastRun);
+    // Переопределим кнопку «Обновить» на полный reload из Supabase
+    function runScan() {
+        loadFromSupabase();
+    }
+
+
+
+
+    const MON_PL_LABEL = {ozon:'OZON',wildberries:'Wildberries',yandex:'Яндекс.Маркет',avito:'Авито',aliexpress:'AliExpress'};
+    const MON_PL_STYLE = {ozon:'background:#e3f2fd;color:#1565c0',wildberries:'background:#f3e5f5;color:#6a1b9a',yandex:'background:#fff3e0;color:#e65100',avito:'background:#e8f5e9;color:#2e7d32',aliexpress:'background:#fff8e1;color:#e65100'};
+    
+    let MON_DATA = MON_RAW.map(r => ({...r, flags: monComputeFlags(r)}));
+
+    // Поисковые запросы на мониторинге
+    const MON_QUERIES_SUGGEST = [
+        'Microsoft Office 2021 ключ активации',
+        'Microsoft Office 2021 Home Business ключ',
+        'Office 365 Personal ключ активации',
+        'Microsoft 365 Personal ключ',
+        'Office 2019 ключ активации',
+        'MS Office ключ активации онлайн',
+        'Office Home and Business 2021 ключ',
+        'Microsoft Office лицензионный ключ'
+    ];
+    // Активные поисковые запросы. При смене дефолта обновляем версию -
+    // тогда у существующих пользователей localStorage сбрасывается до нового набора.
+    const MON_QUERIES_VERSION = 2;
+    const MON_QUERIES_DEFAULT = [
+        'Microsoft Office ключ активации',
+        'Microsoft Office 365 ключ',
+        'Microsoft Office 2021 ключ',
+        'Office 2021 ключ активации',
+        'Office 2024 ключ активации',
+        'MS Office ключ активации'
+    ];
+    let MON_QUERIES;
+    try {
+        const savedVer = parseInt(localStorage.getItem('mon_queries_v') || '0');
+        if (savedVer >= MON_QUERIES_VERSION) {
+            MON_QUERIES = JSON.parse(localStorage.getItem('mon_queries')||'null') || MON_QUERIES_DEFAULT.slice();
+        } else {
+            MON_QUERIES = MON_QUERIES_DEFAULT.slice();
+            localStorage.setItem('mon_queries', JSON.stringify(MON_QUERIES));
+            localStorage.setItem('mon_queries_v', String(MON_QUERIES_VERSION));
+        }
+    } catch(e) {
+        MON_QUERIES = MON_QUERIES_DEFAULT.slice();
+    }
+
+    // Сортировка по умолчанию — пресет 'default' (дисконт ↓ → цена ↑ → название ↑).
+    // Совпадает с предсортировкой в Python merge_mon_raw.py. Клик по заголовку
+    // колонки переключает на режим 'col' (sortPreset='col').
+    // sortCol/sortDir выставлены под пресет 'default' — индикатор ▼ на колонке «Дисконт».
+    let monState = {pl:'all', disc:0, flag:0, search:'', query:'', page:0, pageSize:50,
+                    sortCol:'disc', sortDir:-1, sortPreset:'default'};
+    let monFiltered = [...MON_DATA];
+
+    function monSaveQueries() {
+        try { localStorage.setItem('mon_queries', JSON.stringify(MON_QUERIES)); } catch(e) {}
+    }
+    function monQueryFormToggle() {
+        const f = document.getElementById('monQueryForm');
+        if(!f) return;
+        const show = f.style.display==='none';
+        f.style.display = show ? 'block' : 'none';
+        if(show) {
+            // Render suggested queries not yet added
+            const s = document.getElementById('monQuerySuggest');
+            if(s) s.innerHTML = MON_QUERIES_SUGGEST
+                .filter(q => !MON_QUERIES.includes(q))
+                .map(q => `<button onclick="monQueryAddSuggest(this,'${q.replace(/'/g,"\\'")}')" style="padding:4px 10px;background:#e3f2fd;color:#1565c0;border:1px solid #90caf9;border-radius:12px;cursor:pointer;font-size:12px;">${q}</button>`)
+                .join('');
+            document.getElementById('monQueryInput').focus();
+        }
+    }
+    function monQueryAddSuggest(btn, q) {
+        if(!MON_QUERIES.includes(q)) {
+            MON_QUERIES.push(q);
+            monSaveQueries();
             monRenderQueryTags();
             monRebuildQueryFilterBtns();
-            monApplyFilters();
+            btn.disabled=true; btn.style.opacity='0.4';
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadAll().catch(e => {
-                document.getElementById('monTableBody').innerHTML =
-                    '<tr><td colspan="8" style="text-align:center;color:#c62828;padding:30px;">Не удалось загрузить данные: ' + e.message + '</td></tr>';
-                console.error(e);
-            });
+    }
+    function monQueryAdd() {
+        const inp = document.getElementById('monQueryInput');
+        if(!inp) return;
+        const q = inp.value.trim();
+        if(!q) { inp.focus(); return; }
+        if(MON_QUERIES.includes(q)) { inp.select(); return; }
+        MON_QUERIES.push(q);
+        monSaveQueries();
+        inp.value='';
+        monRenderQueryTags();
+        monRebuildQueryFilterBtns();
+        monQueryFormToggle(); // закрыть форму
+    }
+    function monQueryRemove(q) {
+        MON_QUERIES = MON_QUERIES.filter(x=>x!==q);
+        monSaveQueries();
+        if(monState.query===q) { monState.query=''; }
+        monRenderQueryTags();
+        monRebuildQueryFilterBtns();
+        monApplyFilters();
+    }
+    function monRenderQueryTags() {
+        const c = document.getElementById('monQueryTags');
+        if(!c) return;
+        c.innerHTML = MON_QUERIES.map(q => {
+            const active = monState.query===q;
+            const bg = active ? '#1565c0' : '#e3f2fd';
+            const col = active ? '#fff' : '#1565c0';
+            return `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:${bg};color:${col};border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #90caf9;"
+                onclick="monToggleQueryTag('${q.replace(/'/g,"\\'")}')">${q}
+                <span onclick="event.stopPropagation();monQueryRemove('${q.replace(/'/g,"\\'")}');"
+                    style="font-size:14px;line-height:1;opacity:0.7;margin-left:2px;" title="Удалить">x</span>
+            </span>`;
+        }).join('');
+        if(!MON_QUERIES.length) c.innerHTML = '<span style="font-size:12px;color:#999;font-style:italic;">Нет активных запросов</span>';
+    }
+    function monToggleQueryTag(q) {
+        monState.query = (monState.query===q) ? '' : q;
+        monRenderQueryTags();
+        // sync filter buttons
+        document.querySelectorAll('#monQueryFilterBtns .mon-filter-btn').forEach(b=>{
+            b.classList.toggle('active', b.dataset.q===(monState.query||''));
         });
-    </script>
+        monState.page=0; monApplyFilters();
+    }
+    function monToggleQuery(v, btn) {
+        monState.query=v; monState.page=0;
+        document.querySelectorAll('#monQueryFilterBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        monRenderQueryTags();
+        monApplyFilters();
+    }
+    function monRebuildQueryFilterBtns() {
+        const c = document.getElementById('monQueryFilterBtns');
+        if(!c) return;
+        c.innerHTML = `<button class="mon-filter-btn${monState.query===''?' active':''}" data-q="" onclick="monToggleQuery('',this)">Все</button>`
+            + MON_QUERIES.map(q => `<button class="mon-filter-btn${monState.query===q?' active':''}" data-q="${q}" onclick="monToggleQuery('${q.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',this)">${q.length>25?q.slice(0,25)+'…':q}</button>`).join('');
+    }
+    function monTogglePlat(v, btn) {
+        monState.pl=v; monState.page=0;
+        document.querySelectorAll('#monPlatBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active'); monApplyFilters();
+    }
+    function monToggleDisc(v, btn) {
+        monState.disc=v; monState.page=0;
+        document.querySelectorAll('#monDiscBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active'); monApplyFilters();
+    }
+    function monToggleFlag(v, btn) {
+        monState.flag=v; monState.page=0;
+        document.querySelectorAll('#monFlagBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active'); monApplyFilters();
+    }
+    function monApplyFilters() {
+        const s = (document.getElementById('monSearch')?.value||'').toLowerCase();
+        monFiltered = MON_DATA.filter(r => {
+            if(monState.pl!=='all' && r.pl!==monState.pl) return false;
+            if(r.flags.disc < monState.disc) return false;
+            if(monFlagCount(r.flags) < monState.flag) return false;
+            if(s && !r.title.toLowerCase().includes(s)) return false;
+            if(monState.query && r.query && !r.query.toLowerCase().includes(monState.query.toLowerCase()) && !r.title.toLowerCase().includes(monState.query.toLowerCase())) return false;
+            return true;
+        }).sort((a,b) => b.date.localeCompare(a.date));
+        if(monState.sortCol) monApplySortToFiltered();
+        document.getElementById('monCount').textContent = monFiltered.length;
+        const tot = document.getElementById('monTotal');
+        if(tot) tot.textContent = MON_DATA.length;
+        monState.page = 0;
+        monUpdateSortIndicators();
+        monRender();
+    }
+    function monRender() {
+        const tbody = document.getElementById('monTableBody');
+        if(!tbody) return;
+        const start = monState.page * monState.pageSize;
+        const items = monFiltered.slice(start, start + monState.pageSize);
+        const totalPages = Math.max(1, Math.ceil(monFiltered.length / monState.pageSize));
+        document.getElementById('monPageNum').textContent = monState.page+1;
+        const pt = document.getElementById('monPageTotal'); if(pt) pt.textContent = totalPages;
+        tbody.innerHTML = items.map(r => {
+            const f = r.flags;
+            const dc = f.disc>=95?'color:#c62828':f.disc>=80?'color:#e65100':'color:#f57c00';
+            const d = r.date.split('-').reverse().join('.');
+            const qLabel = r.query ? `<div style="font-size:10px;color:#888;margin-top:2px;">🔎 ${r.query}</div>` : '';
+            return `<tr>
+                <td style="white-space:nowrap;font-size:12px;">${d}</td>
+                <td><span style="display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;${MON_PL_STYLE[r.pl]}">${MON_PL_LABEL[r.pl]}</span></td>
+                <td style="max-width:220px;" title="${r.title}"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.title.length>55?r.title.slice(0,55)+'…':r.title}</div>${qLabel}</td>
+                <td><a href="${r.url}" target="_blank" rel="noopener" style="color:var(--ozon-blue);font-size:12px;white-space:nowrap;">Поиск ↗</a></td>
+                <td style="font-weight:700;">${r.price.toLocaleString('ru')} ₽</td>
+                <td style="color:#666;">${r.op.toLocaleString('ru')} ₽</td>
+                <td style="font-weight:700;${dc}">${f.disc}%</td>
+                <td style="white-space:nowrap;">${monFlagPills(f)}</td>
+            </tr>`;
+        }).join('');
+    }
+    function monSortBy(col) {
+        if(monState.sortCol === col) {
+            monState.sortDir = -monState.sortDir;
+        } else {
+            monState.sortCol = col;
+            monState.sortDir = 1;
+        }
+        // Клик по колонке выходит из режима пресета и снимает активную кнопку.
+        monState.sortPreset = 'col';
+        document.querySelectorAll('#monSortPresetBtns .mon-filter-btn').forEach(b => b.classList.remove('active'));
+        monApplySortToFiltered();
+        monState.page = 0;
+        monUpdateSortIndicators();
+        monRender();
+    }
+    function monApplySortToFiltered() {
+        // Если выбран пресет (а не клик по колонке) — он перехватывает сортировку.
+        if(monState.sortPreset && monState.sortPreset !== 'col') {
+            return monApplyPreset();
+        }
+        const col = monState.sortCol;
+        if(!col) return;
+        const dir = monState.sortDir;
+        // Геттер основного значения по колонке
+        const getMain = (r) => {
+            if(col==='disc') return r.flags.disc;
+            if(col==='flags') return monFlagCount(r.flags);
+            return r[col];
+        };
+        // Мультиключевая сортировка: первичный ключ + тайбрейкеры.
+        // Для дисконта: цена ↑, название ↑ — самые дешёвые в группе наверх.
+        // Для остальных: дисконт ↓, название ↑ — стабильность при равных.
+        monFiltered.sort((a, b) => {
+            const va = getMain(a), vb = getMain(b);
+            let cmp;
+            if(typeof va === 'number') cmp = (va - vb) * dir;
+            else cmp = String(va||'').localeCompare(String(vb||''),'ru') * dir;
+            if(cmp !== 0) return cmp;
+            // Тайбрейкеры (не зависят от dir):
+            if(col === 'disc') {
+                if(a.price !== b.price) return a.price - b.price;
+                return String(a.title||'').localeCompare(String(b.title||''),'ru');
+            }
+            // Для любых других колонок — стабилизация по дисконту ↓, потом по названию
+            if(a.flags.disc !== b.flags.disc) return b.flags.disc - a.flags.disc;
+            return String(a.title||'').localeCompare(String(b.title||''),'ru');
+        });
+    }
+
+    // Нормализация заголовка для группировки в «семьи» товаров.
+    // Убираем мусор и оставляем сигнатуру: версия Office + редакция.
+    function monFamilyKey(title) {
+        let s = String(title||'').toLowerCase();
+        // Версии года и редакции — основа кластера
+        const m = s.match(/(office\s+(?:365|2024|2021|2019|2016|2013|2010))\s*(pro\s*plus|home\s*and\s*business|home\s*and\s*student|professional\s*plus|professional|personal|family|standard|ltsc)?/i);
+        if(m) return (m[1] + ' ' + (m[2]||'')).replace(/\s+/g,' ').trim();
+        if(s.includes('365') && s.includes('microsoft')) return 'microsoft 365';
+        return 'прочее';
+    }
+
+    // Score «подозрительности»: чем выше — тем нагляднее нарушение.
+    // disc 0-100 + бонусы за низкую абсолютную цену и количество флажков.
+    function monScore(r) {
+        const f = r.flags || monComputeFlags(r);
+        let s = Math.max(0, f.disc);                          // 0..100
+        s += monFlagCount(f) * 3;                             // до +18
+        if(r.price < 100) s += 10;
+        else if(r.price < 300) s += 5;
+        // Аномально-низкая цена при высокой op = «приманка»
+        if(r.op > 10000 && r.price < r.op * 0.01) s += 5;
+        return s;
+    }
+
+    // Применить выбранный пресет сортировки.
+    function monApplyPreset() {
+        const preset = monState.sortPreset || 'default';
+        // Подсчитываем размеры «семей» один раз, если нужен family-режим
+        let famCount = null;
+        if(preset === 'family') {
+            famCount = new Map();
+            monFiltered.forEach(r => {
+                const k = monFamilyKey(r.title);
+                famCount.set(k, (famCount.get(k)||0) + 1);
+            });
+        }
+        const titleCmp = (a, b) => String(a.title||'').localeCompare(String(b.title||''),'ru');
+        monFiltered.sort((a, b) => {
+            const da = a.flags.disc, db = b.flags.disc;
+            if(preset === 'default') {
+                if(da !== db) return db - da;          // дисконт ↓
+                if(a.price !== b.price) return a.price - b.price;  // цена ↑
+                return titleCmp(a, b);                              // название ↑
+            }
+            if(preset === 'score') {
+                const sa = monScore(a), sb = monScore(b);
+                if(sa !== sb) return sb - sa;          // score ↓
+                if(a.price !== b.price) return a.price - b.price;
+                return titleCmp(a, b);
+            }
+            if(preset === 'loss') {
+                const la = (a.op||0) - a.price, lb = (b.op||0) - b.price;
+                if(la !== lb) return lb - la;          // потери ↓
+                if(da !== db) return db - da;
+                return titleCmp(a, b);
+            }
+            if(preset === 'family') {
+                const ka = monFamilyKey(a.title), kb = monFamilyKey(b.title);
+                const ca = famCount.get(ka)||0, cb = famCount.get(kb)||0;
+                if(ca !== cb) return cb - ca;          // массовость семьи ↓
+                if(ka !== kb) return ka.localeCompare(kb);
+                if(da !== db) return db - da;
+                return a.price - b.price;
+            }
+            if(preset === 'pl') {
+                if(a.pl !== b.pl) return String(a.pl).localeCompare(String(b.pl));
+                if(da !== db) return db - da;
+                if(a.price !== b.price) return a.price - b.price;
+                return titleCmp(a, b);
+            }
+            if(preset === 'recent') {
+                // Когда появится timeseries из Supabase, date будет содержать
+                // реальную дату появления карточки. Сейчас падаем обратно на default.
+                const d = String(b.date||'').localeCompare(String(a.date||''));
+                if(d !== 0) return d;                   // дата ↓
+                if(da !== db) return db - da;
+                return a.price - b.price;
+            }
+            return 0;
+        });
+    }
+
+    // Маппинг пресет → "эффективная" первичная колонка + направление.
+    // Используется для отображения стрелочки ▼/▲ на колонке, по которой
+    // пресет фактически сортирует (чтобы пользователь видел, что происходит).
+    const MON_PRESET_COLUMN = {
+        default: {col: 'disc', dir: -1},   // дисконт ↓
+        score:   {col: 'disc', dir: -1},   // приближённо: score сильно коррелирует с disc
+        loss:    {col: 'op',   dir: -1},   // (op-price)↓ — ближайшая колонка op↓
+        family:  {col: 'title', dir: 1},   // приближённо: внутри семьи — алфавит
+        pl:      {col: 'pl',   dir: 1},    // площадка ↑
+        recent:  {col: 'date', dir: -1},   // дата ↓
+    };
+
+    function monSetPreset(preset, btn) {
+        monState.sortPreset = preset;
+        // Выставляем sortCol/sortDir по маппингу — стрелка ▼/▲ появится на нужной колонке.
+        const mapping = MON_PRESET_COLUMN[preset] || {col: '', dir: 1};
+        monState.sortCol = mapping.col;
+        monState.sortDir = mapping.dir;
+        document.querySelectorAll('#monSortPresetBtns .mon-filter-btn').forEach(b => b.classList.remove('active'));
+        if(btn) btn.classList.add('active');
+        monState.page = 0;
+        monApplySortToFiltered();
+        monUpdateSortIndicators();
+        monRender();
+    }
+    function monUpdateSortIndicators() {
+        ['date','pl','title','price','op','disc','flags'].forEach(c => {
+            const el = document.getElementById('mts-'+c);
+            if(!el) return;
+            if(monState.sortCol===c) {
+                // Активная сортировка: контрастный треугольник
+                el.innerHTML = monState.sortDir===1
+                    ? ' <span style="color:#1a3a6b;font-weight:700;">▲</span>'
+                    : ' <span style="color:#1a3a6b;font-weight:700;">▼</span>';
+            } else {
+                // Подсказка что колонка сортируема (приглушённый ↕)
+                el.innerHTML = ' <span style="color:#ccc;font-size:10px;">↕</span>';
+            }
+        });
+    }
+    function monPrev() { if(monState.page>0){monState.page--;monRender();} }
+    function monNext() { if((monState.page+1)*monState.pageSize<monFiltered.length){monState.page++;monRender();} }
+    function monSetPageSize(n, btn) {
+        monState.pageSize = n; monState.page = 0;
+        document.querySelectorAll('#monPageSizeBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
+        if(btn) btn.classList.add('active');
+        monRender();
+    }
+    function runScan() {
+        const s=document.getElementById('scanStatus');
+        s.style.background='#fff9c4';s.style.color='#f57f17';s.textContent='⏳ Обновляется...';
+        setTimeout(()=>{
+            s.style.background='#e8f5e9';s.style.color='#2e7d32';s.textContent='✓ Актуально';
+            const now=new Date();
+            document.getElementById('scanLastTime').textContent=now.toLocaleDateString('ru')+', '+now.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
+            monApplyFilters();
+        },2200);
+    }
+    function exportMonCSV() {
+        const d=new Date().toISOString().slice(0,10);
+        // RFC 4180: поля с "," '"' или \n заключаем в кавычки, внутренние " удваиваем.
+        // Без этого 225 карточек с запятыми в title ломали выгрузку.
+        const esc = v => {
+            const s = String(v == null ? '' : v);
+            return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+        };
+        const hdr = ['Площадка','ID','Название','URL','Цена (руб.)','Офиц. цена (руб.)','Дисконт (%)','Флажки','Дата обнаружения','Дата выгрузки'];
+        const lines = [hdr.map(esc).join(',')];
+        monFiltered.forEach(r=>{
+            const f=r.flags;
+            const flags=[f.F1?'F1':'',f.F2?'F2':'',f.F3===true?'F3':f.F3===null?'F3?':'',f.F4===true?'F4':f.F4===null?'F4?':'',f.F5?'F5':'',f.F6?'F6':''].filter(Boolean).join(';');
+            lines.push([
+                MON_PL_LABEL[r.pl], r.id, r.title, r.url,
+                r.price, r.op, f.disc, flags, r.date, d
+            ].map(esc).join(','));
+        });
+        // BOM (\uFEFF) для корректного UTF-8 в Excel + CRLF (RFC 4180)
+        const csv = '\uFEFF' + lines.join('\r\n') + '\r\n';
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+        a.download=`monitoring_${d}.csv`;a.click();
+    }
+    function exportMonXLSX() {
+        if(typeof XLSX==='undefined'){alert('SheetJS не загружен');return;}
+        const d=new Date().toISOString().slice(0,10);
+        const hdr=['Площадка','ID','Название','URL','Цена (руб.)','Офиц. цена (руб.)','Дисконт (%)','Флажки','Дата обнаружения','Дата выгрузки'];
+        const rows=monFiltered.map(r=>{
+            const f=r.flags;
+            const flags=[f.F1?'F1':'',f.F2?'F2':'',f.F3===true?'F3':f.F3===null?'F3?':'',f.F4===true?'F4':f.F4===null?'F4?':'',f.F5?'F5':'',f.F6?'F6':''].filter(Boolean).join('; ');
+            return [MON_PL_LABEL[r.pl],r.id,r.title,r.url,r.price,r.op,f.disc,flags,r.date,d];
+        });
+        const ws=XLSX.utils.aoa_to_sheet([hdr,...rows]);
+        ws['!cols']=[12,18,50,45,10,12,10,20,12,12].map(w=>({wch:w}));
+        const wb=XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Мониторинг');
+        XLSX.writeFile(wb, `monitoring_${d}.xlsx`);
+    }
+
+    // Инициализация мониторинга при загрузке
+    document.addEventListener('DOMContentLoaded', function() { loadFromSupabase(); });
+
+</script>
 </body>
 </html>
