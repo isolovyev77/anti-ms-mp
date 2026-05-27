@@ -2113,6 +2113,21 @@
             let mapped = rows.map(mapSupabaseRow).filter(r => r.title && titleOkClient(r.title) && isCounterfeit(r));
             console.log('После titleOk + 0.5×op:', mapped.length);
 
+            // Дедуп на клиенте — страховка. БД имеет UNIQUE (pl, product_id),
+            // но если что-то пойдёт не так с миграцией, клиент возьмёт первую
+            // встреченную (свежую) карточку.
+            const seenIds = new Set();
+            const beforeDedup = mapped.length;
+            mapped = mapped.filter(r => {
+                const key = r.pl + '|' + r.id;
+                if (seenIds.has(key)) return false;
+                seenIds.add(key);
+                return true;
+            });
+            if (mapped.length < beforeDedup) {
+                console.warn('Client-side dedup убрал', beforeDedup - mapped.length, 'дубликатов — есть проблема в БД');
+            }
+
             // ВАЖНО: показываем только last_seen свежий снимок маркетплейсов.
             // В Supabase listings — накопительный архив (карточки от 19.03 + миграции
             // + все cron-прогоны). Без этого фильтра одни и те же продавцы
