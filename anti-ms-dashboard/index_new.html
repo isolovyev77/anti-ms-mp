@@ -2113,6 +2113,20 @@
             let mapped = rows.map(mapSupabaseRow).filter(r => r.title && titleOkClient(r.title) && isCounterfeit(r));
             console.log('После titleOk + 0.5×op:', mapped.length);
 
+            // ВАЖНО: показываем только last_seen свежий снимок маркетплейсов.
+            // В Supabase listings — накопительный архив (карточки от 19.03 + миграции
+            // + все cron-прогоны). Без этого фильтра одни и те же продавцы
+            // дублировались бы по разным дням. С фильтром остаются только
+            // карточки, которые были видны на последнем парсинге.
+            // (Карточки удалённые с маркетплейса автоматически выпадают, потому что
+            // их last_seen не обновился последним прогоном.)
+            if (mapped.length > 0) {
+                const latestDate = mapped.reduce((max, r) => (r.last_seen && r.last_seen > max) ? r.last_seen : max, mapped[0].last_seen || '');
+                const beforeFresh = mapped.length;
+                mapped = mapped.filter(r => r.last_seen === latestDate);
+                console.log('После фильтра last_seen=' + latestDate + ':', mapped.length, '(из', beforeFresh + ')');
+            }
+
             // Подменим MON_RAW и пересчитаем MON_DATA
             MON_RAW = mapped;
             MON_DATA = mapped.map(r => ({...r, flags: monComputeFlags(r)}));
