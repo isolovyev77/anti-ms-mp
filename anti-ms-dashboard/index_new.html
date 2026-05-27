@@ -2121,10 +2121,11 @@
             // (Карточки удалённые с маркетплейса автоматически выпадают, потому что
             // их last_seen не обновился последним прогоном.)
             if (mapped.length > 0) {
-                const latestDate = mapped.reduce((max, r) => (r.last_seen && r.last_seen > max) ? r.last_seen : max, mapped[0].last_seen || '');
+                // r.date после mapSupabaseRow = last_seen || date в БД
+                const latestDate = mapped.reduce((max, r) => (r.date && r.date > max) ? r.date : max, mapped[0].date || '');
                 const beforeFresh = mapped.length;
-                mapped = mapped.filter(r => r.last_seen === latestDate);
-                console.log('После фильтра last_seen=' + latestDate + ':', mapped.length, '(из', beforeFresh + ')');
+                mapped = mapped.filter(r => r.date === latestDate);
+                console.log('После фильтра date=' + latestDate + ':', mapped.length, '(из', beforeFresh + ')');
             }
 
             // Подменим MON_RAW и пересчитаем MON_DATA
