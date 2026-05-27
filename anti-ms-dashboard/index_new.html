@@ -1372,12 +1372,13 @@
 
         // ========== INITIALIZATION & UTILITIES ==========
         document.addEventListener('DOMContentLoaded', function() {
-            /* initTabs removed */
-            initSearch();
-            initLegalSearch();
-            initExpandableCards();
-            initCounterGrid();
-            initCharts();
+            // try/catch — некоторые init относятся к удалённым вкладкам
+            // (counter, legal, charts) и падают на отсутствующих DOM-узлах
+            try { initSearch(); } catch(e) {}
+            try { initLegalSearch(); } catch(e) {}
+            try { initExpandableCards(); } catch(e) {}
+            try { initCounterGrid(); } catch(e) {}
+            try { initCharts(); } catch(e) {}
         });
 
         // ========== TAB SWITCHING ==========
