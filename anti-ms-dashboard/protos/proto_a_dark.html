@@ -3,54 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Прототип A — Командный центр (тёмный)</title>
+<title>Прототип A — Командный центр (полный)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
   :root{
     --bg:#0E1726; --panel:#16213A; --panel2:#1B2A41; --line:#243a5a;
     --tx:#E4ECF7; --muted:#8499B5;
-    --ozon:#2E7DFF; --wb:#E84BC9; --yandex:#FFD43B; --avito:#A879FF;
-    --accent:#33D6C8;
+    --ozon:#2E7DFF; --wb:#E84BC9; --yandex:#FFD43B; --avito:#A879FF; --accent:#33D6C8;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
   .layout{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
-  /* SIDEBAR */
   .side{background:linear-gradient(180deg,#16213A,#101a2e);border-right:1px solid var(--line);padding:22px 18px;position:sticky;top:0;height:100vh;overflow:auto}
-  .brand{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:24px}
   .brand .dot{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--ozon));display:flex;align-items:center;justify-content:center;font-size:16px}
   .brand b{font-size:15px;letter-spacing:.3px}
-  .side h4{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:22px 0 10px}
-  .chk{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;cursor:pointer;transition:.15s;font-size:13px}
-  .chk:hover{background:#1d2c45}
-  .chk.on{background:#1d2c45}
-  .chk .sw{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
-  .chk .cnt{margin-left:auto;font-size:12px;color:var(--muted)}
+  .side h4{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:20px 0 9px}
+  .chk{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:9px;cursor:pointer;transition:.15s;font-size:13px}
+  .chk:hover{background:#1d2c45}.chk.on{background:#1d2c45}
+  .chk .sw{width:11px;height:11px;border-radius:50%;flex:0 0 auto}.chk .cnt{margin-left:auto;font-size:12px;color:var(--muted)}
   .seg{display:flex;background:#101a2e;border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px;margin-top:4px}
   .seg button{flex:1;border:none;background:none;color:var(--muted);padding:7px 0;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
   .seg button.on{background:var(--accent);color:#06231f}
   .slider{width:100%;margin-top:10px;accent-color:var(--accent)}
-  /* MAIN */
-  .main{padding:24px 28px}
-  .top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px}
-  .top h1{font-size:22px;font-weight:700}
-  .top p{color:var(--muted);font-size:13px;margin-top:3px}
-  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px}
-  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px}
+  .qf{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+  .qf button{text-align:left;border:1px solid var(--line);background:#101a2e;color:var(--muted);padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12px}
+  .qf button.on{background:#1d2c45;color:var(--tx);border-color:var(--accent)}
+  .main{padding:22px 26px}
+  .top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+  .top h1{font-size:21px;font-weight:700}.top p{color:var(--muted);font-size:13px;margin-top:3px}
+  .btn{border:none;border-radius:9px;padding:9px 15px;font-size:13px;font-weight:600;cursor:pointer}
+  .btn-pri{background:var(--accent);color:#06231f}.btn-gh{background:#1d2c45;color:var(--tx);border:1px solid var(--line)}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin-bottom:16px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}
   .kpi .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-  .kpi .val{font-size:26px;font-weight:800;margin-top:6px}
-  .kpi .sub{font-size:12px;margin-top:4px;color:var(--accent)}
-  .grid{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;margin-bottom:16px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
-  .card h3{font-size:15px;font-weight:700;margin-bottom:2px}
-  .card .cap{font-size:12px;color:var(--muted);margin-bottom:14px}
-  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;font-size:12px;color:var(--muted)}
+  .kpi .val{font-size:25px;font-weight:800;margin-top:6px}.kpi .sub{font-size:12px;margin-top:4px;color:var(--accent)}
+  .grid{display:grid;grid-template-columns:1.7fr 1fr;gap:14px;margin-bottom:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:17px 19px}
+  .card h3{font-size:15px;font-weight:700}.card .cap{font-size:12px;color:var(--muted);margin:2px 0 12px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px;font-size:12px;color:var(--muted)}
   .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:middle}
-  .barrow{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13px}
-  .barrow .nm{width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
-  .barrow .tr{flex:1;background:#101a2e;border-radius:6px;height:14px;overflow:hidden}
+  .qtags{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+  .qtag{background:#101a2e;border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--tx)}
+  .qtag b{color:var(--accent);margin-left:5px}
+  .barrow{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+  .barrow .nm{width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
+  .barrow .tr{flex:1;background:#101a2e;border-radius:6px;height:13px;overflow:hidden}
   .barrow .fl{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--wb),#ff6ec7)}
-  .barrow .pc{width:46px;text-align:right;font-weight:700;color:#ff8fd6}
+  .barrow .pc{width:44px;text-align:right;font-weight:700;color:#ff8fd6}
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{text-align:left;padding:11px 12px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
+  tbody td{padding:11px 12px;border-bottom:1px solid #1c2c46}
+  tbody tr:hover{background:#19283f}
+  .plbadge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:11px;font-size:11px;font-weight:600;white-space:nowrap}
+  .apay{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#ff5470}
+  .disc{font-weight:800}
+  .fp{display:inline-block;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;margin-right:3px}
+  .fp-r{background:#3a1622;color:#ff6b8a}.fp-y{background:#3a3415;color:#ffd43b}.fp-o{background:#3a2615;color:#ff9f43}.fp-g{background:#21304a;color:#7e92ad}
+  .pager{display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-top:14px;color:var(--muted);font-size:13px}
+  .pager button{background:#1d2c45;border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:6px 12px;cursor:pointer}
+  a.lnk{color:var(--accent);text-decoration:none;font-size:12px;white-space:nowrap}
   .loading{color:var(--muted);padding:40px;text-align:center}
 </style>
 </head>
@@ -58,51 +71,70 @@
 <div class="layout">
   <aside class="side">
     <div class="brand"><div class="dot">◉</div><b>Контрафакт-мониторинг</b></div>
-
     <h4>Период</h4>
     <div class="seg"><button class="on" data-per="day">День</button><button data-per="week">Неделя</button><button data-per="all">Всё</button></div>
-
-    <h4>Площадки</h4>
-    <div id="platFilters"></div>
-
+    <h4>Площадки</h4><div id="platFilters"></div>
+    <h4>Поисковый запрос</h4><div class="qf" id="queryFilters"></div>
     <h4>Мин. дисконт: <span id="discVal" style="color:var(--accent)">50%</span></h4>
     <input class="slider" type="range" min="0" max="99" value="50" id="discSlider">
-
     <h4>Особое</h4>
     <label class="chk" id="apayChk"><span class="sw" style="background:var(--accent)"></span>💳 Только оплата через Avito</label>
   </aside>
 
   <main class="main">
     <div class="top">
-      <div><h1>Мониторинг признаков контрафакта ПО</h1><p>Командный центр · данные обновляются автоматически</p></div>
-      <div style="font-size:12px;color:var(--muted)">обновлено: <span id="upd">…</span></div>
+      <div><h1>Мониторинг признаков контрафакта ПО</h1><p>Командный центр · обновляется автоматически</p></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:12px;color:var(--muted)">обновлено: <span id="upd">…</span></span>
+        <button class="btn btn-gh" onclick="exportCSV()">📥 CSV</button>
+        <button class="btn btn-pri">🔄 Обновить</button>
+      </div>
     </div>
 
     <div class="kpis" id="kpis"><div class="loading">Загрузка из Supabase…</div></div>
 
     <div class="grid">
       <div class="card">
-        <h3>Динамика обнаружения по дням</h3>
-        <div class="cap">Уникальные карточки контрафакта, цвета площадок</div>
-        <div class="legend">
-          <span><i style="background:var(--ozon)"></i>Ozon</span>
-          <span><i style="background:var(--wb)"></i>Wildberries</span>
-          <span><i style="background:var(--yandex)"></i>Яндекс.Маркет</span>
-          <span><i style="background:var(--avito)"></i>Avito</span>
-        </div>
-        <canvas id="dynChart" height="120"></canvas>
+        <h3>Динамика обнаружения по дням</h3><div class="cap">Уникальные карточки контрафакта, цвета площадок</div>
+        <div class="legend"><span><i style="background:var(--ozon)"></i>Ozon</span><span><i style="background:var(--wb)"></i>Wildberries</span><span><i style="background:var(--yandex)"></i>Яндекс.Маркет</span><span><i style="background:var(--avito)"></i>Avito</span></div>
+        <canvas id="dynChart" height="115"></canvas>
       </div>
-      <div class="card">
-        <h3>Доля площадок</h3>
-        <div class="cap">Активный контрафакт сейчас</div>
-        <canvas id="donut" height="200"></canvas>
+      <div class="card"><h3>Доля площадок</h3><div class="cap">Активный контрафакт сейчас</div><canvas id="donut" height="190"></canvas></div>
+    </div>
+
+    <!-- Блок запросов на мониторинге -->
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <h3 style="margin:0">🔎 Поисковые запросы на мониторинге</h3>
+        <div class="qtags" id="qtags" style="flex:1"></div>
+        <button class="btn btn-gh">+ Добавить запрос</button>
       </div>
     </div>
 
+    <!-- Топ-10 (компактный, сворачиваемый) -->
+    <details class="card" style="margin-bottom:14px" open>
+      <summary style="cursor:pointer;font-weight:700;font-size:15px;list-style:none">🔥 Топ-10 по глубине дисконта <span style="font-weight:400;font-size:12px;color:var(--muted)">— приоритет для реагирования</span></summary>
+      <div id="topDisc" style="margin-top:12px"></div>
+    </details>
+
+    <!-- Полная таблица карточек -->
     <div class="card">
-      <h3>Топ-10 по глубине дисконта</h3>
-      <div class="cap">Самые вопиющие отклонения от официальной цены — приоритет для реагирования</div>
-      <div id="topDisc"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <h3 style="margin:0">Все карточки</h3>
+        <div style="font-size:13px;color:var(--muted)">Показано <b id="cnt" style="color:var(--tx)">0</b> из <b id="tot" style="color:var(--tx)">0</b></div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th onclick="sortBy('date')">Дата</th><th onclick="sortBy('pl')">Площадка</th>
+            <th onclick="sortBy('title')">Название</th><th>Ссылка</th>
+            <th onclick="sortBy('price')">Цена</th><th onclick="sortBy('op')">Офиц.</th>
+            <th onclick="sortBy('disc')">Дисконт</th><th>Флажки</th>
+          </tr></thead>
+          <tbody id="tbody"><tr><td colspan="8" class="loading">Загрузка…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pager"><button onclick="pg(-1)">← Назад</button><span>Стр. <b id="pnum">1</b> / <b id="ptot">1</b></span><button onclick="pg(1)">Вперёд →</button></div>
     </div>
   </main>
 </div>
@@ -112,50 +144,74 @@ const SUPABASE_URL="https://yqfdbuiyfkzhkhpiknob.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_nZNZLCqx4e_7La8pfQmsjA_RSw0zT9t";
 const PL={ozon:{n:'Ozon',c:'#2E7DFF'},wildberries:{n:'Wildberries',c:'#E84BC9'},yandex:{n:'Яндекс.Маркет',c:'#FFD43B'},avito:{n:'Avito',c:'#A879FF'}};
 function op(t){t=(t||'').toLowerCase();if(t.includes('pro plus')||t.includes('proplus')||t.includes('ltsc')||t.includes('professional'))return 39990;if(t.includes('home')&&t.includes('business'))return 22990;if(t.includes('home')&&t.includes('student'))return 14990;if(t.includes('365')&&t.includes('family'))return 5290;if(t.includes('365'))return 2790;if(t.includes('box'))return 6990;return 9990;}
-let RAW=[];
+const TM=['microsoft','office','windows'];
+function flags(r){const d=r._disc,tl=(r.title||'').toLowerCase(),tm=TM.some(k=>tl.includes(k)),cmp=tl.includes('совместимо')||tl.includes('compat');
+  return{F1:d>=50,F2:d>=80,F5:true,F6:tm&&!cmp,disc:d};}
+function flagPills(f){let p=[];if(f.F2)p.push('<span class="fp fp-r">🔴F2</span>');else if(f.F1)p.push('<span class="fp fp-r">🔴F1</span>');p.push('<span class="fp fp-y">🟡F5</span>');if(f.F6)p.push('<span class="fp fp-o">🟠F6</span>');return p.join('');}
+let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false,per:'day',sortCol:'disc',sortDir:-1,page:0,size:50},FILT=[];
+async function fetchAll(path){let all=[],from=0;while(true){const r=await fetch(`${SUPABASE_URL}${path}`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Range-Unit':'items',Range:`${from}-${from+999}`}});const b=await r.json();all=all.concat(b);if(b.length<1000)break;from+=1000;}return all;}
 async function load(){
-  let all=[],from=0;
-  while(true){
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/listings?select=pl,title,price,op,first_seen,last_seen,avito_pay&order=last_seen.desc`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Range-Unit':'items',Range:`${from}-${from+999}`}});
-    const b=await r.json();all=all.concat(b);if(b.length<1000)break;from+=1000;
-  }
-  RAW=all.map(r=>{const o=r.op||op(r.title);return{...r,_op:o,_disc:Math.round((1-r.price/o)*100),_cf:r.price>0&&r.price<0.5*o};});
+  const rows=await fetchAll(`/rest/v1/listings?select=pl,product_id,title,price,op,query,first_seen,last_seen,url,avito_pay&order=last_seen.desc`);
+  RAW=rows.map(r=>{const o=r.op||op(r.title);return{...r,_op:o,_disc:Math.round((1-r.price/o)*100),_cf:r.price>0&&r.price<0.5*o,apay:r.avito_pay===true};});
+  try{QUERIES=(await fetchAll(`/rest/v1/monitor_queries?select=query&active=eq.true&order=id`)).map(x=>x.query);}catch(e){QUERIES=[...new Set(RAW.map(r=>r.query).filter(Boolean))];}
   document.getElementById('upd').textContent=new Date().toLocaleString('ru',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-  render();
+  buildQueryFilters();buildQTags();renderCharts();apply();
 }
-function render(){
-  const cf=RAW.filter(r=>r._cf);
-  // KPI
-  const days=[...new Set(cf.map(r=>r.last_seen))].sort();
-  const maxDay=days[days.length-1];
-  const today=cf.filter(r=>r.last_seen===maxDay);
-  const newToday=cf.filter(r=>r.first_seen===maxDay).length;
-  const apay=cf.filter(r=>r.avito_pay===true).length;
-  const avgDisc=Math.round(today.reduce((s,r)=>s+r._disc,0)/(today.length||1));
-  document.getElementById('kpis').innerHTML=[
-    ['Активный контрафакт',today.length,'на последнюю дату'],
-    ['Средний дисконт',avgDisc+'%','ниже официальной'],
-    ['Новых за сутки','+'+newToday,'впервые замечены'],
-    ['💳 Через Avito',apay,'зона ответственности'],
-    ['Площадок',Object.keys(PL).length,'под наблюдением'],
-  ].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('');
-  // Dynamic stacked area
-  const dsets=Object.keys(PL).map(p=>({label:PL[p].n,data:days.map(d=>cf.filter(r=>r.last_seen===d&&r.pl===p).length),backgroundColor:PL[p].c+'cc',borderColor:PL[p].c,fill:true,tension:.4,pointRadius:2,borderWidth:2}));
-  new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:days.map(d=>d.slice(5)),datasets:dsets},options:{plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}},y:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}}}}});
-  // Donut
-  const byPl=Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length);
-  new Chart(document.getElementById('donut'),{type:'doughnut',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:byPl,backgroundColor:Object.values(PL).map(x=>x.c),borderColor:'#16213A',borderWidth:3}]},options:{cutout:'66%',plugins:{legend:{position:'bottom',labels:{color:'#8499B5',font:{size:11},padding:10}}}}});
-  // Top disc
+function maxDay(){return [...new Set(RAW.filter(r=>r._cf).map(r=>r.last_seen))].sort().pop();}
+function renderCharts(){
+  const cf=RAW.filter(r=>r._cf);const days=[...new Set(cf.map(r=>r.last_seen))].sort();const md=maxDay();const today=cf.filter(r=>r.last_seen===md);
+  const newToday=cf.filter(r=>r.first_seen===md).length,apay=cf.filter(r=>r.apay).length,avg=Math.round(today.reduce((s,r)=>s+r._disc,0)/(today.length||1));
+  document.getElementById('kpis').innerHTML=[['Активный контрафакт',today.length,'на последнюю дату'],['Средний дисконт',avg+'%','ниже официальной'],['Новых за сутки','+'+newToday,'впервые замечены'],['💳 Через Avito',apay,'зона ответственности'],['Площадок',Object.keys(PL).length,'под наблюдением']].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('');
+  const ds=Object.keys(PL).map(p=>({label:PL[p].n,data:days.map(d=>cf.filter(r=>r.last_seen===d&&r.pl===p).length),backgroundColor:PL[p].c+'cc',borderColor:PL[p].c,fill:true,tension:.4,pointRadius:2,borderWidth:2}));
+  new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:days.map(d=>d.slice(5)),datasets:ds},options:{plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}},y:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}}}}});
+  new Chart(document.getElementById('donut'),{type:'doughnut',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:'#16213A',borderWidth:3}]},options:{cutout:'66%',plugins:{legend:{position:'bottom',labels:{color:'#8499B5',font:{size:11},padding:9}}}}});
   const top=[...today].sort((a,b)=>b._disc-a._disc).slice(0,10);
-  document.getElementById('topDisc').innerHTML=top.map(r=>`<div class="barrow"><span class="nm" title="${r.title}">${(r.title||'').slice(0,40)}</span><span class="tr"><span class="fl" style="width:${r._disc}%"></span></span><span class="pc">${r._disc}%</span></div>`).join('');
+  document.getElementById('topDisc').innerHTML=top.map(r=>`<div class="barrow"><span class="nm" title="${r.title}">${(r.title||'').slice(0,38)}</span><span class="tr"><span class="fl" style="width:${Math.max(0,r._disc)}%"></span></span><span class="pc">${r._disc}%</span></div>`).join('');
 }
-// filters (визуальные — для прототипа полноценную фильтрацию подключим при выборе концепта)
-document.getElementById('discSlider').oninput=e=>document.getElementById('discVal').textContent=e.target.value+'%';
-document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
-function buildPlat(){document.getElementById('platFilters').innerHTML=Object.keys(PL).map(p=>`<label class="chk on"><span class="sw" style="background:${PL[p].c}"></span>${PL[p].n}</label>`).join('');document.querySelectorAll('#platFilters .chk').forEach(c=>c.onclick=()=>c.classList.toggle('on'));}
-buildPlat();
-document.getElementById('apayChk').onclick=function(){this.classList.toggle('on');};
-load();
+function buildQTags(){const md=maxDay();const cf=RAW.filter(r=>r._cf&&r.last_seen===md);
+  document.getElementById('qtags').innerHTML=QUERIES.map(q=>`<span class="qtag">${q}<b>${cf.filter(r=>r.query===q).length}</b></span>`).join('');}
+function buildQueryFilters(){const c=document.getElementById('queryFilters');
+  c.innerHTML=`<button class="on" data-q="">Все запросы</button>`+QUERIES.map(q=>`<button data-q="${q}">${q}</button>`).join('');
+  c.querySelectorAll('button').forEach(b=>b.onclick=()=>{c.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.q=b.dataset.q;state.page=0;apply();});}
+function apply(){
+  const md=maxDay();
+  FILT=RAW.filter(r=>r._cf)
+    .filter(r=>state.per==='all'?true:r.last_seen===md)
+    .filter(r=>state.pl.has(r.pl))
+    .filter(r=>r._disc>=state.disc)
+    .filter(r=>!state.apay||r.apay)
+    .filter(r=>!state.q||r.query===state.q);
+  FILT.sort((a,b)=>{const k=state.sortCol;let av,bv;if(k==='date'){av=a.last_seen;bv=b.last_seen}else if(k==='pl'){av=a.pl;bv=b.pl}else if(k==='title'){av=a.title;bv=b.title}else if(k==='price'){av=a.price;bv=b.price}else if(k==='op'){av=a._op;bv=b._op}else{av=a._disc;bv=b._disc}return (av>bv?1:av<bv?-1:0)*state.sortDir;});
+  document.getElementById('tot').textContent=FILT.length;document.getElementById('cnt').textContent=Math.min(FILT.length,state.size);
+  renderTable();
+}
+function renderTable(){
+  const st=state.page*state.size,items=FILT.slice(st,st+state.size);
+  document.getElementById('ptot').textContent=Math.max(1,Math.ceil(FILT.length/state.size));document.getElementById('pnum').textContent=state.page+1;
+  document.getElementById('tbody').innerHTML=items.map(r=>{const f=flags(r);const dc=r._disc>=95?'#ff5470':r._disc>=80?'#ff9f43':'#ffd43b';
+    return `<tr>
+      <td style="white-space:nowrap;color:var(--muted)">${(r.last_seen||'').slice(5).split('-').reverse().join('.')}</td>
+      <td><span class="plbadge" style="background:${PL[r.pl].c}22;color:${PL[r.pl].c}">${PL[r.pl].n}</span> ${r.apay?'<span class="apay" title="Оплата через Avito"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>':''}</td>
+      <td style="max-width:280px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${(r.title||'').replace(/"/g,'&quot;')}">${(r.title||'').slice(0,55)}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">🔎 ${r.query||''}</div></td>
+      <td><a class="lnk" href="${r.url}" target="_blank" rel="noopener">Открыть ↗</a></td>
+      <td style="font-weight:700">${(r.price||0).toLocaleString('ru')} ₽</td>
+      <td style="color:var(--muted)">${r._op.toLocaleString('ru')} ₽</td>
+      <td class="disc" style="color:${dc}">${r._disc}%</td>
+      <td style="white-space:nowrap">${flagPills(f)}</td>
+    </tr>`;}).join('')||'<tr><td colspan="8" class="loading">Нет карточек под фильтры</td></tr>';
+}
+function sortBy(c){if(state.sortCol===c)state.sortDir*=-1;else{state.sortCol=c;state.sortDir=(c==='title'||c==='pl')?1:-1;}apply();}
+function pg(d){const mx=Math.ceil(FILT.length/state.size);state.page=Math.max(0,Math.min(mx-1,state.page+d));renderTable();}
+function exportCSV(){const h=['Дата','Площадка','Название','URL','Цена','Офиц','Дисконт%','Оплата Avito','Запрос'];const esc=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const lines=[h.join(',')].concat(FILT.map(r=>[r.last_seen,PL[r.pl].n,r.title,r.url,r.price,r._op,r._disc,r.apay?'да':'',r.query].map(esc).join(',')));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv'}));a.download='contraband_'+maxDay()+'.csv';a.click();}
+// sidebar wiring
+function buildPlat(){document.getElementById('platFilters').innerHTML=Object.keys(PL).map(p=>`<label class="chk on" data-pl="${p}"><span class="sw" style="background:${PL[p].c}"></span>${PL[p].n}</label>`).join('');
+  document.querySelectorAll('#platFilters .chk').forEach(c=>c.onclick=()=>{c.classList.toggle('on');const p=c.dataset.pl;if(c.classList.contains('on'))state.pl.add(p);else state.pl.delete(p);state.page=0;apply();});}
+document.getElementById('discSlider').oninput=e=>{document.getElementById('discVal').textContent=e.target.value+'%';state.disc=+e.target.value;state.page=0;apply();};
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.per=b.dataset.per;state.page=0;apply();});
+document.getElementById('apayChk').onclick=function(){this.classList.toggle('on');state.apay=this.classList.contains('on');state.page=0;apply();};
+buildPlat();load();
 </script>
 </body>
 </html>
