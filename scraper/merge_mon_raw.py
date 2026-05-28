@@ -140,9 +140,14 @@ def format_record(r: dict) -> str:
         auth = 'null'
     else:
         auth = 'true' if r['auth'] else 'false'
-    # apay рендерим только для карточек с признаком true — чтобы не раздувать
-    # MON_RAW. Отсутствие поля в JS = falsy, фильтр/значок не сработают.
-    apay_part = ',apay:true' if r.get('apay') is True else ''
+    # apay: true (оплата через Avito) / false (проверено, оплаты нет) рендерим оба,
+    # чтобы в экспорте честно различать «нет» и «не проверено» (отсутствие поля).
+    if r.get('apay') is True:
+        apay_part = ',apay:true'
+    elif r.get('apay') is False:
+        apay_part = ',apay:false'
+    else:
+        apay_part = ''
     return (
         "{"
         f"date:'{r['date']}',"

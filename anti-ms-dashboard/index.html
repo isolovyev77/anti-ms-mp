@@ -5577,7 +5577,7 @@
         monFiltered.forEach(r=>{
             const f=r.flags;
             const flags=[f.F1?'F1':'',f.F2?'F2':'',f.F3===true?'F3':f.F3===null?'F3?':'',f.F4===true?'F4':f.F4===null?'F4?':'',f.F5?'F5':'',f.F6?'F6':''].filter(Boolean).join(';');
-            const apay = r.apay===true ? 'да' : (r.pl==='avito' ? 'нет' : '');
+            const apay = r.apay===true ? 'да' : (r.apay===false ? 'нет' : (r.pl==='avito' ? 'не проверено' : ''));
             lines.push([
                 MON_PL_LABEL[r.pl], r.id, r.title, r.url,
                 r.price, r.op, f.disc, flags, apay, r.date, d
@@ -5596,7 +5596,7 @@
         const rows=monFiltered.map(r=>{
             const f=r.flags;
             const flags=[f.F1?'F1':'',f.F2?'F2':'',f.F3===true?'F3':f.F3===null?'F3?':'',f.F4===true?'F4':f.F4===null?'F4?':'',f.F5?'F5':'',f.F6?'F6':''].filter(Boolean).join('; ');
-            const apay = r.apay===true ? 'да' : (r.pl==='avito' ? 'нет' : '');
+            const apay = r.apay===true ? 'да' : (r.apay===false ? 'нет' : (r.pl==='avito' ? 'не проверено' : ''));
             return [MON_PL_LABEL[r.pl],r.id,r.title,r.url,r.price,r.op,f.disc,flags,apay,r.date,d];
         });
         const ws=XLSX.utils.aoa_to_sheet([hdr,...rows]);
