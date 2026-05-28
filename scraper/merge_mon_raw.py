@@ -40,7 +40,8 @@ RAW_OBJ_RE = re.compile(
     r"price:(?P<price>\d+),"
     r"op:(?P<op>\d+),"
     r"regDays:(?P<regDays>null|\d+),"
-    r"auth:(?P<auth>null|true|false)\}"
+    r"auth:(?P<auth>null|true|false)"
+    r"(?:,apay:(?P<apay>true|false))?\}"
 )
 
 
@@ -115,7 +116,7 @@ def load_fresh_for(source: Path) -> list[dict]:
 
 
 def normalize(entry: dict) -> dict:
-    return {
+    out = {
         'date': entry['date'],
         'pl': entry['pl'],
         'id': entry['id'],
@@ -127,6 +128,10 @@ def normalize(entry: dict) -> dict:
         'regDays': entry.get('regDays'),
         'auth': entry.get('auth'),
     }
+    # apay добавляем только если поле задано (есть данные enrich_avito_pay)
+    if 'apay' in entry and entry['apay'] is not None:
+        out['apay'] = bool(entry['apay'])
+    return out
 
 
 def format_record(r: dict) -> str:
@@ -135,6 +140,9 @@ def format_record(r: dict) -> str:
         auth = 'null'
     else:
         auth = 'true' if r['auth'] else 'false'
+    # apay рендерим только для карточек с признаком true — чтобы не раздувать
+    # MON_RAW. Отсутствие поля в JS = falsy, фильтр/значок не сработают.
+    apay_part = ',apay:true' if r.get('apay') is True else ''
     return (
         "{"
         f"date:'{r['date']}',"
@@ -147,6 +155,7 @@ def format_record(r: dict) -> str:
         f"op:{r['op']},"
         f"regDays:{reg},"
         f"auth:{auth}"
+        f"{apay_part}"
         "}"
     )
 

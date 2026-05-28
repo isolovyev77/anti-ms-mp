@@ -3122,6 +3122,13 @@
                             <button class="mon-filter-btn" onclick="monToggleFlag(3,this)">3+</button>
                         </div>
                     </div>
+                    <div>
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Оплата через Avito</div>
+                        <div style="display:flex;gap:6px;" id="monApayBtns">
+                            <button class="mon-filter-btn active" onclick="monToggleApay('all',this)" title="Все карточки">Все</button>
+                            <button class="mon-filter-btn" onclick="monToggleApay('yes',this)" title="Только объявления с оплатой через инфраструктуру Avito (Авито Доставка / безопасная сделка) — прямая зона ответственности площадки">💳 Только через Avito</button>
+                        </div>
+                    </div>
                     <div style="flex:1;min-width:180px;">
                         <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Поиск по названию</div>
                         <input type="text" id="monSearch" placeholder="Введите название..." oninput="monApplyFilters()"
@@ -5215,7 +5222,7 @@
     // Совпадает с предсортировкой в Python merge_mon_raw.py. Клик по заголовку
     // колонки переключает на режим 'col' (sortPreset='col').
     // sortCol/sortDir выставлены под пресет 'default' — индикатор ▼ на колонке «Дисконт».
-    let monState = {pl:'all', disc:0, flag:0, search:'', query:'', page:0, pageSize:50,
+    let monState = {pl:'all', disc:0, flag:0, search:'', query:'', apay:'all', page:0, pageSize:50,
                     sortCol:'disc', sortDir:-1, sortPreset:'default'};
     let monFiltered = [...MON_DATA];
 
@@ -5319,12 +5326,18 @@
         document.querySelectorAll('#monFlagBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
         btn.classList.add('active'); monApplyFilters();
     }
+    function monToggleApay(v, btn) {
+        monState.apay=v; monState.page=0;
+        document.querySelectorAll('#monApayBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active'); monApplyFilters();
+    }
     function monApplyFilters() {
         const s = (document.getElementById('monSearch')?.value||'').toLowerCase();
         monFiltered = MON_DATA.filter(r => {
             if(monState.pl!=='all' && r.pl!==monState.pl) return false;
             if(r.flags.disc < monState.disc) return false;
             if(monFlagCount(r.flags) < monState.flag) return false;
+            if(monState.apay==='yes' && r.apay !== true) return false;
             if(s && !r.title.toLowerCase().includes(s)) return false;
             if(monState.query && r.query && !r.query.toLowerCase().includes(monState.query.toLowerCase()) && !r.title.toLowerCase().includes(monState.query.toLowerCase())) return false;
             return true;
@@ -5350,9 +5363,13 @@
             const dc = f.disc>=95?'color:#c62828':f.disc>=80?'color:#e65100':'color:#f57c00';
             const d = r.date.split('-').reverse().join('.');
             const qLabel = r.query ? `<div style="font-size:10px;color:#888;margin-top:2px;">🔎 ${r.query}</div>` : '';
+            // Значок «Оплата через инфраструктуру Avito» — прямая зона ответственности площадки
+            const apayBadge = r.apay === true
+                ? `<div style="margin-top:3px;"><span title="Покупка с Авито Доставкой / безопасной сделкой — оплата проходит через инфраструктуру Avito. По заявлению самой площадки, за такие объявления она несёт ответственность." style="display:inline-block;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700;background:#ffebee;color:#c62828;border:1px solid #ef9a9a;">💳 оплата через Avito</span></div>`
+                : '';
             return `<tr>
                 <td style="white-space:nowrap;font-size:12px;">${d}</td>
-                <td><span style="display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;${MON_PL_STYLE[r.pl]}">${MON_PL_LABEL[r.pl]}</span></td>
+                <td><span style="display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;${MON_PL_STYLE[r.pl]}">${MON_PL_LABEL[r.pl]}</span>${apayBadge}</td>
                 <td style="max-width:220px;" title="${r.title}"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.title.length>55?r.title.slice(0,55)+'…':r.title}</div>${qLabel}</td>
                 <td><a href="${r.url}" target="_blank" rel="noopener" style="color:var(--ozon-blue);font-size:12px;white-space:nowrap;">Поиск ↗</a></td>
                 <td style="font-weight:700;">${r.price.toLocaleString('ru')} ₽</td>
@@ -5559,14 +5576,15 @@
             const s = String(v == null ? '' : v);
             return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
         };
-        const hdr = ['Площадка','ID','Название','URL','Цена (руб.)','Офиц. цена (руб.)','Дисконт (%)','Флажки','Дата обнаружения','Дата выгрузки'];
+        const hdr = ['Площадка','ID','Название','URL','Цена (руб.)','Офиц. цена (руб.)','Дисконт (%)','Флажки','Оплата через Avito','Дата обнаружения','Дата выгрузки'];
         const lines = [hdr.map(esc).join(',')];
         monFiltered.forEach(r=>{
             const f=r.flags;
             const flags=[f.F1?'F1':'',f.F2?'F2':'',f.F3===true?'F3':f.F3===null?'F3?':'',f.F4===true?'F4':f.F4===null?'F4?':'',f.F5?'F5':'',f.F6?'F6':''].filter(Boolean).join(';');
+            const apay = r.apay===true ? 'да' : (r.pl==='avito' ? 'нет' : '');
             lines.push([
                 MON_PL_LABEL[r.pl], r.id, r.title, r.url,
-                r.price, r.op, f.disc, flags, r.date, d
+                r.price, r.op, f.disc, flags, apay, r.date, d
             ].map(esc).join(','));
         });
         // BOM (\uFEFF) для корректного UTF-8 в Excel + CRLF (RFC 4180)
@@ -5578,14 +5596,15 @@
     function exportMonXLSX() {
         if(typeof XLSX==='undefined'){alert('SheetJS не загружен');return;}
         const d=new Date().toISOString().slice(0,10);
-        const hdr=['Площадка','ID','Название','URL','Цена (руб.)','Офиц. цена (руб.)','Дисконт (%)','Флажки','Дата обнаружения','Дата выгрузки'];
+        const hdr=['Площадка','ID','Название','URL','Цена (руб.)','Офиц. цена (руб.)','Дисконт (%)','Флажки','Оплата через Avito','Дата обнаружения','Дата выгрузки'];
         const rows=monFiltered.map(r=>{
             const f=r.flags;
             const flags=[f.F1?'F1':'',f.F2?'F2':'',f.F3===true?'F3':f.F3===null?'F3?':'',f.F4===true?'F4':f.F4===null?'F4?':'',f.F5?'F5':'',f.F6?'F6':''].filter(Boolean).join('; ');
-            return [MON_PL_LABEL[r.pl],r.id,r.title,r.url,r.price,r.op,f.disc,flags,r.date,d];
+            const apay = r.apay===true ? 'да' : (r.pl==='avito' ? 'нет' : '');
+            return [MON_PL_LABEL[r.pl],r.id,r.title,r.url,r.price,r.op,f.disc,flags,apay,r.date,d];
         });
         const ws=XLSX.utils.aoa_to_sheet([hdr,...rows]);
-        ws['!cols']=[12,18,50,45,10,12,10,20,12,12].map(w=>({wch:w}));
+        ws['!cols']=[12,18,50,45,10,12,10,20,18,12,12].map(w=>({wch:w}));
         const wb=XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Мониторинг');
         XLSX.writeFile(wb, `monitoring_${d}.xlsx`);

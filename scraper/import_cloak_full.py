@@ -32,6 +32,16 @@ SOURCES = {
     'yandex':      LAB / 'ym_cloak_full.json',
 }
 
+# Карта «оплата через инфраструктуру Avito» из enrich_avito_pay.py
+# { 'AV-12345': true/false }. None/отсутствие = не проверено.
+AVITO_PAY = {}
+_apay_file = LAB / 'avito_pay.json'
+if _apay_file.exists():
+    try:
+        AVITO_PAY = json.loads(_apay_file.read_text(encoding='utf-8'))
+    except Exception:
+        AVITO_PAY = {}
+
 OFFICIAL_PRICES = {
     # Microsoft 365 — годовые подписки
     'm365_personal':       2790,   # 1 устройство, 1 ТБ OneDrive
@@ -134,7 +144,7 @@ def normalize_item(pl: str, it: dict, today: str) -> dict | None:
     if price >= op * 0.5:
         return None
     url = it.get('url') or ''
-    return {
+    rec = {
         'date': today,
         'pl': pl,
         'id': f"{PL_PREFIX[pl]}-{raw_id}",
@@ -142,10 +152,17 @@ def normalize_item(pl: str, it: dict, today: str) -> dict | None:
         'title': title[:120],
         'url': url,
         'price': price,
-        'op': official_price(title),
+        'op': op,
         'regDays': None,
         'auth': None,
     }
+    # apay: оплата через инфраструктуру Avito (из enrich_avito_pay.py).
+    # True — есть кнопка покупки/доставки через Avito (зона ответственности площадки),
+    # False — только «Написать»/телефон (оплата вне Avito), None — не проверено.
+    apay = AVITO_PAY.get(rec['id'])
+    if apay is not None:
+        rec['apay'] = apay
+    return rec
 
 
 def main() -> int:
