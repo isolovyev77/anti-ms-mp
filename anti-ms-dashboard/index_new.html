@@ -1152,8 +1152,14 @@
         // Только Windows (не Office)
         if (/^(код|ключ|лицензия)\s+windows\b/.test(t) || /^windows\s+\d/.test(t)) return false;
         // Книги о Office
-        const bookKw = ['книга', 'руководство', 'учебник', 'самоучитель', 'шаг за шагом'];
+        const bookKw = ['книга', 'руководство', 'учебник', 'учебное', 'пособие', 'самоучитель', 'шаг за шагом', 'методичк', 'power bi'];
         if (bookKw.some(e => t.includes(e))) return false;
+        // Железо с предустановленным Office (ноутбук/моноблок/ПК) — не ключ.
+        // ВАЖНО: «ключ ДЛЯ ноутбука/macbook/планшета» — валидный ключ (предлог «для»).
+        const brandHW = /vivobook|ideapad|thinkbook|thinkpad|magicbook|matebook|aspire\s+go|ozon-?book|ninkear|super-?book/.test(t);
+        const genericHW = (/\bноутбук\b|\bnotebook\b|\blaptop\b|моноблок|неттоп|системный блок/.test(t)
+                           && !/для\s+(ноутбук|notebook|laptop|macbook|план|пк|компьютер|устройств)/.test(t));
+        if (brandHW || genericHW) return false;
         return true;
     }
 

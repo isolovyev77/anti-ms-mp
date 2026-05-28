@@ -75,10 +75,8 @@
     <div class="seg"><button class="on" data-per="day">День</button><button data-per="week">Неделя</button><button data-per="all">Всё</button></div>
     <h4>Площадки</h4><div id="platFilters"></div>
     <h4>Поисковый запрос</h4><div class="qf" id="queryFilters"></div>
-    <h4>Мин. дисконт: <span id="discVal" style="color:var(--accent)">50%</span></h4>
+    <h4>Мин. дисконт: <span id="discVal" style="color:var(--accent)">50%</span> · <span id="discCnt" style="color:var(--muted)">0</span> карт.</h4>
     <input class="slider" type="range" min="0" max="99" value="50" id="discSlider">
-    <h4>Особое</h4>
-    <label class="chk" id="apayChk"><span class="sw" style="background:var(--accent)"></span>💳 Только оплата через Avito</label>
   </aside>
 
   <main class="main">
@@ -97,9 +95,9 @@
       <div class="card">
         <h3>Динамика обнаружения по дням</h3><div class="cap">Уникальные карточки контрафакта, цвета площадок</div>
         <div class="legend"><span><i style="background:var(--ozon)"></i>Ozon</span><span><i style="background:var(--wb)"></i>Wildberries</span><span><i style="background:var(--yandex)"></i>Яндекс.Маркет</span><span><i style="background:var(--avito)"></i>Avito</span></div>
-        <canvas id="dynChart" height="115"></canvas>
+        <canvas id="dynChart" height="58"></canvas>
       </div>
-      <div class="card"><h3>Доля площадок</h3><div class="cap">Активный контрафакт сейчас</div><canvas id="donut" height="190"></canvas></div>
+      <div class="card"><h3>Доля площадок</h3><div class="cap">Активный контрафакт сейчас</div><canvas id="donut" height="95"></canvas></div>
     </div>
 
     <!-- Блок запросов на мониторинге -->
@@ -117,11 +115,27 @@
       <div id="topDisc" style="margin-top:12px"></div>
     </details>
 
+    <!-- Легенда флажков -->
+    <details class="card" style="margin-bottom:14px">
+      <summary style="cursor:pointer;font-weight:700;font-size:14px;list-style:none">🚩 Легенда красных флажков <span style="font-weight:400;font-size:12px;color:var(--muted)">— п.2.2 Модельных практик ФАС/МСАП СНГ 2025</span></summary>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:9px;margin-top:12px;font-size:12px">
+        <div style="padding:9px;background:#3a1622;border-radius:7px"><b style="color:#ff6b8a">🔴 F1 — Аномальная цена:</b> ниже официальной на ≥50%</div>
+        <div style="padding:9px;background:#3a1622;border-radius:7px"><b style="color:#ff6b8a">🔴 F2 — Критический дисконт:</b> ниже на ≥80%</div>
+        <div style="padding:9px;background:#3a3415;border-radius:7px"><b style="color:#ffd43b">🟡 F3 — Новый продавец:</b> зарегистрирован &lt;30 дней</div>
+        <div style="padding:9px;background:#3a3415;border-radius:7px"><b style="color:#ffd43b">🟡 F4 — Нет статуса партнёра:</b> не в реестре реселлеров MS</div>
+        <div style="padding:9px;background:#3a3415;border-radius:7px"><b style="color:#ffd43b">🟡 F5 — Ключ неактивируемый:</b> телефонная активация в РФ отключена</div>
+        <div style="padding:9px;background:#3a2615;border-radius:7px"><b style="color:#ff9f43">🟠 F6 — ТЗ без «совместимо»:</b> нарушение СИП №С01-1261/2024</div>
+      </div>
+    </details>
+
     <!-- Полная таблица карточек -->
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
         <h3 style="margin:0">Все карточки</h3>
-        <div style="font-size:13px;color:var(--muted)">Показано <b id="cnt" style="color:var(--tx)">0</b> из <b id="tot" style="color:var(--tx)">0</b></div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)">На странице: <span class="seg" style="margin:0;display:inline-flex"><button class="ps" data-ps="10">10</button><button class="ps on" data-ps="50">50</button><button class="ps" data-ps="100">100</button></span></div>
+          <div style="font-size:13px;color:var(--muted)">Показано <b id="cnt" style="color:var(--tx)">0</b> из <b id="tot" style="color:var(--tx)">0</b></div>
+        </div>
       </div>
       <div style="overflow-x:auto">
         <table>
@@ -144,6 +158,10 @@ const SUPABASE_URL="https://yqfdbuiyfkzhkhpiknob.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_nZNZLCqx4e_7La8pfQmsjA_RSw0zT9t";
 const PL={ozon:{n:'Ozon',c:'#2E7DFF'},wildberries:{n:'Wildberries',c:'#E84BC9'},yandex:{n:'Яндекс.Маркет',c:'#FFD43B'},avito:{n:'Avito',c:'#A879FF'}};
 function op(t){t=(t||'').toLowerCase();if(t.includes('pro plus')||t.includes('proplus')||t.includes('ltsc')||t.includes('professional'))return 39990;if(t.includes('home')&&t.includes('business'))return 22990;if(t.includes('home')&&t.includes('student'))return 14990;if(t.includes('365')&&t.includes('family'))return 5290;if(t.includes('365'))return 2790;if(t.includes('box'))return 6990;return 9990;}
+// Железо с предустановленным Office — НЕ ключ. «ключ ДЛЯ ноутбука/macbook» — валидный ключ.
+function isHW(t){t=(t||'');const brand=/vivobook|ideapad|thinkbook|thinkpad|magicbook|matebook|aspire\s+go|ozon-?book|ninkear|super-?book/i.test(t);
+  const gen=/\bноутбук\b|\bnotebook\b|\blaptop\b|моноблок|неттоп|системный блок/i.test(t)&&!/для\s+(ноутбук|notebook|laptop|macbook|план|пк|компьютер|устройств)/i.test(t);
+  return brand||gen;}
 const TM=['microsoft','office','windows'];
 function flags(r){const d=r._disc,tl=(r.title||'').toLowerCase(),tm=TM.some(k=>tl.includes(k)),cmp=tl.includes('совместимо')||tl.includes('compat');
   return{F1:d>=50,F2:d>=80,F5:true,F6:tm&&!cmp,disc:d};}
@@ -152,7 +170,7 @@ let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false
 async function fetchAll(path){let all=[],from=0;while(true){const r=await fetch(`${SUPABASE_URL}${path}`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Range-Unit':'items',Range:`${from}-${from+999}`}});const b=await r.json();all=all.concat(b);if(b.length<1000)break;from+=1000;}return all;}
 async function load(){
   const rows=await fetchAll(`/rest/v1/listings?select=pl,product_id,title,price,op,query,first_seen,last_seen,url,avito_pay&order=last_seen.desc`);
-  RAW=rows.map(r=>{const o=r.op||op(r.title);return{...r,_op:o,_disc:Math.round((1-r.price/o)*100),_cf:r.price>0&&r.price<0.5*o,apay:r.avito_pay===true};});
+  RAW=rows.map(r=>{const o=r.op||op(r.title);return{...r,_op:o,_disc:Math.round((1-r.price/o)*100),_cf:r.price>0&&r.price<0.5*o&&!isHW(r.title),apay:r.avito_pay===true};});
   try{QUERIES=(await fetchAll(`/rest/v1/monitor_queries?select=query&active=eq.true&order=id`)).map(x=>x.query);}catch(e){QUERIES=[...new Set(RAW.map(r=>r.query).filter(Boolean))];}
   document.getElementById('upd').textContent=new Date().toLocaleString('ru',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   buildQueryFilters();buildQTags();renderCharts();apply();
@@ -161,12 +179,14 @@ function maxDay(){return [...new Set(RAW.filter(r=>r._cf).map(r=>r.last_seen))].
 function renderCharts(){
   const cf=RAW.filter(r=>r._cf);const days=[...new Set(cf.map(r=>r.last_seen))].sort();const md=maxDay();const today=cf.filter(r=>r.last_seen===md);
   const newToday=cf.filter(r=>r.first_seen===md).length,apay=cf.filter(r=>r.apay).length,avg=Math.round(today.reduce((s,r)=>s+r._disc,0)/(today.length||1));
-  document.getElementById('kpis').innerHTML=[['Активный контрафакт',today.length,'на последнюю дату'],['Средний дисконт',avg+'%','ниже официальной'],['Новых за сутки','+'+newToday,'впервые замечены'],['💳 Через Avito',apay,'зона ответственности'],['Площадок',Object.keys(PL).length,'под наблюдением']].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('');
+  document.getElementById('kpis').innerHTML=[['Активный контрафакт',today.length,'на последнюю дату'],['Средний дисконт',avg+'%','ниже официальной'],['Новых за сутки','+'+newToday,'впервые замечены'],['Площадок',Object.keys(PL).length,'под наблюдением']].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('');
   const ds=Object.keys(PL).map(p=>({label:PL[p].n,data:days.map(d=>cf.filter(r=>r.last_seen===d&&r.pl===p).length),backgroundColor:PL[p].c+'cc',borderColor:PL[p].c,fill:true,tension:.4,pointRadius:2,borderWidth:2}));
   new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:days.map(d=>d.slice(5)),datasets:ds},options:{plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}},y:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}}}}});
   new Chart(document.getElementById('donut'),{type:'doughnut',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:'#16213A',borderWidth:3}]},options:{cutout:'66%',plugins:{legend:{position:'bottom',labels:{color:'#8499B5',font:{size:11},padding:9}}}}});
-  const top=[...today].sort((a,b)=>b._disc-a._disc).slice(0,10);
-  document.getElementById('topDisc').innerHTML=top.map(r=>`<div class="barrow"><span class="nm" title="${r.title}">${(r.title||'').slice(0,38)}</span><span class="tr"><span class="fl" style="width:${Math.max(0,r._disc)}%"></span></span><span class="pc">${r._disc}%</span></div>`).join('');
+  // Топ-10: самые дешёвые абсолютно (минимальная цена при максимальном отклонении) —
+  // это самые «кричащие» предложения, с площадкой и ценой для мгновенной оценки
+  const top=[...today].sort((a,b)=>a.price-b.price).slice(0,10);
+  document.getElementById('topDisc').innerHTML=top.map(r=>`<div class="barrow"><span class="plbadge" style="background:${PL[r.pl].c}22;color:${PL[r.pl].c};width:96px;justify-content:center">${PL[r.pl].n}</span><span class="nm" title="${(r.title||'').replace(/"/g,'&quot;')}" style="width:230px">${(r.title||'').slice(0,40)}</span><span class="tr"><span class="fl" style="width:${Math.max(2,r._disc)}%"></span></span><span style="width:70px;text-align:right;font-weight:800;color:#ff8fd6">${(r.price||0).toLocaleString('ru')} ₽</span><span class="pc">−${r._disc}%</span></div>`).join('');
 }
 function buildQTags(){const md=maxDay();const cf=RAW.filter(r=>r._cf&&r.last_seen===md);
   document.getElementById('qtags').innerHTML=QUERIES.map(q=>`<span class="qtag">${q}<b>${cf.filter(r=>r.query===q).length}</b></span>`).join('');}
@@ -183,6 +203,9 @@ function apply(){
     .filter(r=>!state.q||r.query===state.q);
   FILT.sort((a,b)=>{const k=state.sortCol;let av,bv;if(k==='date'){av=a.last_seen;bv=b.last_seen}else if(k==='pl'){av=a.pl;bv=b.pl}else if(k==='title'){av=a.title;bv=b.title}else if(k==='price'){av=a.price;bv=b.price}else if(k==='op'){av=a._op;bv=b._op}else{av=a._disc;bv=b._disc}return (av>bv?1:av<bv?-1:0)*state.sortDir;});
   document.getElementById('tot').textContent=FILT.length;document.getElementById('cnt').textContent=Math.min(FILT.length,state.size);
+  // счётчик у бегунка дисконта — сколько карточек проходит текущий порог (без учёта самого дисконт-фильтра)
+  const md2=maxDay();const dcBase=RAW.filter(r=>r._cf).filter(r=>state.per==='all'?true:r.last_seen===md2).filter(r=>state.pl.has(r.pl)).filter(r=>!state.apay||r.apay).filter(r=>!state.q||r.query===state.q);
+  document.getElementById('discCnt').textContent=dcBase.filter(r=>r._disc>=state.disc).length;
   renderTable();
 }
 function renderTable(){
@@ -206,11 +229,24 @@ function exportCSV(){const h=['Дата','Площадка','Название','
   const lines=[h.join(',')].concat(FILT.map(r=>[r.last_seen,PL[r.pl].n,r.title,r.url,r.price,r._op,r._disc,r.apay?'да':'',r.query].map(esc).join(',')));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv'}));a.download='contraband_'+maxDay()+'.csv';a.click();}
 // sidebar wiring
-function buildPlat(){document.getElementById('platFilters').innerHTML=Object.keys(PL).map(p=>`<label class="chk on" data-pl="${p}"><span class="sw" style="background:${PL[p].c}"></span>${PL[p].n}</label>`).join('');
-  document.querySelectorAll('#platFilters .chk').forEach(c=>c.onclick=()=>{c.classList.toggle('on');const p=c.dataset.pl;if(c.classList.contains('on'))state.pl.add(p);else state.pl.delete(p);state.page=0;apply();});}
+function buildPlat(){
+  const reg=['ozon','wildberries','yandex'];
+  let html=reg.map(p=>`<label class="chk on" data-pl="${p}"><span class="sw" style="background:${PL[p].c}"></span>${PL[p].n}</label>`).join('');
+  // Avito — поле разделено пополам: слева вся Avito, справа только оплата через Avito
+  html+=`<div class="chk on" id="avRow" style="padding:0;gap:0;overflow:hidden">
+    <div id="avFull" style="flex:1;display:flex;align-items:center;gap:9px;padding:7px 10px;cursor:pointer"><span class="sw" style="background:${PL.avito.c}"></span>Avito</div>
+    <div id="avPay" title="Только оплата через Avito (зона ответственности площадки)" style="display:flex;align-items:center;gap:5px;padding:7px 11px;border-left:1px solid var(--line);cursor:pointer;color:var(--muted)"><span style="display:inline-flex;width:15px;height:15px;border-radius:50%;background:#445;align-items:center;justify-content:center"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>с&nbsp;картой</div>
+  </div>`;
+  document.getElementById('platFilters').innerHTML=html;
+  document.querySelectorAll('#platFilters label.chk').forEach(c=>c.onclick=()=>{c.classList.toggle('on');const p=c.dataset.pl;if(c.classList.contains('on'))state.pl.add(p);else state.pl.delete(p);state.page=0;apply();});
+  // левая половина Avito — toggle площадки
+  document.getElementById('avFull').onclick=()=>{const row=document.getElementById('avRow');row.classList.toggle('on');if(row.classList.contains('on'))state.pl.add('avito');else state.pl.delete('avito');state.page=0;apply();};
+  // правая половина — toggle «только оплата через Avito»
+  document.getElementById('avPay').onclick=function(){state.apay=!state.apay;this.style.background=state.apay?'#1d3a32':'';this.style.color=state.apay?'var(--accent)':'var(--muted)';if(state.apay){state.pl.add('avito');document.getElementById('avRow').classList.add('on');}state.page=0;apply();};
+}
 document.getElementById('discSlider').oninput=e=>{document.getElementById('discVal').textContent=e.target.value+'%';state.disc=+e.target.value;state.page=0;apply();};
-document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.per=b.dataset.per;state.page=0;apply();});
-document.getElementById('apayChk').onclick=function(){this.classList.toggle('on');state.apay=this.classList.contains('on');state.page=0;apply();};
+document.querySelectorAll('.seg button[data-per]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.seg button[data-per]').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.per=b.dataset.per;state.page=0;apply();});
+document.querySelectorAll('.ps').forEach(b=>b.onclick=()=>{document.querySelectorAll('.ps').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.size=+b.dataset.ps;state.page=0;apply();});
 buildPlat();load();
 </script>
 </body>

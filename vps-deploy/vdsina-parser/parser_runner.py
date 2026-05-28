@@ -109,6 +109,15 @@ def title_ok(title: str) -> bool:
         return False
     if _re.match(r"^office suite|^офисный пакет(?! microsoft)", s):
         return False
+    # Железо с предустановленным Office (ноутбуки/моноблоки/ПК) — это устройство,
+    # а не контрафактный ключ. ВАЖНО: «ключ для ноутбука/macbook/планшета» — это
+    # валидный КЛЮЧ (предлог «для»), его НЕ исключаем.
+    brand_hw = _re.search(r"vivobook|ideapad|thinkbook|thinkpad|magicbook|matebook|"
+                          r"aspire\s+go|ozon-?book|ninkear|super-?book", s)
+    generic_hw = (_re.search(r"\bноутбук\b|\bnotebook\b|\blaptop\b|моноблок|неттоп|системный блок", s)
+                  and not _re.search(r"для\s+(ноутбук|notebook|laptop|macbook|план|пк|компьютер|устройств)", s))
+    if brand_hw or generic_hw:
+        return False
     return (
         "office" in s
         or ("365" in s and ("microsoft" in s or "ms" in s.split()))
