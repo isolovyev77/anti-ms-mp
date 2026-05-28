@@ -4708,7 +4708,8 @@
       "price": 100,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4720,7 +4721,8 @@
       "price": 199,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4732,7 +4734,8 @@
       "price": 189,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4744,7 +4747,8 @@
       "price": 499,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4756,7 +4760,8 @@
       "price": 249,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4768,7 +4773,8 @@
       "price": 169,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4780,7 +4786,8 @@
       "price": 149,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4792,7 +4799,8 @@
       "price": 300,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4804,7 +4812,8 @@
       "price": 200,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4816,7 +4825,8 @@
       "price": 490,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4828,7 +4838,8 @@
       "price": 400,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4840,7 +4851,8 @@
       "price": 153,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4852,7 +4864,8 @@
       "price": 250,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4864,7 +4877,8 @@
       "price": 90,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4876,7 +4890,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4888,7 +4903,8 @@
       "price": 6990,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -4900,7 +4916,8 @@
       "price": 6500,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -4912,7 +4929,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4924,7 +4942,8 @@
       "price": 370,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4936,7 +4955,8 @@
       "price": 370,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4960,7 +4980,8 @@
       "price": 2000,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4972,7 +4993,8 @@
       "price": 449,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4984,7 +5006,8 @@
       "price": 250,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -4996,7 +5019,8 @@
       "price": 550,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5008,7 +5032,8 @@
       "price": 1890,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5020,7 +5045,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5032,7 +5058,8 @@
       "price": 2490,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5044,7 +5071,8 @@
       "price": 3000,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5056,7 +5084,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5068,7 +5097,8 @@
       "price": 350,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5080,7 +5110,8 @@
       "price": 350,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5092,7 +5123,8 @@
       "price": 450,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5104,7 +5136,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5116,7 +5149,8 @@
       "price": 1890,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5128,7 +5162,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5140,7 +5175,8 @@
       "price": 2990,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5152,7 +5188,8 @@
       "price": 2490,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5164,7 +5201,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5176,7 +5214,8 @@
       "price": 350,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5188,7 +5227,8 @@
       "price": 350,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5200,7 +5240,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5212,7 +5253,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5224,7 +5266,8 @@
       "price": 590,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5236,7 +5279,8 @@
       "price": 1890,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5248,7 +5292,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5260,7 +5305,8 @@
       "price": 2990,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5272,7 +5318,8 @@
       "price": 2490,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5284,7 +5331,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5296,7 +5344,8 @@
       "price": 350,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5308,7 +5357,8 @@
       "price": 350,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5320,7 +5370,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5332,7 +5383,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5344,7 +5396,8 @@
       "price": 650,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -5356,7 +5409,8 @@
       "price": 300,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5368,7 +5422,8 @@
       "price": 100,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5380,7 +5435,8 @@
       "price": 3500,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5392,7 +5448,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5404,7 +5461,8 @@
       "price": 3000,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5416,7 +5474,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5428,7 +5487,8 @@
       "price": 350,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5440,7 +5500,8 @@
       "price": 350,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5452,7 +5513,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5464,7 +5526,8 @@
       "price": 1890,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5476,7 +5539,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5488,7 +5552,8 @@
       "price": 2990,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5500,7 +5565,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5512,7 +5578,8 @@
       "price": 350,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5524,7 +5591,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5536,7 +5604,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5548,7 +5617,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5560,7 +5630,8 @@
       "price": 250,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5572,7 +5643,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5584,7 +5656,8 @@
       "price": 2990,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5596,7 +5669,8 @@
       "price": 390,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5608,7 +5682,8 @@
       "price": 1900,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5620,7 +5695,8 @@
       "price": 4900,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -5632,7 +5708,8 @@
       "price": 6300,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -5644,7 +5721,8 @@
       "price": 290,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5656,7 +5734,8 @@
       "price": 100,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5668,7 +5747,8 @@
       "price": 1500,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -5680,7 +5760,8 @@
       "price": 2200,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -5692,7 +5773,8 @@
       "price": 2500,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -5704,7 +5786,8 @@
       "price": 2500,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -5716,7 +5799,8 @@
       "price": 250,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -5728,7 +5812,8 @@
       "price": 149,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5740,7 +5825,8 @@
       "price": 450,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5752,7 +5838,8 @@
       "price": 200,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5764,7 +5851,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5776,7 +5864,8 @@
       "price": 2000,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5788,7 +5877,8 @@
       "price": 3700,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5800,7 +5890,8 @@
       "price": 3500,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5812,7 +5903,8 @@
       "price": 3000,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5824,7 +5916,8 @@
       "price": 400,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5836,7 +5929,8 @@
       "price": 750,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5848,7 +5942,8 @@
       "price": 3700,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5860,7 +5955,8 @@
       "price": 4900,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5872,7 +5968,8 @@
       "price": 1450,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5884,7 +5981,8 @@
       "price": 500,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5896,7 +5994,8 @@
       "price": 2000,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5908,7 +6007,8 @@
       "price": 750,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5920,7 +6020,8 @@
       "price": 1500,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5932,7 +6033,8 @@
       "price": 750,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5944,7 +6046,8 @@
       "price": 790,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5956,7 +6059,8 @@
       "price": 2000,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5968,7 +6072,8 @@
       "price": 2000,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5980,7 +6085,8 @@
       "price": 750,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -5992,7 +6098,8 @@
       "price": 700,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6004,7 +6111,8 @@
       "price": 290,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6016,7 +6124,8 @@
       "price": 320,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6028,7 +6137,8 @@
       "price": 450,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6040,7 +6150,8 @@
       "price": 950,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6052,7 +6163,8 @@
       "price": 750,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6064,7 +6176,8 @@
       "price": 49,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6076,7 +6189,8 @@
       "price": 29,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6088,7 +6202,8 @@
       "price": 250,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6112,7 +6227,8 @@
       "price": 2790,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -6124,7 +6240,8 @@
       "price": 2790,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -6136,7 +6253,8 @@
       "price": 1590,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -6148,7 +6266,8 @@
       "price": 950,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6160,7 +6279,8 @@
       "price": 250,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -6172,7 +6292,8 @@
       "price": 1100,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6184,7 +6305,8 @@
       "price": 100,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6196,7 +6318,8 @@
       "price": 700,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -6208,7 +6331,8 @@
       "price": 300,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -6220,7 +6344,8 @@
       "price": 290,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6232,7 +6357,8 @@
       "price": 250,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6244,7 +6370,8 @@
       "price": 300,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6256,7 +6383,8 @@
       "price": 300,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6268,7 +6396,8 @@
       "price": 300,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6280,7 +6409,8 @@
       "price": 250,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6292,7 +6422,8 @@
       "price": 299,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6304,7 +6435,8 @@
       "price": 250,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6316,7 +6448,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6328,7 +6461,8 @@
       "price": 500,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6340,7 +6474,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6352,7 +6487,8 @@
       "price": 1500,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6364,7 +6500,8 @@
       "price": 200,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6376,7 +6513,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6388,7 +6526,8 @@
       "price": 1200,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6400,7 +6539,8 @@
       "price": 590,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6412,7 +6552,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6424,7 +6565,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6436,7 +6578,8 @@
       "price": 550,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6448,7 +6591,8 @@
       "price": 600,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6472,7 +6616,8 @@
       "price": 250,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6484,7 +6629,8 @@
       "price": 270,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6496,7 +6642,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6508,7 +6655,8 @@
       "price": 300,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6520,7 +6668,8 @@
       "price": 150,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6532,7 +6681,8 @@
       "price": 300,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6544,7 +6694,8 @@
       "price": 160,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6556,7 +6707,8 @@
       "price": 250,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6568,7 +6720,8 @@
       "price": 650,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6580,7 +6733,8 @@
       "price": 1990,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -6592,7 +6746,8 @@
       "price": 499,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6604,7 +6759,8 @@
       "price": 220,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6616,7 +6772,8 @@
       "price": 210,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6628,7 +6785,8 @@
       "price": 200,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6640,7 +6798,8 @@
       "price": 250,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6652,7 +6811,8 @@
       "price": 180,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6664,7 +6824,8 @@
       "price": 350,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6676,7 +6837,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6688,7 +6850,8 @@
       "price": 299,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6700,7 +6863,8 @@
       "price": 500,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6712,7 +6876,8 @@
       "price": 500,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6724,7 +6889,8 @@
       "price": 500,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6736,7 +6902,8 @@
       "price": 500,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6748,7 +6915,8 @@
       "price": 500,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6760,7 +6928,8 @@
       "price": 500,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6772,7 +6941,8 @@
       "price": 500,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6784,7 +6954,8 @@
       "price": 500,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6796,7 +6967,8 @@
       "price": 312,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6808,7 +6980,8 @@
       "price": 320,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6820,7 +6993,8 @@
       "price": 450,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6832,7 +7006,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6844,7 +7019,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6856,7 +7032,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6868,7 +7045,8 @@
       "price": 600,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6880,7 +7058,8 @@
       "price": 399,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6892,7 +7071,8 @@
       "price": 200,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6904,7 +7084,8 @@
       "price": 590,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6916,7 +7097,8 @@
       "price": 2890,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -6928,7 +7110,8 @@
       "price": 499,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6940,7 +7123,8 @@
       "price": 320,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6952,7 +7136,8 @@
       "price": 480,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6964,7 +7149,8 @@
       "price": 390,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6976,7 +7162,8 @@
       "price": 500,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -6988,7 +7175,8 @@
       "price": 249,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7000,7 +7188,8 @@
       "price": 1250,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -7012,7 +7201,8 @@
       "price": 500,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7024,7 +7214,8 @@
       "price": 1190,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -7036,7 +7227,8 @@
       "price": 450,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7048,7 +7240,8 @@
       "price": 99,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7060,7 +7253,8 @@
       "price": 299,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7072,7 +7266,8 @@
       "price": 320,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7084,7 +7279,8 @@
       "price": 450,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7096,7 +7292,8 @@
       "price": 499,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7108,7 +7305,8 @@
       "price": 9500,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7120,7 +7318,8 @@
       "price": 250,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7132,7 +7331,8 @@
       "price": 750,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7144,7 +7344,8 @@
       "price": 250,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7156,7 +7357,8 @@
       "price": 3300,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7168,7 +7370,8 @@
       "price": 300,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7180,7 +7383,8 @@
       "price": 300,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7192,7 +7396,8 @@
       "price": 400,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7204,7 +7409,8 @@
       "price": 700,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7216,7 +7422,8 @@
       "price": 250,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7228,7 +7435,8 @@
       "price": 2700,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7240,7 +7448,8 @@
       "price": 400,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7252,7 +7461,8 @@
       "price": 159,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7264,7 +7474,8 @@
       "price": 179,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7276,7 +7487,8 @@
       "price": 50,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7288,7 +7500,8 @@
       "price": 200,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7300,7 +7513,8 @@
       "price": 120,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7312,7 +7526,8 @@
       "price": 200,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7324,7 +7539,8 @@
       "price": 1500,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7336,7 +7552,8 @@
       "price": 1000,
       "op": 5290,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7348,7 +7565,8 @@
       "price": 400,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7360,7 +7578,8 @@
       "price": 249,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7372,7 +7591,8 @@
       "price": 1000,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7384,7 +7604,8 @@
       "price": 300,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7396,7 +7617,8 @@
       "price": 390,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7408,7 +7630,8 @@
       "price": 200,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7420,7 +7643,8 @@
       "price": 310,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7432,7 +7656,8 @@
       "price": 1000,
       "op": 2790,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7444,7 +7669,8 @@
       "price": 305,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7456,7 +7682,8 @@
       "price": 99,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7480,7 +7707,8 @@
       "price": 389,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7504,7 +7732,8 @@
       "price": 349,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7516,7 +7745,8 @@
       "price": 400,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7528,7 +7758,8 @@
       "price": 100,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -7540,7 +7771,8 @@
       "price": 100,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7552,7 +7784,8 @@
       "price": 3800,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7564,7 +7797,8 @@
       "price": 290,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7576,7 +7810,8 @@
       "price": 200,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7588,7 +7823,8 @@
       "price": 400,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7600,7 +7836,8 @@
       "price": 299,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7612,7 +7849,8 @@
       "price": 300,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7624,7 +7862,8 @@
       "price": 150,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7636,7 +7875,8 @@
       "price": 290,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7648,7 +7888,8 @@
       "price": 450,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7660,7 +7901,8 @@
       "price": 99,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7672,7 +7914,8 @@
       "price": 150,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7684,7 +7927,8 @@
       "price": 99,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7696,7 +7940,8 @@
       "price": 175,
       "op": 5290,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7708,7 +7953,8 @@
       "price": 99,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7720,7 +7966,8 @@
       "price": 149,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7732,7 +7979,8 @@
       "price": 300,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7744,7 +7992,8 @@
       "price": 179,
       "op": 5290,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7756,7 +8005,8 @@
       "price": 99,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7768,7 +8018,8 @@
       "price": 39,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7780,7 +8031,8 @@
       "price": 495,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7792,7 +8044,8 @@
       "price": 150,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7804,7 +8057,8 @@
       "price": 250,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7816,7 +8070,8 @@
       "price": 399,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7828,7 +8083,8 @@
       "price": 349,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7840,7 +8096,8 @@
       "price": 1000,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7852,7 +8109,8 @@
       "price": 500,
       "op": 2790,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7864,7 +8122,8 @@
       "price": 500,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7876,7 +8135,8 @@
       "price": 150,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7888,7 +8148,8 @@
       "price": 700,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7900,7 +8161,8 @@
       "price": 200,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7912,7 +8174,8 @@
       "price": 650,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7924,7 +8187,8 @@
       "price": 500,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7936,7 +8200,8 @@
       "price": 79,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7948,7 +8213,8 @@
       "price": 500,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7960,7 +8226,8 @@
       "price": 349,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7972,7 +8239,8 @@
       "price": 390,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7984,7 +8252,8 @@
       "price": 1000,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -7996,7 +8265,8 @@
       "price": 1000,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8008,7 +8278,8 @@
       "price": 490,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8020,7 +8291,8 @@
       "price": 500,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8032,7 +8304,8 @@
       "price": 190,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -8044,7 +8317,8 @@
       "price": 200,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -8056,7 +8330,8 @@
       "price": 400,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8068,7 +8343,8 @@
       "price": 189,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -8080,7 +8356,8 @@
       "price": 199,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -8092,7 +8369,8 @@
       "price": 90,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8104,7 +8382,8 @@
       "price": 110,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8116,7 +8395,8 @@
       "price": 140,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8128,7 +8408,8 @@
       "price": 300,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8140,7 +8421,8 @@
       "price": 950,
       "op": 5290,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8152,7 +8434,8 @@
       "price": 500,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8164,7 +8447,8 @@
       "price": 2500,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8176,7 +8460,8 @@
       "price": 250,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8188,7 +8473,8 @@
       "price": 500,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8200,7 +8486,8 @@
       "price": 3800,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8212,7 +8499,8 @@
       "price": 3199,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8224,7 +8512,8 @@
       "price": 199,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8236,7 +8525,8 @@
       "price": 450,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8248,7 +8538,8 @@
       "price": 450,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8272,7 +8563,8 @@
       "price": 250,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8284,7 +8576,8 @@
       "price": 4190,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8296,7 +8589,8 @@
       "price": 450,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8308,7 +8602,8 @@
       "price": 260,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8320,7 +8615,8 @@
       "price": 250,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8332,7 +8628,8 @@
       "price": 300,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8344,7 +8641,8 @@
       "price": 307,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8356,7 +8654,8 @@
       "price": 250,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8392,7 +8691,8 @@
       "price": 2499,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -8404,7 +8704,8 @@
       "price": 99,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -8416,7 +8717,8 @@
       "price": 300,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8428,7 +8730,8 @@
       "price": 299,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8440,7 +8743,8 @@
       "price": 299,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8452,7 +8756,8 @@
       "price": 299,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8464,7 +8769,8 @@
       "price": 1505,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8476,7 +8782,8 @@
       "price": 249,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8500,7 +8807,8 @@
       "price": 250,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8512,7 +8820,8 @@
       "price": 250,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8524,7 +8833,8 @@
       "price": 250,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8536,7 +8846,8 @@
       "price": 1800,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8548,7 +8859,8 @@
       "price": 500,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8560,7 +8872,8 @@
       "price": 450,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8572,7 +8885,8 @@
       "price": 499,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8584,7 +8898,8 @@
       "price": 3500,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8596,7 +8911,8 @@
       "price": 450,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8608,7 +8924,8 @@
       "price": 3500,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8620,7 +8937,8 @@
       "price": 450,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8632,7 +8950,8 @@
       "price": 2990,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -8644,7 +8963,8 @@
       "price": 3290,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": true
     },
     {
       "date": "2026-05-28",
@@ -8656,7 +8976,8 @@
       "price": 349,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8680,7 +9001,8 @@
       "price": 3900,
       "op": 22990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8692,7 +9014,8 @@
       "price": 100,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8704,7 +9027,8 @@
       "price": 299,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8716,7 +9040,8 @@
       "price": 3000,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8728,7 +9053,8 @@
       "price": 3500,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8740,7 +9066,8 @@
       "price": 850,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8752,7 +9079,8 @@
       "price": 298,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8764,7 +9092,8 @@
       "price": 1890,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8776,7 +9105,8 @@
       "price": 300,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8788,7 +9118,8 @@
       "price": 200,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8800,7 +9131,8 @@
       "price": 300,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8812,7 +9144,8 @@
       "price": 399,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8824,7 +9157,8 @@
       "price": 499,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8836,7 +9170,8 @@
       "price": 49,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8848,7 +9183,8 @@
       "price": 390,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8860,7 +9196,8 @@
       "price": 400,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8872,7 +9209,8 @@
       "price": 390,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8884,7 +9222,8 @@
       "price": 950,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8896,7 +9235,8 @@
       "price": 300,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8908,7 +9248,8 @@
       "price": 450,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8920,7 +9261,8 @@
       "price": 450,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8932,7 +9274,8 @@
       "price": 300,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8944,7 +9287,8 @@
       "price": 900,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8956,7 +9300,8 @@
       "price": 300,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8968,7 +9313,8 @@
       "price": 990,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8980,7 +9326,8 @@
       "price": 200,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -8992,7 +9339,8 @@
       "price": 1490,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9004,7 +9352,8 @@
       "price": 900,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9016,7 +9365,8 @@
       "price": 1400,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9028,7 +9378,8 @@
       "price": 500,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9040,7 +9391,8 @@
       "price": 200,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9052,7 +9404,8 @@
       "price": 4290,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9064,7 +9417,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9076,7 +9430,8 @@
       "price": 350,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9088,7 +9443,8 @@
       "price": 299,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9100,7 +9456,8 @@
       "price": 700,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9112,7 +9469,8 @@
       "price": 200,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9124,7 +9482,8 @@
       "price": 350,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9136,7 +9495,8 @@
       "price": 299,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9148,7 +9508,8 @@
       "price": 300,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9160,7 +9521,8 @@
       "price": 330,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9172,7 +9534,8 @@
       "price": 310,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9184,7 +9547,8 @@
       "price": 299,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9196,7 +9560,8 @@
       "price": 500,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9208,7 +9573,8 @@
       "price": 299,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9220,7 +9586,8 @@
       "price": 300,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9232,7 +9599,8 @@
       "price": 400,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9244,7 +9612,8 @@
       "price": 399,
       "op": 5290,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9256,7 +9625,8 @@
       "price": 305,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9268,7 +9638,8 @@
       "price": 311,
       "op": 6990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9280,7 +9651,8 @@
       "price": 250,
       "op": 39990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9292,7 +9664,8 @@
       "price": 500,
       "op": 14990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9304,7 +9677,8 @@
       "price": 250,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     },
     {
       "date": "2026-05-28",
@@ -9316,7 +9690,8 @@
       "price": 299,
       "op": 9990,
       "regDays": null,
-      "auth": null
+      "auth": null,
+      "apay": false
     }
   ]
 }
