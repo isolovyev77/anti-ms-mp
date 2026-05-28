@@ -154,6 +154,39 @@ def main() -> int:
         log("KILLED", run_id=rid, pid=pid, stale_sec=stale, was_alive=was_alive)
         killed += 1
 
+    # Страховка №2: убиваем процессы parser_runner старше MAX_PROC_AGE_SEC,
+    # даже если их parser_runs уже finalized (status=ok). Был кейс: парсер дошёл
+    # до "run end", но cloakbrowser оставил non-daemon потоки/chromium, и процесс
+    # висел 17 часов, держа ресурс. Такой зомби не виден через parser_runs.
+    MAX_PROC_AGE_SEC = int(os.environ.get("WATCHDOG_MAX_PROC_AGE_SEC", "2700"))  # 45 мин
+    try:
+        import subprocess
+        out = subprocess.run(
+            ["ps", "-eo", "pid,etimes,comm,args"],
+            capture_output=True, text=True, timeout=10,
+        ).stdout
+        for line in out.splitlines():
+            if "parser_runner.py" not in line:
+                continue
+            parts = line.split(None, 3)
+            if len(parts) < 4:
+                continue
+            try:
+                pid_i = int(parts[0]); age = int(parts[1])
+            except ValueError:
+                continue
+            if pid_i == os.getpid():
+                continue
+            if age > MAX_PROC_AGE_SEC:
+                try:
+                    os.kill(pid_i, signal.SIGKILL)
+                    log("KILLED stale process (by age)", pid=pid_i, age_sec=age)
+                    killed += 1
+                except (ProcessLookupError, PermissionError):
+                    pass
+    except Exception as e:
+        log("proc-age scan failed", err=str(e)[:150])
+
     log("done", killed=killed)
     return 0
 

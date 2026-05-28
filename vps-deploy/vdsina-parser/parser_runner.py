@@ -721,7 +721,13 @@ def main() -> int:
     finalize_parser_run(run_id, totals, all_errors, status)
     log("=== run end ===", status=status, totals=totals, errors=len(all_errors))
     n8n_notify({"run_id": run_id, "status": status, "totals": totals, "errors_count": len(all_errors)})
-    return 0 if status != "failed" else 1
+    # ВАЖНО: os._exit, а не return/sys.exit. cloakbrowser/Playwright оставляет
+    # non-daemon потоки и дочерний chromium, из-за которых процесс зависал после
+    # завершения работы (run end в логе есть, а процесс жил ещё часами и держал
+    # cloakbrowser-ресурс — watchdog не ловил, т.к. run уже finalized=ok).
+    # os._exit рвёт процесс немедленно, минуя ожидание потоков и atexit.
+    sys.stdout.flush(); sys.stderr.flush()
+    os._exit(0 if status != "failed" else 1)
 
 
 if __name__ == "__main__":
