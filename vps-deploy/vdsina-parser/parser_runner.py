@@ -25,6 +25,7 @@ import os
 import random
 import socket
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -34,13 +35,18 @@ from urllib.parse import quote
 from cloakbrowser import launch
 
 # === Конфиг ===
-QUERIES = [
-    "Microsoft Office ключ активации",
-    "Microsoft Office 365 ключ",
-    "Office 2021 ключ активации",
-    "Office 2024 ключ активации",
-    "MS Office ключ активации",
+# QUERIES теперь читаются из Supabase (таблица monitor_queries, active=true).
+# Этот список — fallback на случай, если БД недоступна (см. load_queries()).
+QUERIES_FALLBACK = [
+    "Office ключ",          # широкий базовый (включает MS Office ключ, Office 2021/2024 ключ)
+    "Office активация",     # альтернативная формулировка
+    "Microsoft 365",        # подписочный сегмент (отдельный от ключей)
+    "Office LTSC",          # корпоративные бессрочные
+    "Office 2024",          # новейшая версия без слов «ключ/активация»
+    "Office 2019",          # старая популярная версия
 ]
+# Заполняется в main() из load_queries(); глобал, т.к. scrape_one_platform читает его.
+QUERIES: list[str] = list(QUERIES_FALLBACK)
 
 # Платформы и их url-фабрики
 PLATFORMS = {
@@ -97,7 +103,7 @@ def title_ok(title: str) -> bool:
                             "libreoffice", "astra linux", "базальт", "rosa",
                             "кит офис", "обычный офис")):
         return False
-    if _re.search(r"\bкнига\b|\bруководство\b|\bучебник\b|\bсамоучитель\b|шаг за шагом", s):
+    if _re.search(r"\bкнига\b|\bруководство\b|учебник|учебн[ао]е|пособи[ея]|\bсамоучитель\b|шаг за шагом|методичк|методическ|монограф|\bлекци[ия]\b|power bi", s):
         return False
     if _re.match(r"^код windows|^ключ windows|^windows\s+\d|^лицензия windows", s):
         return False
@@ -183,6 +189,47 @@ def supabase_post(path: str, payload, method="POST", prefer=None) -> dict | None
     except urllib.error.HTTPError as e:
         log(f"supabase {method} {path} FAIL", code=e.code, body=e.read()[:300])
         raise
+
+def load_queries() -> list[str]:
+    """Читает активные запросы из monitor_queries. При ошибке — QUERIES_FALLBACK."""
+    req = urllib.request.Request(
+        f"{SUPABASE_URL}/rest/v1/monitor_queries?select=query&active=eq.true&order=id",
+        headers={
+            "apikey": SUPABASE_SERVICE_ROLE_KEY,
+            "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as r:
+            rows = json.loads(r.read())
+        qs = [row["query"] for row in rows if row.get("query")]
+        if qs:
+            return qs
+        log("load_queries: пустой список в БД, использую fallback")
+    except Exception as e:
+        log("load_queries FAIL, использую fallback", err=str(e)[:200])
+    return list(QUERIES_FALLBACK)
+
+
+def mark_query_parsed(query: str) -> None:
+    """Обновляет last_parsed_at для запроса. Best-effort."""
+    try:
+        payload = json.dumps({"last_parsed_at": dt.datetime.now(dt.timezone.utc).isoformat()}).encode()
+        from urllib.parse import quote as _q
+        req = urllib.request.Request(
+            f"{SUPABASE_URL}/rest/v1/monitor_queries?query=eq.{_q(query)}",
+            data=payload, method="PATCH",
+            headers={
+                "apikey": SUPABASE_SERVICE_ROLE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal",
+            },
+        )
+        urllib.request.urlopen(req, timeout=10).read()
+    except Exception:
+        pass
+
 
 def n8n_notify(payload: dict) -> None:
     if not N8N_WEBHOOK:
@@ -284,31 +331,40 @@ EXTRACT_JS = {
         if (!m) return;
         const title = (card.querySelector('[data-auto="snippet-title"]')?.textContent || link.textContent || '').trim();
 
-        // Цена — несколько селекторов + fallback на regex ₽ (NBSP заменяем)
-        // Селектор [data-auto="snippet-price"] часто устаревает, поэтому fallback.
+        // Цена — берём ровно ту, что показана покупателю.
+        // Требуем наличие \u20BD в тексте (защита от рейтингов/отзывов без валюты).
+        // Низкие цены (18\u20BD, 28\u20BD и т.п.) — это РЕАЛЬНЫЕ предложения контрафакта,
+        // их НЕ отсекаем — это самые яркие сигналы для мониторинга.
         let price = 0;
         const sels = ['[data-auto="snippet-price"]', '[data-auto="price-value"]',
-                      '[data-auto="mainPrice"]', '[itemprop="price"]',
-                      '[class*="snippetPrice"]', '[class*="priceText"]'];
+                      '[data-auto="mainPrice"]', '[class*="snippetPrice"]',
+                      '[class*="priceText"]', '[class*="price"][class*="value"]'];
         for (const sel of sels) {
-          const el = card.querySelector(sel);
-          if (el) {
-            // NBSP (U+00A0) и тонкий пробел (U+202F) → обычный пробел
-            const t = (el.textContent || '').replace(/[  ]/g, ' ');
-            const n = parseInt(t.replace(/\D/g, ''), 10);
-            if (n > 0) { price = n; break; }
-          }
-        }
-        if (!price) {
-          // Fallback: ищем любой <span>/<div> с паттерном "ЧИСЛО ₽"
-          card.querySelectorAll('span, div').forEach(el => {
-            if (price) return;
-            const t = (el.textContent || '').replace(/[  ]/g, ' ').trim();
-            if (/^\d[\d ]{0,8}\s*₽$/.test(t)) {
-              const n = parseInt(t.replace(/\D/g, ''), 10);
-              if (n > 0) price = n;
+          const els = card.querySelectorAll(sel);
+          for (const el of els) {
+            const t = (el.textContent || '').replace(/[\u00A0\u202F]/g, ' ');
+            if (!t.includes('\u20BD')) continue;
+            // Берём первое число перед \u20BD — это всегда основная (видимая) цена.
+            // Зачёркнутая старая цена — отдельный элемент.
+            const m = t.match(/(\d[\d ]{0,8})\s*\u20BD/);
+            if (m) {
+              const n = parseInt(m[1].replace(/\D/g, ''), 10);
+              if (n > 0) { price = n; break; }
             }
-          });
+          }
+          if (price > 0) break;
+        }
+        // Fallback: текстовый узел вида "N \u20BD"
+        if (!price) {
+          const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+          let node;
+          while (node = walker.nextNode()) {
+            const t = (node.textContent || '').replace(/[\u00A0\u202F]/g, ' ').trim();
+            if (/^\d[\d ]{0,8}\s*\u20BD$/.test(t)) {
+              const v = parseInt(t.replace(/\D/g, ''), 10);
+              if (v > 0) { price = v; break; }
+            }
+          }
         }
 
         out.push({ id: m[1], title: title.slice(0, 200), price, url: href.startsWith('http') ? href : 'https://market.yandex.ru' + href });
@@ -337,46 +393,78 @@ def scroll_lazy(page, rounds=4):
             break
 
 
+def _safe_detect_block(page) -> tuple[bool, str]:
+    """detect_block может бросить ExecCtx-исключение если страница в момент проверки
+    делает SPA-навигацию (типично для avito antibot-redirect). Маскируем как 'blocked'."""
+    try:
+        return detect_block(page)
+    except Exception as e:
+        return True, f"ExecCtx during detect_block: {str(e)[:120]}"
+
+
+def _scrape_one_page(page, platform: str, q: str, p: int, run_log, items: list[dict],
+                     errors: list[dict]) -> tuple[bool, bool]:
+    """Скрейпит одну страницу. Возвращает (page_ok, should_break_query).
+
+    Любая ошибка ловится тут локально, чтобы не оборвать весь прогон платформы.
+    """
+    cfg = PLATFORMS[platform]
+    url = cfg["url"](q, p)
+    try:
+        page.goto(url, wait_until="domcontentloaded", timeout=45000)
+    except Exception as e:
+        errors.append({"platform": platform, "query": q, "page": p, "message": f"goto: {str(e)[:120]}"})
+        return False, True
+    time.sleep(2)
+    # Дожидаемся успокоения сети — анти-SPA-навигация защита.
+    # Не критично, если не дождались за 8 сек — продолжаем.
+    try:
+        page.wait_for_load_state("networkidle", timeout=8000)
+    except Exception:
+        pass
+    blocked, sample = _safe_detect_block(page)
+    if blocked:
+        errors.append({"platform": platform, "query": q, "page": p, "message": f"BLOCKED: {sample[:120]}"})
+        return False, True
+    scroll_lazy(page)
+    try:
+        cards = page.evaluate(EXTRACT_JS[platform])
+    except Exception as e:
+        errors.append({"platform": platform, "query": q, "page": p, "message": f"extract: {str(e)[:120]}"})
+        return False, False  # это страница упала, но другие query на этой платформе можно пробовать
+    if not cards:
+        return True, True
+    kept = 0
+    for c in cards:
+        title = (c.get("title") or "").strip()
+        if not title or not title_ok(title):
+            continue
+        c["platform"] = platform
+        c["query"] = q
+        items.append(c)
+        kept += 1
+    run_log(f"    стр.{p}: {len(cards)} → {kept} после title_ok (итого {len(items)})")
+    return True, False
+
+
 def scrape_one_platform(page, platform: str, run_log) -> tuple[list[dict], list[dict]]:
+    """Скрейпит платформу. Любая ошибка отдельной query/page изолируется —
+    остальные query пробуются, чтобы не потерять всю платформу из-за одной
+    кривой страницы (типично avito SPA-navigation: "Execution context was destroyed")."""
     cfg = PLATFORMS[platform]
     items: list[dict] = []
     errors: list[dict] = []
     for q in QUERIES:
         run_log(f"  [{platform}] query='{q}'")
         for p in range(1, cfg["max_pages"] + 1):
-            url = cfg["url"](q, p)
-            try:
-                page.goto(url, wait_until="domcontentloaded", timeout=45000)
-            except Exception as e:
-                errors.append({"platform": platform, "query": q, "page": p, "message": str(e)[:200]})
+            page_ok, should_break = _scrape_one_page(page, platform, q, p, run_log, items, errors)
+            # Retry стр.1 один раз при ExecCtx ошибке — частый паттерн avito antibot
+            if not page_ok and p == 1 and errors and "extract:" in (errors[-1].get("message") or ""):
+                run_log(f"    стр.1 retry после extract-ошибки")
+                time.sleep(3)
+                page_ok, should_break = _scrape_one_page(page, platform, q, p, run_log, items, errors)
+            if should_break:
                 break
-            time.sleep(2)
-            blocked, sample = detect_block(page)
-            if blocked:
-                errors.append({"platform": platform, "query": q, "page": p, "message": f"BLOCKED: {sample[:120]}"})
-                break
-            scroll_lazy(page)
-            try:
-                cards = page.evaluate(EXTRACT_JS[platform])
-            except Exception as e:
-                errors.append({"platform": platform, "query": q, "page": p, "message": f"extract: {str(e)[:120]}"})
-                cards = []
-            if not cards:
-                break
-            kept = 0
-            for c in cards:
-                # ВАЖНО: фильтруем title_ok ДО записи в Supabase, чтобы в БД
-                # не лежал мусор (велосипеды M5/M365, лежанки для кошек,
-                # RFID-браслеты OFFICE-TEMIC и пр. ozon-выдача по нерелевантным
-                # запросам). Эта проверка дублирует логику import_cloak_full.py.
-                title = (c.get("title") or "").strip()
-                if not title or not title_ok(title):
-                    continue
-                c["platform"] = platform
-                c["query"] = q
-                items.append(c)
-                kept += 1
-            run_log(f"    стр.{p}: {len(cards)} → {kept} после title_ok (итого {len(items)})")
             jitter()
     return items, errors
 
@@ -479,13 +567,55 @@ def upsert_listings(rows: list[dict]) -> int:
 
 
 def insert_parser_run(trigger: str) -> int:
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
     resp = supabase_post(
         "/rest/v1/parser_runs",
-        {"status": "running", "trigger": trigger, "host": socket.gethostname()},
+        {
+            "status": "running",
+            "trigger": trigger,
+            "host": socket.gethostname(),
+            "hostname": socket.gethostname(),
+            "pid": os.getpid(),
+            "last_heartbeat": now,
+        },
         method="POST",
         prefer="return=representation",
     )
     return resp[0]["id"] if isinstance(resp, list) else resp["id"]
+
+
+def heartbeat(run_id: int) -> None:
+    """Раз в 30 сек пишем last_heartbeat=NOW в parser_runs для watchdog."""
+    payload = json.dumps({"last_heartbeat": dt.datetime.now(dt.timezone.utc).isoformat()}).encode()
+    req = urllib.request.Request(
+        f"{SUPABASE_URL}/rest/v1/parser_runs?id=eq.{run_id}",
+        data=payload,
+        method="PATCH",
+        headers={
+            "apikey": SUPABASE_SERVICE_ROLE_KEY,
+            "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal",
+        },
+    )
+    try:
+        urllib.request.urlopen(req, timeout=10).read()
+    except Exception:
+        pass  # heartbeat best-effort; watchdog убьёт всё равно если важно
+
+
+def start_heartbeat_thread(run_id: int, interval: int = 30) -> threading.Event:
+    """Запускает фоновый поток, который каждые `interval` секунд пишет heartbeat.
+    Возвращает Event, который надо `.set()` чтобы остановить поток."""
+    stop = threading.Event()
+
+    def loop():
+        while not stop.wait(interval):
+            heartbeat(run_id)
+
+    t = threading.Thread(target=loop, daemon=True, name=f"heartbeat-{run_id}")
+    t.start()
+    return stop
 
 
 def finalize_parser_run(run_id: int, totals: dict, errors: list[dict], status: str) -> None:
@@ -513,13 +643,28 @@ def finalize_parser_run(run_id: int, totals: dict, errors: list[dict], status: s
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--platforms", default=",".join(PLATFORMS), help="ozon,wildberries,yandex,avito")
-    ap.add_argument("--trigger", default="cron", choices=["cron", "manual", "watcher"])
+    ap.add_argument("--trigger", default="cron", choices=["cron", "manual", "watcher", "dashboard"])
+    ap.add_argument("--only-query", default=None,
+                    help="Парсить только этот запрос (для быстрого прогона нового запроса с дашборда)")
     args = ap.parse_args()
     platforms = [p.strip() for p in args.platforms.split(",") if p.strip() in PLATFORMS]
 
+    # QUERIES: либо один запрос (--only-query), либо активные из monitor_queries.
+    global QUERIES
+    if args.only_query:
+        QUERIES = [args.only_query]
+        log("режим single-query", query=args.only_query)
+    else:
+        QUERIES = load_queries()
+    log("queries загружены", count=len(QUERIES))
+
     log("=== run start ===", platforms=",".join(platforms), proxy=SCRAPER_PROXY or "direct")
     run_id = insert_parser_run(args.trigger)
-    log("run id", id=run_id)
+    log("run id", id=run_id, pid=os.getpid())
+
+    # Heartbeat-поток: каждые 30 сек обновляет parser_runs.last_heartbeat.
+    # Watchdog на VDSina убьёт прогон, если heartbeat молчит >5 мин.
+    heartbeat_stop = start_heartbeat_thread(run_id, interval=30)
 
     totals: dict = {}
     all_errors: list[dict] = []
@@ -530,6 +675,15 @@ def main() -> int:
     browser = launch(**launch_kwargs)
     try:
         page = browser.new_page()
+        # Защита от вечного зависания: жёсткие таймауты на всех уровнях.
+        # Cloakbrowser/Playwright по умолчанию ждёт 30 сек, но page.evaluate
+        # вообще без timeout — поэтому страница с DataDome-challenge может
+        # висеть бесконечно. Эти setter'ы делают timeout явным.
+        try:
+            page.set_default_navigation_timeout(45000)
+            page.set_default_timeout(30000)
+        except Exception:
+            pass
         for plat in platforms:
             try:
                 items, errors = scrape_one_platform(page, plat, log)
@@ -558,6 +712,12 @@ def main() -> int:
         if runs_deleted > 0:
             log("retention: удалено parser_runs старше 90 дней", deleted=runs_deleted)
 
+    # Отметим запросы как обработанные (для дашборда — когда последний раз парсился)
+    if has_data:
+        for q in QUERIES:
+            mark_query_parsed(q)
+
+    heartbeat_stop.set()  # стоп heartbeat-потока перед финализацией
     finalize_parser_run(run_id, totals, all_errors, status)
     log("=== run end ===", status=status, totals=totals, errors=len(all_errors))
     n8n_notify({"run_id": run_id, "status": status, "totals": totals, "errors_count": len(all_errors)})

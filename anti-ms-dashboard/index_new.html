@@ -1132,7 +1132,7 @@
                     <button onclick="monQueryFormToggle()" style="padding:6px 14px;background:#1565c0;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;">+ Добавить запрос</button>
                 </div>
                 <div id="monQueryForm" style="display:none;padding:12px;background:#f5f5f5;border-radius:6px;">
-                    <div style="font-size:12px;color:#666;margin-bottom:8px;">Новый поисковый запрос для постановки на мониторинг (будет искаться на всех площадках):</div>
+                    <div style="font-size:12px;color:#666;margin-bottom:8px;">Новый поисковый запрос для постановки на мониторинг (будет искаться на всех площадках). Потребуется ключевая фраза. После добавления сразу запустится парсинг только по нему (~3 мин):</div>
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                         <input type="text" id="monQueryInput" placeholder="Напр.: Windows 11 ключ активации"
                             style="flex:1;min-width:220px;padding:8px 12px;border:1px solid #bdbdbd;border-radius:6px;font-size:14px;"
@@ -2075,12 +2075,81 @@
     }
 
     async function supabaseFetchLatestRun() {
-        const r = await fetch(SUPABASE_URL + '/rest/v1/parser_runs?select=*&order=started_at.desc&limit=1', {
+        // ВАЖНО: сортируем по finished_at, а не started_at. Иначе ручной smoke-тест,
+        // запущенный позже cron-а, перекроет успешный cron в шапке "Актуальность".
+        // nullslast → running-прогоны (без finished_at) не лезут вперёд.
+        const r = await fetch(SUPABASE_URL + '/rest/v1/parser_runs?select=*&order=finished_at.desc.nullslast&limit=1', {
             headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
         });
         if (!r.ok) return null;
         const arr = await r.json();
         return arr[0] || null;
+    }
+
+    // Активные поисковые запросы из monitor_queries (единый источник правды с парсером)
+    async function supabaseFetchQueries() {
+        try {
+            const r = await fetch(SUPABASE_URL + '/rest/v1/monitor_queries?select=query&active=eq.true&order=id', {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+            });
+            if (!r.ok) return null;
+            const arr = await r.json();
+            return arr.map(x => x.query).filter(Boolean);
+        } catch (e) { return null; }
+    }
+
+    // Статус очереди парсинга (есть ли pending/running запросы)
+    async function supabaseFetchQueueActive() {
+        try {
+            const r = await fetch(SUPABASE_URL + "/rest/v1/parse_queue?select=id,query,status&status=in.(pending,running)&order=requested_at.asc", {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+            });
+            if (!r.ok) return [];
+            return await r.json();
+        } catch (e) { return []; }
+    }
+
+    // RPC: запросить парсинг (с ключевой фразой). p_query=null → полный прогон.
+    async function supabaseRequestParse(secret, query) {
+        const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/request_parse', {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ p_secret: secret, p_query: query || null }),
+        });
+        if (!r.ok) return { ok: false, error: 'HTTP ' + r.status };
+        return await r.json();
+    }
+
+    // Ключевая фраза: запоминаем в sessionStorage на время сессии (не localStorage —
+    // не храним секрет на диске). Сбрасываем при «Неверная ключевая фраза».
+    function getKeyPhrase(force) {
+        let p = force ? null : sessionStorage.getItem('mon_secret');
+        if (!p) {
+            p = prompt('Введите ключевую фразу для запуска парсинга / добавления запроса:');
+            if (p) sessionStorage.setItem('mon_secret', p);
+        }
+        return p;
+    }
+
+    // ── Кеш данных в localStorage ──
+    // Чтобы дашборд не открывался пустым: показываем последний снимок мгновенно,
+    // потом фоном грузим свежее из Supabase и заменяем.
+    const MON_CACHE_KEY = 'mon_cache_v1';
+    function saveCache(mapped, lastRun) {
+        try {
+            localStorage.setItem(MON_CACHE_KEY, JSON.stringify({
+                rows: mapped, lastRun: lastRun || null, savedAt: new Date().toISOString(),
+            }));
+        } catch (e) { /* quota — не критично */ }
+    }
+    function loadCache() {
+        try {
+            const raw = localStorage.getItem(MON_CACHE_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
     }
 
     // Маппинг Supabase row → формат MON_RAW
@@ -2099,15 +2168,65 @@
         };
     }
 
+    // Боковой индикатор фоновой загрузки
+    function showLoadingBadge(text) {
+        let b = document.getElementById('monLoadingBadge');
+        if (!b) {
+            b = document.createElement('div');
+            b.id = 'monLoadingBadge';
+            b.style.cssText = 'position:fixed;right:18px;bottom:18px;z-index:9999;background:#1565c0;color:#fff;'
+                + 'padding:10px 16px;border-radius:24px;font-size:13px;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,0.2);'
+                + 'display:flex;align-items:center;gap:8px;';
+            document.body.appendChild(b);
+        }
+        b.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid #fff;'
+            + 'border-top-color:transparent;border-radius:50%;animation:monspin 0.8s linear infinite;"></span>' + text;
+        b.style.display = 'flex';
+        if (!document.getElementById('monSpinStyle')) {
+            const st = document.createElement('style'); st.id='monSpinStyle';
+            st.textContent = '@keyframes monspin{to{transform:rotate(360deg)}}';
+            document.head.appendChild(st);
+        }
+    }
+    function hideLoadingBadge() {
+        const b = document.getElementById('monLoadingBadge');
+        if (b) b.style.display = 'none';
+    }
+
+    // Мгновенный показ из кеша при первом открытии (до сетевой загрузки)
+    function renderFromCache() {
+        const c = loadCache();
+        if (!c || !c.rows || !c.rows.length) return false;
+        MON_RAW = c.rows;
+        MON_DATA = c.rows.map(r => ({...r, flags: monComputeFlags(r)}));
+        monFiltered = [...MON_DATA];
+        const tsEl = document.getElementById('scanLastTime');
+        if (c.lastRun && tsEl) {
+            const d = new Date(c.lastRun.finished_at || c.lastRun.started_at);
+            tsEl.textContent = d.toLocaleDateString('ru') + ', ' + d.toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit'}) + ' (кеш)';
+        }
+        if (typeof monRenderQueryTags === 'function') monRenderQueryTags();
+        if (typeof monRebuildQueryFilterBtns === 'function') monRebuildQueryFilterBtns();
+        if (typeof monApplyFilters === 'function') monApplyFilters();
+        return true;
+    }
+
     async function loadFromSupabase() {
         try {
             const tsEl = document.getElementById('scanLastTime');
             const statusEl = document.getElementById('scanStatus');
-            if (tsEl) tsEl.textContent = 'Загрузка…';
-            if (statusEl) { statusEl.style.background='#fff9c4'; statusEl.style.color='#f57f17'; statusEl.textContent='⏳ Загрузка…'; }
+            showLoadingBadge('Загрузка обновлённых данных из Supabase…');
+            if (statusEl) { statusEl.style.background='#fff9c4'; statusEl.style.color='#f57f17'; statusEl.textContent='⏳ Обновление…'; }
 
-            const [rows, lastRun] = await Promise.all([supabaseFetchAll(), supabaseFetchLatestRun()]);
+            const [rows, lastRun, dbQueries] = await Promise.all([
+                supabaseFetchAll(), supabaseFetchLatestRun(), supabaseFetchQueries(),
+            ]);
             console.log('Supabase: загружено', rows.length, 'строк');
+
+            // Запросы — из БД (единый источник с парсером)
+            if (dbQueries && dbQueries.length) {
+                MON_QUERIES = dbQueries;
+            }
 
             // Маппинг + клиентский фильтр titleOk + price<0.5×op
             let mapped = rows.map(mapSupabaseRow).filter(r => r.title && titleOkClient(r.title) && isCounterfeit(r));
@@ -2164,16 +2283,67 @@
             if (typeof monRenderQueryTags === 'function') monRenderQueryTags();
             if (typeof monRebuildQueryFilterBtns === 'function') monRebuildQueryFilterBtns();
             if (typeof monApplyFilters === 'function') monApplyFilters();
+
+            // Сохраним свежий снимок в кеш для мгновенного показа при следующем открытии
+            saveCache(mapped, lastRun);
+            hideLoadingBadge();
         } catch (e) {
             console.error('Supabase loader error:', e);
-            const tbody = document.getElementById('monTableBody');
-            if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#c62828;padding:30px;">Не удалось загрузить из Supabase: ' + e.message + '</td></tr>';
+            hideLoadingBadge();
+            // Если есть кеш — оставляем его, не затираем ошибкой
+            if (!MON_DATA || !MON_DATA.length) {
+                const tbody = document.getElementById('monTableBody');
+                if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#c62828;padding:30px;">Не удалось загрузить из Supabase: ' + e.message + '</td></tr>';
+            } else {
+                showLoadingBadge('⚠ Не удалось обновить — показаны кешированные данные');
+                setTimeout(hideLoadingBadge, 4000);
+            }
         }
     }
 
-    // Переопределим кнопку «Обновить» на полный reload из Supabase
-    function runScan() {
-        loadFromSupabase();
+    // Кнопка «Обновить» = запустить парсинг (тяжёлая операция, нужна ключевая фраза).
+    // Просто перечитать данные можно обычным reload браузера (Cmd+Shift+R).
+    async function runScan() {
+        const secret = getKeyPhrase(false);
+        if (!secret) return;
+        const btn = event && event.target;
+        if (btn) { btn.disabled = true; btn.dataset.old = btn.textContent; btn.textContent = '⏳ Запуск…'; }
+        const res = await supabaseRequestParse(secret, null);
+        if (btn) { btn.disabled = false; btn.textContent = btn.dataset.old || '🔄 Обновить'; }
+        if (!res.ok) {
+            if ((res.error || '').includes('фраз')) sessionStorage.removeItem('mon_secret');
+            alert('Не удалось запустить парсинг: ' + (res.error || 'ошибка'));
+            return;
+        }
+        const statusEl = document.getElementById('scanStatus');
+        if (statusEl) { statusEl.style.background='#fff9c4'; statusEl.style.color='#f57f17'; statusEl.textContent='⏳ Парсинг запущен'; }
+        showLoadingBadge('Парсинг запущен — результат через ~15 мин. Можно закрыть страницу.');
+        setTimeout(hideLoadingBadge, 8000);
+        monPollQueue();  // следим за очередью, по завершении подтянем данные
+    }
+
+    // Опрос очереди: пока есть pending/running — показываем статус, по опустошению reload данных
+    let monQueuePollTimer = null;
+    async function monPollQueue() {
+        if (monQueuePollTimer) return;
+        let wasActive = false;
+        monQueuePollTimer = setInterval(async () => {
+            const active = await supabaseFetchQueueActive();
+            const statusEl = document.getElementById('scanStatus');
+            if (active.length) {
+                wasActive = true;
+                if (statusEl) { statusEl.style.background='#fff9c4'; statusEl.style.color='#f57f17';
+                    statusEl.textContent = '⏳ Парсинг идёт (' + active.length + ' в очереди)'; }
+            } else if (wasActive) {
+                clearInterval(monQueuePollTimer); monQueuePollTimer = null;
+                showLoadingBadge('Парсинг завершён — обновляю данные…');
+                await loadFromSupabase();
+            } else {
+                // очередь была пуста с самого начала — перестаём опрашивать через минуту
+            }
+        }, 20000);
+        // авто-стоп через 30 мин на всякий случай
+        setTimeout(() => { if (monQueuePollTimer) { clearInterval(monQueuePollTimer); monQueuePollTimer = null; } }, 1800000);
     }
 
 
@@ -2195,30 +2365,13 @@
         'Office Home and Business 2021 ключ',
         'Microsoft Office лицензионный ключ'
     ];
-    // Активные поисковые запросы. При смене дефолта обновляем версию -
-    // тогда у существующих пользователей localStorage сбрасывается до нового набора.
-    const MON_QUERIES_VERSION = 2;
+    // Активные поисковые запросы — ЕДИНЫЙ ИСТОЧНИК: таблица monitor_queries в Supabase.
+    // Этот список — fallback до первой загрузки; loadFromSupabase() перезапишет из БД.
     const MON_QUERIES_DEFAULT = [
-        'Microsoft Office ключ активации',
-        'Microsoft Office 365 ключ',
-        'Microsoft Office 2021 ключ',
-        'Office 2021 ключ активации',
-        'Office 2024 ключ активации',
-        'MS Office ключ активации'
+        'Office ключ', 'Office активация', 'Microsoft 365',
+        'Office LTSC', 'Office 2024', 'Office 2019'
     ];
-    let MON_QUERIES;
-    try {
-        const savedVer = parseInt(localStorage.getItem('mon_queries_v') || '0');
-        if (savedVer >= MON_QUERIES_VERSION) {
-            MON_QUERIES = JSON.parse(localStorage.getItem('mon_queries')||'null') || MON_QUERIES_DEFAULT.slice();
-        } else {
-            MON_QUERIES = MON_QUERIES_DEFAULT.slice();
-            localStorage.setItem('mon_queries', JSON.stringify(MON_QUERIES));
-            localStorage.setItem('mon_queries_v', String(MON_QUERIES_VERSION));
-        }
-    } catch(e) {
-        MON_QUERIES = MON_QUERIES_DEFAULT.slice();
-    }
+    let MON_QUERIES = MON_QUERIES_DEFAULT.slice();
 
     // Сортировка по умолчанию — пресет 'default' (дисконт ↓ → цена ↑ → название ↑).
     // Совпадает с предсортировкой в Python merge_mon_raw.py. Клик по заголовку
@@ -2246,31 +2399,58 @@
             document.getElementById('monQueryInput').focus();
         }
     }
-    function monQueryAddSuggest(btn, q) {
-        if(!MON_QUERIES.includes(q)) {
-            MON_QUERIES.push(q);
-            monSaveQueries();
-            monRenderQueryTags();
-            monRebuildQueryFilterBtns();
-            btn.disabled=true; btn.style.opacity='0.4';
+    // Добавление запроса: пишем в monitor_queries + ставим в очередь парсинг ТОЛЬКО
+    // по нему (через RPC request_parse с ключевой фразой). Парсер прогонит его за ~3 мин.
+    async function monQuerySubmit(q, btn) {
+        q = (q || '').trim();
+        if (!q) return false;
+        if (MON_QUERIES.includes(q)) { alert('Такой запрос уже на мониторинге'); return false; }
+        const secret = getKeyPhrase(false);
+        if (!secret) return false;
+        if (btn) { btn.disabled = true; }
+        const res = await supabaseRequestParse(secret, q);
+        if (btn) { btn.disabled = false; }
+        if (!res.ok) {
+            if ((res.error || '').includes('фраз')) sessionStorage.removeItem('mon_secret');
+            alert('Не удалось добавить запрос: ' + (res.error || 'ошибка'));
+            return false;
         }
-    }
-    function monQueryAdd() {
-        const inp = document.getElementById('monQueryInput');
-        if(!inp) return;
-        const q = inp.value.trim();
-        if(!q) { inp.focus(); return; }
-        if(MON_QUERIES.includes(q)) { inp.select(); return; }
+        // Локально показываем сразу (БД-снимок подтянется после парсинга)
         MON_QUERIES.push(q);
-        monSaveQueries();
-        inp.value='';
         monRenderQueryTags();
         monRebuildQueryFilterBtns();
-        monQueryFormToggle(); // закрыть форму
+        showLoadingBadge('Запрос «' + q + '» добавлен, парсинг запущен (~3 мин)…');
+        setTimeout(hideLoadingBadge, 6000);
+        monPollQueue();
+        return true;
     }
-    function monQueryRemove(q) {
+    async function monQueryAddSuggest(btn, q) {
+        const ok = await monQuerySubmit(q, btn);
+        if (ok) { btn.disabled=true; btn.style.opacity='0.4'; }
+    }
+    async function monQueryAdd() {
+        const inp = document.getElementById('monQueryInput');
+        if(!inp) return;
+        const ok = await monQuerySubmit(inp.value, null);
+        if (ok) { inp.value=''; monQueryFormToggle(); }
+    }
+    // Удаление = деактивация в monitor_queries (тоже write, нужна фраза).
+    async function monQueryRemove(q) {
+        if (!confirm('Снять запрос «' + q + '» с мониторинга?')) return;
+        const secret = getKeyPhrase(false);
+        if (!secret) return;
+        const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/deactivate_query', {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ p_secret: secret, p_query: q }),
+        });
+        const res = r.ok ? await r.json() : { ok:false, error:'HTTP '+r.status };
+        if (!res.ok) {
+            if ((res.error || '').includes('фраз')) sessionStorage.removeItem('mon_secret');
+            alert('Не удалось снять запрос: ' + (res.error || 'ошибка'));
+            return;
+        }
         MON_QUERIES = MON_QUERIES.filter(x=>x!==q);
-        monSaveQueries();
         if(monState.query===q) { monState.query=''; }
         monRenderQueryTags();
         monRebuildQueryFilterBtns();
@@ -2601,7 +2781,11 @@
     }
 
     // Инициализация мониторинга при загрузке
-    document.addEventListener('DOMContentLoaded', function() { loadFromSupabase(); });
+    document.addEventListener('DOMContentLoaded', function() {
+        // Мгновенно показываем кеш (если есть), затем фоном грузим свежее из Supabase.
+        renderFromCache();
+        loadFromSupabase();
+    });
 
 </script>
 </body>
