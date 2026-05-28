@@ -95,9 +95,9 @@
       <div class="card">
         <h3>Динамика обнаружения по дням</h3><div class="cap">Уникальные карточки контрафакта, цвета площадок</div>
         <div class="legend"><span><i style="background:var(--ozon)"></i>Ozon</span><span><i style="background:var(--wb)"></i>Wildberries</span><span><i style="background:var(--yandex)"></i>Яндекс.Маркет</span><span><i style="background:var(--avito)"></i>Avito</span></div>
-        <canvas id="dynChart" height="58"></canvas>
+        <div style="height:200px"><canvas id="dynChart"></canvas></div>
       </div>
-      <div class="card"><h3>Доля площадок</h3><div class="cap">Активный контрафакт сейчас</div><canvas id="donut" height="95"></canvas></div>
+      <div class="card"><h3>Доля площадок</h3><div class="cap">Активный контрафакт сейчас</div><div style="height:200px"><canvas id="donut"></canvas></div></div>
     </div>
 
     <!-- Блок запросов на мониторинге -->
@@ -181,8 +181,8 @@ function renderCharts(){
   const newToday=cf.filter(r=>r.first_seen===md).length,apay=cf.filter(r=>r.apay).length,avg=Math.round(today.reduce((s,r)=>s+r._disc,0)/(today.length||1));
   document.getElementById('kpis').innerHTML=[['Активный контрафакт',today.length,'на последнюю дату'],['Средний дисконт',avg+'%','ниже официальной'],['Новых за сутки','+'+newToday,'впервые замечены'],['Площадок',Object.keys(PL).length,'под наблюдением']].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('');
   const ds=Object.keys(PL).map(p=>({label:PL[p].n,data:days.map(d=>cf.filter(r=>r.last_seen===d&&r.pl===p).length),backgroundColor:PL[p].c+'cc',borderColor:PL[p].c,fill:true,tension:.4,pointRadius:2,borderWidth:2}));
-  new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:days.map(d=>d.slice(5)),datasets:ds},options:{plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}},y:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}}}}});
-  new Chart(document.getElementById('donut'),{type:'doughnut',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:'#16213A',borderWidth:3}]},options:{cutout:'66%',plugins:{legend:{position:'bottom',labels:{color:'#8499B5',font:{size:11},padding:9}}}}});
+  new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:days.map(d=>d.slice(5)),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}},y:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}}}}});
+  new Chart(document.getElementById('donut'),{type:'doughnut',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:'#16213A',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'66%',plugins:{legend:{position:'bottom',labels:{color:'#8499B5',font:{size:11},padding:9}}}}});
   // Топ-10: самые дешёвые абсолютно (минимальная цена при максимальном отклонении) —
   // это самые «кричащие» предложения, с площадкой и ценой для мгновенной оценки
   const top=[...today].sort((a,b)=>a.price-b.price).slice(0,10);
