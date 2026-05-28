@@ -3096,13 +3096,14 @@
                     </div>
                     <div>
                         <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Площадка</div>
-                        <div style="display:flex;gap:6px;" id="monPlatBtns">
-                            <button class="mon-filter-btn active" onclick="monTogglePlat('all',this)">Все</button>
-                            <button class="mon-filter-btn" onclick="monTogglePlat('ozon',this)">OZON</button>
-                            <button class="mon-filter-btn" onclick="monTogglePlat('wildberries',this)">Wildberries</button>
-                            <button class="mon-filter-btn" onclick="monTogglePlat('yandex',this)">Яндекс.Маркет</button>
-                            <button class="mon-filter-btn" onclick="monTogglePlat('avito',this)">Авито</button>
-                            <button class="mon-filter-btn" onclick="monTogglePlat('aliexpress',this)">AliExpress</button>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="monPlatBtns">
+                            <button class="mon-filter-btn active" data-pl="all" onclick="monTogglePlat('all',this)">Все</button>
+                            <button class="mon-filter-btn" data-pl="ozon" onclick="monTogglePlat('ozon',this)">OZON</button>
+                            <button class="mon-filter-btn" data-pl="wildberries" onclick="monTogglePlat('wildberries',this)">Wildberries</button>
+                            <button class="mon-filter-btn" data-pl="yandex" onclick="monTogglePlat('yandex',this)">Яндекс.Маркет</button>
+                            <button class="mon-filter-btn" data-pl="avito" onclick="monTogglePlat('avito',this)">Авито</button>
+                            <button class="mon-filter-btn" data-pl="avito-pay" onclick="monTogglePlatApay(this)" title="Только объявления Avito с оплатой через инфраструктуру Avito (Авито Доставка / безопасная сделка) — прямая зона ответственности площадки">💳 Авито с оплатой</button>
+                            <button class="mon-filter-btn" data-pl="aliexpress" onclick="monTogglePlat('aliexpress',this)">AliExpress</button>
                         </div>
                     </div>
                     <div>
@@ -3120,13 +3121,6 @@
                             <button class="mon-filter-btn active" onclick="monToggleFlag(0,this)">Любое</button>
                             <button class="mon-filter-btn" onclick="monToggleFlag(2,this)">2+</button>
                             <button class="mon-filter-btn" onclick="monToggleFlag(3,this)">3+</button>
-                        </div>
-                    </div>
-                    <div>
-                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Оплата через Avito</div>
-                        <div style="display:flex;gap:6px;" id="monApayBtns">
-                            <button class="mon-filter-btn active" onclick="monToggleApay('all',this)" title="Все карточки">Все</button>
-                            <button class="mon-filter-btn" onclick="monToggleApay('yes',this)" title="Только объявления с оплатой через инфраструктуру Avito (Авито Доставка / безопасная сделка) — прямая зона ответственности площадки">💳 Только через Avito</button>
                         </div>
                     </div>
                     <div style="flex:1;min-width:180px;">
@@ -5312,7 +5306,13 @@
             + MON_QUERIES.map(q => `<button class="mon-filter-btn${monState.query===q?' active':''}" data-q="${q}" onclick="monToggleQuery('${q.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',this)">${q.length>25?q.slice(0,25)+'…':q}</button>`).join('');
     }
     function monTogglePlat(v, btn) {
-        monState.pl=v; monState.page=0;
+        monState.pl=v; monState.apay='all'; monState.page=0;  // обычная площадка сбрасывает фильтр оплаты
+        document.querySelectorAll('#monPlatBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active'); monApplyFilters();
+    }
+    // Подфильтр площадки Avito: только карточки с оплатой через инфраструктуру Avito
+    function monTogglePlatApay(btn) {
+        monState.pl='avito'; monState.apay='yes'; monState.page=0;
         document.querySelectorAll('#monPlatBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
         btn.classList.add('active'); monApplyFilters();
     }
@@ -5324,11 +5324,6 @@
     function monToggleFlag(v, btn) {
         monState.flag=v; monState.page=0;
         document.querySelectorAll('#monFlagBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active'); monApplyFilters();
-    }
-    function monToggleApay(v, btn) {
-        monState.apay=v; monState.page=0;
-        document.querySelectorAll('#monApayBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
         btn.classList.add('active'); monApplyFilters();
     }
     function monApplyFilters() {
