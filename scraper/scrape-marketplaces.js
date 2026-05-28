@@ -22,13 +22,17 @@ const path = require('path');
 
 // ========== КОНФИГУРАЦИЯ ==========
 const CONFIG = {
-  // Поисковые запросы для мониторинга (только Microsoft Office, без Windows)
+  // Поисковые запросы для мониторинга. Финальный набор из 8 (отобран эмпирически
+  // по % новых product_id ≥10%). = MON_QUERIES_DEFAULT в anti-ms-dashboard/index.html.
   queries: [
-    'Microsoft Office ключ активации',
-    'Microsoft Office 365 ключ',
-    'Office 2021 ключ активации',
-    'Office 2024 ключ активации',
-    'MS Office ключ активации',
+    'Office ключ',
+    'Office активация',
+    'Microsoft 365',
+    'Office LTSC',
+    'Office 2024',
+    'Office 2019',
+    'Майкрософт Офис 2021',
+    'Майкрософт Офис 2016',
   ],
   // Площадки: ozon | wildberries | yandex | avito
   platforms: ['ozon', 'wildberries', 'yandex', 'avito'],
@@ -116,8 +120,8 @@ function titleOk(title) {
   if (t.includes('officesuite')) return false;  // конкурент, не Microsoft
   return (
     t.includes('office') ||
-    (t.includes('365') && t.includes('microsoft')) ||
-    (t.includes('офис') && t.includes('microsoft'))
+    (t.includes('365') && (t.includes('microsoft') || t.includes('майкрософт'))) ||
+    (t.includes('офис') && (t.includes('microsoft') || t.includes('майкрософт')))
   );
 }
 

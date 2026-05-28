@@ -10,7 +10,7 @@
     "scrape:wb": "node scrape-marketplaces.js --platforms wildberries --pages 10",
     "scrape:ym": "node scrape-marketplaces.js --platforms yandex --pages 5",
     "scrape:avito": "node scrape-marketplaces.js --platforms avito --pages 5",
-    "test": "node scrape-marketplaces.js --platforms ozon --pages 1 --query 'Microsoft Office ключ активации'"
+    "test": "node scrape-marketplaces.js --platforms ozon --pages 1 --query 'Office ключ'"
   },
   "dependencies": {
     "playwright": "^1.42.0"

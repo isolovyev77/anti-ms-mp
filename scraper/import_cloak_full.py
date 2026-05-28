@@ -115,11 +115,13 @@ def title_ok(title: str) -> bool:
         return False
     if re.match(r'^office suite|^офисный пакет(?! microsoft)', s):
         return False
-    # Положительные критерии: должны быть Microsoft Office / Office 365 / Office 2021 etc.
+    # Положительные критерии: Microsoft Office / Office 365 / Office 2021 и кириллические
+    # варианты («Майкрософт Офис», «Майкрософт 365») — нужны для запросов
+    # «Майкрософт Офис 2021/2016», которые дают карточки с кириллическим названием.
     return (
         'office' in s
-        or ('365' in s and ('microsoft' in s or 'ms' in s.split()))
-        or ('офис' in s and 'microsoft' in s)
+        or ('365' in s and ('microsoft' in s or 'майкрософт' in s or 'ms' in s.split()))
+        or ('офис' in s and ('microsoft' in s or 'майкрософт' in s))
     )
 
 
