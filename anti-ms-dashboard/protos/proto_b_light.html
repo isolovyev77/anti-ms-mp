@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Прототип B — Светлый минимализм</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<style>
+  :root{
+    --bg:#F5F7FB; --panel:#FFFFFF; --line:#EAEEF5; --tx:#1A2333; --muted:#8A97AC;
+    --ozon:#005BFF; --wb:#CB11AB; --yandex:#F5B800; --avito:#7B61FF; --accent:#2BB7A8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
+  .layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+  .side{background:var(--panel);border-right:1px solid var(--line);padding:24px 18px;position:sticky;top:0;height:100vh;overflow:auto}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:30px}
+  .brand .dot{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--ozon));color:#fff;display:flex;align-items:center;justify-content:center}
+  .brand b{font-size:15px}
+  .side h4{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin:24px 0 10px}
+  .chk{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;cursor:pointer;font-size:13px;color:#4a5568}
+  .chk:hover{background:#F5F7FB}.chk.on{background:#EEF3FF;color:var(--tx);font-weight:600}
+  .chk .sw{width:11px;height:11px;border-radius:50%}.chk .cnt{margin-left:auto;color:var(--muted);font-size:12px}
+  .seg{display:flex;background:#F0F3F9;border-radius:10px;padding:3px;gap:3px;margin-top:4px}
+  .seg button{flex:1;border:none;background:none;color:var(--muted);padding:7px 0;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
+  .seg button.on{background:#fff;color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .slider{width:100%;margin-top:10px;accent-color:var(--ozon)}
+  .main{padding:26px 30px}
+  .top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px}
+  .top h1{font-size:23px;font-weight:800;letter-spacing:-.5px}.top p{color:var(--muted);margin-top:4px}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 2px 10px rgba(20,40,80,.04)}
+  .kpi .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .kpi .val{font-size:27px;font-weight:800;margin-top:8px}.kpi .sub{font-size:12px;margin-top:5px;color:var(--accent);font-weight:600}
+  .grid{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;margin-bottom:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 22px;box-shadow:0 2px 10px rgba(20,40,80,.04)}
+  .card h3{font-size:15px;font-weight:700}.card .cap{font-size:12px;color:var(--muted);margin:3px 0 14px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;font-size:12px;color:var(--muted)}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:middle}
+  .barrow{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13px}
+  .barrow .nm{width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#5a6678}
+  .barrow .tr{flex:1;background:#F0F3F9;border-radius:6px;height:14px;overflow:hidden}
+  .barrow .fl{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--wb),#ff6ec7)}
+  .barrow .pc{width:46px;text-align:right;font-weight:700;color:var(--wb)}
+  .loading{color:var(--muted);padding:40px;text-align:center}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <div class="brand"><div class="dot">◉</div><b>Контрафакт-мониторинг</b></div>
+    <h4>Период</h4>
+    <div class="seg"><button class="on">День</button><button>Неделя</button><button>Всё</button></div>
+    <h4>Площадки</h4><div id="platFilters"></div>
+    <h4>Мин. дисконт: <span id="discVal" style="color:var(--ozon)">50%</span></h4>
+    <input class="slider" type="range" min="0" max="99" value="50" id="discSlider">
+    <h4>Особое</h4>
+    <label class="chk" id="apayChk"><span class="sw" style="background:var(--accent)"></span>💳 Только оплата через Avito</label>
+  </aside>
+  <main class="main">
+    <div class="top"><div><h1>Мониторинг признаков контрафакта ПО</h1><p>Светлый минимализм · обновляется автоматически</p></div>
+      <div style="font-size:12px;color:var(--muted)">обновлено: <span id="upd">…</span></div></div>
+    <div class="kpis" id="kpis"><div class="loading">Загрузка из Supabase…</div></div>
+    <div class="grid">
+      <div class="card"><h3>Динамика обнаружения по дням</h3><div class="cap">Уникальные карточки контрафакта, цвета площадок</div>
+        <div class="legend"><span><i style="background:var(--ozon)"></i>Ozon</span><span><i style="background:var(--wb)"></i>Wildberries</span><span><i style="background:var(--yandex)"></i>Яндекс.Маркет</span><span><i style="background:var(--avito)"></i>Avito</span></div>
+        <canvas id="dynChart" height="120"></canvas></div>
+      <div class="card"><h3>Доля площадок</h3><div class="cap">Активный контрафакт сейчас</div><canvas id="donut" height="200"></canvas></div>
+    </div>
+    <div class="card"><h3>Топ-10 по глубине дисконта</h3><div class="cap">Самые вопиющие отклонения — приоритет для реагирования</div><div id="topDisc"></div></div>
+  </main>
+</div>
+<script>
+const SUPABASE_URL="https://yqfdbuiyfkzhkhpiknob.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_nZNZLCqx4e_7La8pfQmsjA_RSw0zT9t";
+const PL={ozon:{n:'Ozon',c:'#005BFF'},wildberries:{n:'Wildberries',c:'#CB11AB'},yandex:{n:'Яндекс.Маркет',c:'#F5B800'},avito:{n:'Avito',c:'#7B61FF'}};
+const GRID='#EAEEF5',TICK='#8A97AC';
+function op(t){t=(t||'').toLowerCase();if(t.includes('pro plus')||t.includes('proplus')||t.includes('ltsc')||t.includes('professional'))return 39990;if(t.includes('home')&&t.includes('business'))return 22990;if(t.includes('home')&&t.includes('student'))return 14990;if(t.includes('365')&&t.includes('family'))return 5290;if(t.includes('365'))return 2790;if(t.includes('box'))return 6990;return 9990;}
+let RAW=[];
+async function load(){let all=[],from=0;while(true){const r=await fetch(`${SUPABASE_URL}/rest/v1/listings?select=pl,title,price,op,first_seen,last_seen,avito_pay&order=last_seen.desc`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Range-Unit':'items',Range:`${from}-${from+999}`}});const b=await r.json();all=all.concat(b);if(b.length<1000)break;from+=1000;}
+  RAW=all.map(r=>{const o=r.op||op(r.title);return{...r,_op:o,_disc:Math.round((1-r.price/o)*100),_cf:r.price>0&&r.price<0.5*o};});
+  document.getElementById('upd').textContent=new Date().toLocaleString('ru',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});render();}
+function render(){const cf=RAW.filter(r=>r._cf);const days=[...new Set(cf.map(r=>r.last_seen))].sort();const maxDay=days[days.length-1];
+  const today=cf.filter(r=>r.last_seen===maxDay);const newToday=cf.filter(r=>r.first_seen===maxDay).length;const apay=cf.filter(r=>r.avito_pay===true).length;const avgDisc=Math.round(today.reduce((s,r)=>s+r._disc,0)/(today.length||1));
+  document.getElementById('kpis').innerHTML=[['Активный контрафакт',today.length,'на последнюю дату'],['Средний дисконт',avgDisc+'%','ниже официальной'],['Новых за сутки','+'+newToday,'впервые замечены'],['💳 Через Avito',apay,'зона ответственности'],['Площадок',Object.keys(PL).length,'под наблюдением']].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('');
+  const dsets=Object.keys(PL).map(p=>({label:PL[p].n,data:days.map(d=>cf.filter(r=>r.last_seen===d&&r.pl===p).length),backgroundColor:PL[p].c+'33',borderColor:PL[p].c,fill:true,tension:.4,pointRadius:2,borderWidth:2}));
+  new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:days.map(d=>d.slice(5)),datasets:dsets},options:{plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:GRID},ticks:{color:TICK}},y:{stacked:true,grid:{color:GRID},ticks:{color:TICK}}}}});
+  const byPl=Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length);
+  new Chart(document.getElementById('donut'),{type:'doughnut',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:byPl,backgroundColor:Object.values(PL).map(x=>x.c),borderColor:'#fff',borderWidth:3}]},options:{cutout:'66%',plugins:{legend:{position:'bottom',labels:{color:TICK,font:{size:11},padding:10}}}}});
+  const top=[...today].sort((a,b)=>b._disc-a._disc).slice(0,10);
+  document.getElementById('topDisc').innerHTML=top.map(r=>`<div class="barrow"><span class="nm" title="${r.title}">${(r.title||'').slice(0,40)}</span><span class="tr"><span class="fl" style="width:${r._disc}%"></span></span><span class="pc">${r._disc}%</span></div>`).join('');}
+document.getElementById('discSlider').oninput=e=>document.getElementById('discVal').textContent=e.target.value+'%';
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+function buildPlat(){document.getElementById('platFilters').innerHTML=Object.keys(PL).map(p=>`<label class="chk on"><span class="sw" style="background:${PL[p].c}"></span>${PL[p].n}</label>`).join('');document.querySelectorAll('#platFilters .chk').forEach(c=>c.onclick=()=>c.classList.toggle('on'));}
+buildPlat();document.getElementById('apayChk').onclick=function(){this.classList.toggle('on');};load();
+</script>
+</body>
+</html>
