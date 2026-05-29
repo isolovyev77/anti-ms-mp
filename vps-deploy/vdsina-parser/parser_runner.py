@@ -681,6 +681,8 @@ def main() -> int:
     ap.add_argument("--trigger", default="cron", choices=["cron", "manual", "watcher", "dashboard"])
     ap.add_argument("--only-query", default=None,
                     help="Парсить только этот запрос (для быстрого прогона нового запроса с дашборда)")
+    ap.add_argument("--no-notify", action="store_true",
+                    help="Не слать n8n/Telegram-уведомление (для ночного cron: один отчёт шлёт оркестратор в 04:00)")
     args = ap.parse_args()
     platforms = [p.strip() for p in args.platforms.split(",") if p.strip() in PLATFORMS]
 
@@ -764,7 +766,10 @@ def main() -> int:
     heartbeat_stop.set()  # стоп heartbeat-потока перед финализацией
     finalize_parser_run(run_id, totals, all_errors, status)
     log("=== run end ===", status=status, totals=totals, errors=len(all_errors))
-    n8n_notify({"run_id": run_id, "status": status, "totals": totals, "errors_count": len(all_errors)})
+    if not args.no_notify:
+        n8n_notify({"run_id": run_id, "status": status, "totals": totals, "errors_count": len(all_errors)})
+    else:
+        log("n8n notify пропущен (--no-notify): отчёт пришлёт оркестратор")
     # ВАЖНО: os._exit, а не return/sys.exit. cloakbrowser/Playwright оставляет
     # non-daemon потоки и дочерний chromium, из-за которых процесс зависал после
     # завершения работы (run end в логе есть, а процесс жил ещё часами и держал
