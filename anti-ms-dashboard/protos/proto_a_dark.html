@@ -92,6 +92,9 @@
   .plbadge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:11px;font-size:11px;font-weight:600;white-space:nowrap}
   .apay{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#ff5470}
   .disc{font-weight:800}
+  .si{color:var(--accent);font-size:10px;margin-left:2px;letter-spacing:0}
+  .si sup{font-size:8px;font-weight:700}
+  #pieTip{position:fixed;display:none;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:12px;color:var(--tx);box-shadow:0 6px 20px rgba(0,0,0,.45);z-index:200;white-space:nowrap}
   .fp{display:inline-block;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;margin-right:3px}
   .fp-r{background:#3a1622;color:#ff6b8a}.fp-y{background:#3a3415;color:#ffd43b}.fp-o{background:#3a2615;color:#ff9f43}.fp-g{background:#21304a;color:#7e92ad}
   .pager{display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-top:14px;color:var(--muted);font-size:13px}
@@ -152,7 +155,7 @@
     <div class="card" style="margin-bottom:14px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
         <div><h3>Динамика обнаружения контрафакта</h3><div class="cap">Уникальные карточки по дням, цвета площадок</div></div>
-        <div class="seg" style="width:auto;margin:0" id="granSeg"><button class="on" data-gran="day">Дни</button><button data-gran="month">Месяцы</button><button data-gran="year">Годы</button></div>
+        <div class="seg" style="width:auto;margin:0;gap:6px" id="granSeg"><button class="on" data-gran="day">Дни</button><button data-gran="week">Нед</button><button data-gran="month">Мес</button><button data-gran="year">Год</button></div>
       </div>
       <div class="legend"><span><i style="background:var(--ozon)"></i>Ozon</span><span><i style="background:var(--wb)"></i>Wildberries</span><span><i style="background:var(--yandex)"></i>Яндекс.Маркет</span><span><i style="background:var(--avito)"></i>Avito</span></div>
       <div style="height:230px"><canvas id="dynChart"></canvas></div>
@@ -174,27 +177,26 @@
     <!-- Полная таблица карточек -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
-        <h3 style="margin:0">Все карточки</h3>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <h3 style="margin:0">Карточки</h3>
+          <div class="presets" id="presetBtns" style="margin:0">
+            <button class="on" data-preset="default" title="Дисконт ↓ → Цена ↑ → Название ↑">📊 По умолчанию</button>
+            <button data-preset="score" title="Индекс подозрительности: дисконт + флажки + аномально низкая цена">🔥 Самые подозрительные</button>
+            <button data-preset="recent" title="Сначала самые свежие (по дате обнаружения)">🆕 Свежие</button>
+          </div>
+        </div>
         <div style="display:flex;align-items:center;gap:14px">
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)">На странице: <span class="seg" style="margin:0;display:inline-flex"><button class="ps" data-ps="10">10</button><button class="ps on" data-ps="50">50</button><button class="ps" data-ps="100">100</button></span></div>
           <div style="font-size:13px;color:var(--muted)">Показано <b id="cnt" style="color:var(--tx)">0</b> из <b id="tot" style="color:var(--tx)">0</b></div>
         </div>
       </div>
-      <div class="presets" id="presetBtns">
-        <button class="on" data-preset="default" title="Дисконт ↓ → Цена ↑ → Название ↑">📊 По умолчанию</button>
-        <button data-preset="score" title="Индекс подозрительности: дисконт + флажки + аномально низкая цена">🔥 Самые подозрительные</button>
-        <button data-preset="loss" title="Абсолютная недоплата = Офиц. − Цена. Сверху наибольшие потери в рублях">💸 Крупнейшие потери</button>
-        <button data-preset="family" title="Группировка по виду продукта (Office 2021 Pro Plus и т.п.). Сверху самые массовые">👥 Группы товаров</button>
-        <button data-preset="pl" title="Группировать по площадке, внутри — дисконт ↓">🏪 По площадкам</button>
-        <button data-preset="recent" title="Сначала самые свежие (по дате обнаружения)">🆕 Свежие</button>
-      </div>
       <div style="overflow-x:auto">
         <table>
           <thead><tr>
-            <th onclick="sortBy('date')">Дата</th><th onclick="sortBy('pl')">Площадка</th>
-            <th onclick="sortBy('title')">Название</th><th>Ссылка</th>
-            <th onclick="sortBy('price')">Цена</th><th onclick="sortBy('op')">Офиц.</th>
-            <th onclick="sortBy('disc')">Дисконт</th><th>Флажки</th>
+            <th onclick="sortBy('date')">Дата <span class="si" data-si="date"></span></th><th onclick="sortBy('pl')">Площадка <span class="si" data-si="pl"></span></th>
+            <th onclick="sortBy('title')">Название <span class="si" data-si="title"></span></th><th>Ссылка</th>
+            <th onclick="sortBy('price')">Цена <span class="si" data-si="price"></span></th><th onclick="sortBy('op')">Офиц. <span class="si" data-si="op"></span></th>
+            <th onclick="sortBy('disc')">Дисконт <span class="si" data-si="disc"></span></th><th>Флажки</th>
           </tr></thead>
           <tbody id="tbody"><tr><td colspan="8" class="loading">Загрузка…</td></tr></tbody>
         </table>
@@ -203,6 +205,7 @@
     </div>
   </main>
 </div>
+<div id="pieTip"></div>
 
 <script>
 const SUPABASE_URL="https://yqfdbuiyfkzhkhpiknob.supabase.co";
@@ -260,8 +263,15 @@ async function addQuery(){const inp=document.getElementById('newQ');const q=(inp
   else{if((res.error||'').includes('фраз'))sessionStorage.removeItem('mon_secret');alert('Не удалось добавить: '+(res.error||'ошибка'));}}
 function maxDay(){return [...new Set(RAW.filter(r=>r._cf).map(r=>r.last_seen))].sort().pop();}
 // Гранулярность оси времени: day=YYYY-MM-DD, month=YYYY-MM, year=YYYY
-function bucket(d,g){return g==='year'?d.slice(0,4):g==='month'?d.slice(0,7):d;}
-function bucketLabel(b,g){return g==='year'?b:g==='month'?b.slice(2):b.slice(5);}
+function bucket(d,g){
+  if(g==='year')return d.slice(0,4);
+  if(g==='month')return d.slice(0,7);
+  if(g==='week'){const t=new Date(d+'T00:00:00');const off=(t.getDay()+6)%7;t.setDate(t.getDate()-off);
+    return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');}
+  return d;
+}
+// Подпись: год=YYYY, месяц=YY-MM, день/неделя=ДД.ММ (неделя — по понедельнику)
+function bucketLabel(b,g){return g==='year'?b:g==='month'?b.slice(2):b.slice(5).split('-').reverse().join('.');}
 let dynChartObj=null,donutObj=null;
 function renderCharts(){
   const cf=RAW.filter(r=>r._cf);const md=maxDay();const today=cf.filter(r=>r.last_seen===md);
@@ -278,7 +288,7 @@ function renderCharts(){
   const GRID=cssVar('--grid'),TICK=cssVar('--muted'),PIEB=cssVar('--pieborder');
   // Круговая диаграмма долей площадок (pie, не бублик): названия в tooltip по hover + легенда справа
   if(donutObj)donutObj.destroy();
-  donutObj=new Chart(document.getElementById('pie'),{type:'pie',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:PIEB,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}}}});
+  donutObj=new Chart(document.getElementById('pie'),{type:'pie',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:PIEB,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false,external:pieTip}}}});
   // Динамика из daily_stats (не из listings — иначе схлопывание last_seen даёт провал).
   // Значение бакета = среднее (counterfeit, либо total для бэкфилла) по дням бакета.
   const g=state.gran;const buckets=[...new Set(DAILY.map(r=>bucket(r.day,g)))].sort();
@@ -291,6 +301,26 @@ function renderCharts(){
   dynChartObj=new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:buckets.map(b=>bucketLabel(b,g)),datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:GRID},ticks:{color:TICK}},y:{stacked:true,grid:{color:GRID},ticks:{color:TICK}}}}});
 }
 function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()||'#888';}
+// Внешняя HTML-подсказка для круговой диаграммы — рисуется поверх страницы (position:fixed),
+// поэтому не обрезается маленьким контейнером canvas.
+function pieTip(ctx){
+  const t=ctx.tooltip,el=document.getElementById('pieTip');if(!el)return;
+  if(!t||t.opacity===0){el.style.display='none';return;}
+  if(t.dataPoints&&t.dataPoints.length){const p=t.dataPoints[0];el.innerHTML=`${p.label}: <b>${p.parsed}</b>`;}
+  const r=ctx.chart.canvas.getBoundingClientRect();
+  el.style.display='block';el.style.left=(r.left+t.caretX+12)+'px';el.style.top=(r.top+t.caretY-6)+'px';
+}
+// Индикаторы сортировки в заголовках: ▲/▼ + порядковый номер для многоуровневой сортировки.
+function updateSortInd(){
+  document.querySelectorAll('.si').forEach(s=>s.innerHTML='');
+  let pairs;
+  if(state.preset==='default')pairs=[{c:'disc',d:-1,n:1},{c:'price',d:1,n:2}]; // 2 уровня
+  else if(state.preset==='recent')pairs=[{c:'date',d:-1}];
+  else if(state.preset==='score')pairs=[]; // композитный индекс — без привязки к колонке
+  else pairs=[{c:state.sortCol,d:state.sortDir}]; // ручная сортировка по клику
+  pairs.forEach(p=>{const el=document.querySelector('.si[data-si="'+p.c+'"]');
+    if(el)el.innerHTML=(p.d<0?'▼':'▲')+(p.n?'<sup>'+p.n+'</sup>':'');});
+}
 function buildQueryFilters(){const c=document.getElementById('queryFilters');
   c.innerHTML=`<button class="on" data-q="">Все запросы</button>`+QUERIES.map(q=>`<button data-q="${q}">${q}</button>`).join('');
   c.querySelectorAll('button').forEach(b=>b.onclick=()=>{c.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.q=b.dataset.q;state.page=0;apply();});}
@@ -323,6 +353,7 @@ function apply(){
   const md2=maxDay();const dcBase=RAW.filter(r=>r._cf).filter(r=>r.last_seen===md2).filter(r=>state.pl.has(r.pl)).filter(r=>!state.apay||r.apay).filter(r=>!state.q||r.query===state.q);
   document.getElementById('discCnt').textContent=dcBase.filter(r=>r._disc>=state.disc).length;
   renderTable();
+  updateSortInd();
 }
 function renderTable(){
   const st=state.page*state.size,items=FILT.slice(st,st+state.size);
