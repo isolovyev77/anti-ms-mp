@@ -1,8 +1,9 @@
 # anti-ms-mp — восстановление с нуля
 
 Снимок боевой системы на 2026-05-29. Позволяет поднять всё заново при потере
-VPS, GitHub/Gitverse или Supabase. **Секреты не в git** — лежат в `~/anti-ms-mp-secrets/`
-(`vdsina.env`, `vultr.env`) на этом ноутбуке.
+VPS, GitHub/Gitverse или Supabase. **Секреты лежат в папке проекта, но НЕ в git** —
+`backup/secrets/` (`vdsina.env`, `vultr.env`) в .gitignore, поэтому локально доступны,
+но никогда не пушатся на GitHub. (Дубль — в `~/anti-ms-mp-secrets/`.)
 
 ## Архитектура (что где крутится)
 

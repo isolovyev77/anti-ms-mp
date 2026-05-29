@@ -193,7 +193,7 @@
       <div style="overflow-x:auto">
         <table>
           <thead><tr>
-            <th onclick="sortBy('date')">Дата <span class="si" data-si="date"></span></th><th onclick="sortBy('pl')">Площадка <span class="si" data-si="pl"></span></th>
+            <th onclick="sortBy('date')">Найдена <span class="si" data-si="date"></span></th><th onclick="sortBy('pl')">Площадка <span class="si" data-si="pl"></span></th>
             <th onclick="sortBy('title')">Название <span class="si" data-si="title"></span></th><th>Ссылка</th>
             <th onclick="sortBy('price')">Цена <span class="si" data-si="price"></span></th><th onclick="sortBy('op')">Офиц. <span class="si" data-si="op"></span></th>
             <th onclick="sortBy('disc')">Дисконт <span class="si" data-si="disc"></span></th><th>Флажки</th>
@@ -316,7 +316,7 @@ function updateSortInd(){
   let pairs;
   if(state.preset==='default')pairs=[{c:'disc',d:-1,n:1},{c:'price',d:1,n:2}]; // 2 уровня
   else if(state.preset==='recent')pairs=[{c:'date',d:-1}];
-  else if(state.preset==='score')pairs=[]; // композитный индекс — без привязки к колонке
+  else if(state.preset==='score')pairs=[{c:'disc',d:-1}]; // индекс подозрительности — дисконт доминирует
   else pairs=[{c:state.sortCol,d:state.sortDir}]; // ручная сортировка по клику
   pairs.forEach(p=>{const el=document.querySelector('.si[data-si="'+p.c+'"]');
     if(el)el.innerHTML=(p.d<0?'▼':'▲')+(p.n?'<sup>'+p.n+'</sup>':'');});
@@ -335,7 +335,7 @@ function applyPreset(arr,preset){
     if(preset==='loss'){const la=(a._op||0)-a.price,lb=(b._op||0)-b.price;if(la!==lb)return lb-la;if(da!==db)return db-da;return tc(a,b);}
     if(preset==='family'){const ka=monFamilyKey(a.title),kb=monFamilyKey(b.title),ca=fam.get(ka)||0,cb=fam.get(kb)||0;if(ca!==cb)return cb-ca;if(ka!==kb)return ka.localeCompare(kb);if(da!==db)return db-da;return a.price-b.price;}
     if(preset==='pl'){if(a.pl!==b.pl)return String(a.pl).localeCompare(String(b.pl));if(da!==db)return db-da;return a.price-b.price;}
-    if(preset==='recent'){const d=String(b.last_seen||'').localeCompare(String(a.last_seen||''));if(d)return d;if(da!==db)return db-da;return a.price-b.price;}
+    if(preset==='recent'){const d=String(b.first_seen||b.last_seen||'').localeCompare(String(a.first_seen||a.last_seen||''));if(d)return d;if(da!==db)return db-da;return a.price-b.price;}
     /* default */ if(da!==db)return db-da;if(a.price!==b.price)return a.price-b.price;return tc(a,b);});
 }
 function apply(){
@@ -347,7 +347,7 @@ function apply(){
     .filter(r=>!state.apay||r.apay)
     .filter(r=>!state.q||r.query===state.q);
   if(state.preset){applyPreset(FILT,state.preset);}
-  else{FILT.sort((a,b)=>{const k=state.sortCol;let av,bv;if(k==='date'){av=a.last_seen;bv=b.last_seen}else if(k==='pl'){av=a.pl;bv=b.pl}else if(k==='title'){av=a.title;bv=b.title}else if(k==='price'){av=a.price;bv=b.price}else if(k==='op'){av=a._op;bv=b._op}else{av=a._disc;bv=b._disc}return (av>bv?1:av<bv?-1:0)*state.sortDir;});}
+  else{FILT.sort((a,b)=>{const k=state.sortCol;let av,bv;if(k==='date'){av=a.first_seen||a.last_seen;bv=b.first_seen||b.last_seen}else if(k==='pl'){av=a.pl;bv=b.pl}else if(k==='title'){av=a.title;bv=b.title}else if(k==='price'){av=a.price;bv=b.price}else if(k==='op'){av=a._op;bv=b._op}else{av=a._disc;bv=b._disc}return (av>bv?1:av<bv?-1:0)*state.sortDir;});}
   document.getElementById('tot').textContent=FILT.length;document.getElementById('cnt').textContent=Math.min(FILT.length,state.size);
   // счётчик у бегунка дисконта — сколько карточек проходит текущий порог (без учёта самого дисконт-фильтра)
   const md2=maxDay();const dcBase=RAW.filter(r=>r._cf).filter(r=>r.last_seen===md2).filter(r=>state.pl.has(r.pl)).filter(r=>!state.apay||r.apay).filter(r=>!state.q||r.query===state.q);
@@ -360,7 +360,7 @@ function renderTable(){
   document.getElementById('ptot').textContent=Math.max(1,Math.ceil(FILT.length/state.size));document.getElementById('pnum').textContent=state.page+1;
   document.getElementById('tbody').innerHTML=items.map(r=>{const f=flags(r);const dc=r._disc>=95?'#ff5470':r._disc>=80?'#ff9f43':'#ffd43b';
     return `<tr>
-      <td style="white-space:nowrap;color:var(--muted)">${(r.last_seen||'').slice(5).split('-').reverse().join('.')}</td>
+      <td style="white-space:nowrap;color:var(--muted)" title="Дата первого обнаружения">${((r.first_seen||r.last_seen)||'').slice(5).split('-').reverse().join('.')}</td>
       <td><span class="plbadge" style="background:${PL[r.pl].c}22;color:${PL[r.pl].c}">${PL[r.pl].n}</span> ${r.apay?'<span class="apay" title="Оплата через Avito"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>':''}</td>
       <td style="max-width:280px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${(r.title||'').replace(/"/g,'&quot;')}">${(r.title||'').slice(0,55)}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">🔎 ${r.query||''}</div></td>
       <td><a class="lnk" href="${r.url}" target="_blank" rel="noopener">Открыть ↗</a></td>
