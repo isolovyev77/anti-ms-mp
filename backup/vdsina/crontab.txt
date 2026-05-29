@@ -1,0 +1,8 @@
+# Полный прогон парсера — раз в сутки, 00:00 МСК (вся ночь в запасе на ретраи/обрывы)
+0 0 * * * cd /opt/anti-ms-mp && .venv/bin/python parser_runner.py --trigger cron --no-notify >> /var/log/anti-ms.log 2>&1
+# Watchdog — каждые 5 мин (страховка от зависших прогонов)
+*/5 * * * * cd /opt/anti-ms-mp && .venv/bin/python watchdog.py >> /var/log/anti-ms-watchdog.log 2>&1
+# Очередь ручной кнопки «Обновить» — каждую минуту
+* * * * * cd /opt/anti-ms-mp && .venv/bin/python queue_poller.py >> /var/log/anti-ms-queue.log 2>&1
+# Обогащение avito_pay — раз в сутки, 01:00 (после прогона)
+0 1 * * * cd /opt/anti-ms-mp && .venv/bin/python enrich_avito_pay_db.py >> /var/log/anti-ms-apay.log 2>&1

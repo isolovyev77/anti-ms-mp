@@ -2,3 +2,9 @@
 cloakbrowser-lab/
 .env
 .env.local
+.gstack/
+
+# секреты бэкапа — НИКОГДА в git
+backup/secrets/
+*.env
+!*.env.template

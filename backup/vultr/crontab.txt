@@ -1,0 +1,9 @@
+* * * * * XDG_RUNTIME_DIR=/run/user/$(id -u) /home/linuxuser/claudeclaw/scripts/watchdog.sh
+*/5 * * * * /home/linuxuser/claudeclaw/scripts/health-monitor.sh
+0 4 * * * /home/linuxuser/claudeclaw/scripts/cleanup-claude-versions.sh >> /home/linuxuser/claudeclaw/store/cleanup.log 2>&1
+# YTLM еженедельный дайджест — каждую субботу в 10:00 UTC (13:00 МСК)
+0 10 * * 6 /home/linuxuser/ytlm-venv/bin/python /home/linuxuser/ytlm/digest.py >> /home/linuxuser/ytlm/digest.log 2>&1
+0 * * * * /home/linuxuser/claudeclaw/scripts/cleanup-tmux.sh
+0 * * * * /opt/claude-workspace/sync-vault.sh >> /var/log/vault-sync.log 2>&1
+0 3 * * 0 /home/linuxuser/n8n-stack/update-n8n.sh
+0 1 * * * /opt/anti-ms-mp-watcher/orchestrator.sh >> /opt/anti-ms-mp-watcher/orchestrator.log 2>&1
