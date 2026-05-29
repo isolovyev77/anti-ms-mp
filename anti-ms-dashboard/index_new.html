@@ -1,1929 +1,415 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мониторинг признаков контрафакта ПО на маркетплейсах</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        :root {
-            --ozon-blue: #1a3a6b;
-            --ozon-dark: #0f2240;
-            --danger: #e53935;
-            --warning: #f57c00;
-            --success: #2e7d32;
-            --light-gray: #f5f5f5;
-            --dark-gray: #333;
-            --border-gray: #e0e0e0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #fafafa;
-            color: var(--dark-gray);
-            line-height: 1.6;
-        }
-
-        .header {
-            background: linear-gradient(135deg, var(--ozon-dark) 0%, var(--ozon-blue) 100%);
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,26,110,0.15);
-        }
-
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .header p {
-            font-size: 16px;
-            opacity: 0.95;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px 20px;
-        }
-
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .alert {
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid;
-            background-color: #f9f9f9;
-        }
-
-        .alert-danger {
-            border-color: var(--danger);
-            background-color: #ffebee;
-        }
-
-        .alert-warning {
-            border-color: var(--warning);
-            background-color: #fff3e0;
-        }
-
-        .alert-info {
-            border-color: var(--ozon-blue);
-            background-color: #e3f2fd;
-        }
-
-        .alert-success {
-            border-color: var(--success);
-            background-color: #e8f5e9;
-        }
-
-        .alert-title {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--dark-gray);
-        }
-
-        .alert p {
-            margin: 0;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .alert a {
-            color: var(--ozon-blue);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .alert a:hover {
-            text-decoration: underline;
-        }
-
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 16px;
-            margin-bottom: 30px;
-        }
-
-        .kpi-card {
-            padding: 20px;
-            border-radius: 8px;
-            color: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .kpi-card.danger {
-            background: linear-gradient(135deg, var(--danger) 0%, #c62828 100%);
-        }
-
-        .kpi-card.warning {
-            background: linear-gradient(135deg, var(--warning) 0%, #e65100 100%);
-        }
-
-        .kpi-card.info {
-            background: linear-gradient(135deg, var(--ozon-blue) 0%, var(--ozon-dark) 100%);
-        }
-
-        .kpi-card.success {
-            background: linear-gradient(135deg, var(--success) 0%, #1b5e20 100%);
-        }
-
-        .kpi-value {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .kpi-label {
-            font-size: 14px;
-            opacity: 0.95;
-        }
-
-        .kpi-source {
-            font-size: 11px;
-            opacity: 0.8;
-            margin-top: 8px;
-        }
-
-        .kpi-source a {
-            color: white;
-            text-decoration: underline;
-        }
-
-        .chart-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            position: relative;
-            height: 400px;
-        }
-
-        .chart-container h3 {
-            margin-bottom: 20px;
-            color: var(--dark-gray);
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--dark-gray);
-        }
-
-        .expandable-card {
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .expandable-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transform: translateY(-2px);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .card-icon {
-            font-size: 24px;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--light-gray);
-            border-radius: 8px;
-        }
-
-        .card-title-section {
-            flex: 1;
-        }
-
-        .card-title-main {
-            font-weight: 600;
-            color: var(--dark-gray);
-            margin-bottom: 4px;
-        }
-
-        .card-subtitle {
-            font-size: 13px;
-            color: #999;
-        }
-
-        .card-toggle-icon {
-            font-size: 20px;
-            transition: transform 0.3s;
-            color: var(--ozon-blue);
-        }
-
-        .expandable-card.expanded .card-toggle-icon {
-            transform: rotate(180deg);
-        }
-
-        .card-body {
-            display: none;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border-gray);
-        }
-
-        .expandable-card.expanded .card-body {
-            display: block;
-        }
-
-        .card-body ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .card-body li {
-            padding: 8px 0 8px 24px;
-            position: relative;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .card-body li:before {
-            content: "→";
-            position: absolute;
-            left: 0;
-            color: var(--ozon-blue);
-            font-weight: bold;
-        }
-
-        .legal-basis {
-            margin-top: 12px;
-            padding: 12px;
-            background: #f0f4ff;
-            border-left: 3px solid var(--ozon-blue);
-            border-radius: 4px;
-            font-size: 13px;
-            color: #333;
-        }
-
-        .legal-basis strong {
-            color: var(--ozon-blue);
-        }
-
-        .source-link-inline {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            color: var(--ozon-blue);
-            text-decoration: none;
-            font-size: 12px;
-            margin-left: 8px;
-        }
-
-        .source-link-inline:hover {
-            text-decoration: underline;
-        }
-
-        .counter-arg-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .counter-arg-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .counter-arg-card-header {
-            padding: 16px;
-            background: var(--ozon-blue);
-            color: white;
-            font-weight: 600;
-        }
-
-        .counter-arg-section {
-            padding: 16px;
-            border-bottom: 1px solid var(--border-gray);
-        }
-
-        .counter-arg-section:last-child {
-            border-bottom: none;
-        }
-
-        .counter-arg-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #999;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .ozon-says {
-            background: #f0f0f0;
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 12px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .our-answer {
-            background: #e3f2fd;
-            padding: 12px;
-            border-radius: 4px;
-            font-size: 14px;
-            line-height: 1.5;
-            color: #333;
-        }
-
-        .sources-list {
-            margin-top: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .source-link {
-            font-size: 13px;
-            color: var(--ozon-blue);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .source-link:hover {
-            text-decoration: underline;
-        }
-
-        .external-icon {
-            font-size: 12px;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        th {
-            background: var(--light-gray);
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--dark-gray);
-            border-bottom: 2px solid var(--border-gray);
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-gray);
-        }
-
-        tr:hover {
-            background: #fafafa;
-        }
-
-        .timeline {
-            position: relative;
-            padding: 20px 0;
-        }
-
-        .timeline-item {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .timeline-marker {
-            flex: 0 0 40px;
-            width: 40px;
-            height: 40px;
-            background: var(--ozon-blue);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 12px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .timeline-item:not(:last-child) .timeline-marker:after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: 30px;
-            background: var(--border-gray);
-        }
-
-        .timeline-content {
-            flex: 1;
-            background: white;
-            padding: 16px;
-            border-radius: 8px;
-            border-left: 3px solid var(--ozon-blue);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .timeline-date {
-            font-weight: 600;
-            color: var(--ozon-blue);
-            margin-bottom: 4px;
-            font-size: 14px;
-        }
-
-        .timeline-title {
-            font-weight: 600;
-            color: var(--dark-gray);
-            margin-bottom: 8px;
-        }
-
-        .timeline-description {
-            font-size: 14px;
-            line-height: 1.5;
-            color: #666;
-        }
-
-        .timeline-sources {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed var(--border-gray);
-        }
-
-        .timeline-sources a {
-            font-size: 12px;
-            color: var(--ozon-blue);
-            text-decoration: none;
-            margin-right: 12px;
-        }
-
-        .timeline-sources a:hover {
-            text-decoration: underline;
-        }
-
-        .demand-card {
-            background: linear-gradient(135deg, var(--ozon-blue) 0%, var(--ozon-dark) 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-        }
-
-        .demand-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .demand-steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .demand-step {
-            background: rgba(255,255,255,0.15);
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 3px solid white;
-        }
-
-        .step-number {
-            display: inline-block;
-            background: white;
-            color: var(--ozon-blue);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .step-title {
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 8px;
-        }
-
-        .step-description {
-            font-size: 13px;
-            opacity: 0.95;
-            line-height: 1.4;
-        }
-
-        .benefits-card {
-            background: linear-gradient(135deg, var(--success) 0%, #1b5e20 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-        }
-
-        .benefits-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .benefits-list {
-            list-style: none;
-            display: grid;
-            gap: 12px;
-        }
-
-        .benefits-list li {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 15px;
-        }
-
-        .benefits-list li:before {
-            content: "✓";
-            font-weight: 700;
-            font-size: 18px;
-            flex: 0 0 auto;
-        }
-
-        .regulatory-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .regulatory-block {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border-top: 3px solid var(--ozon-blue);
-        }
-
-        .regulatory-block h3 {
-            margin-bottom: 12px;
-            color: var(--ozon-blue);
-            font-size: 16px;
-        }
-
-        .regulatory-block p {
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 12px;
-            color: #666;
-        }
-
-        .regulatory-block a {
-            color: var(--ozon-blue);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .regulatory-block a:hover {
-            text-decoration: underline;
-        }
-
-        .comparison-table {
-            width: 100%;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .comparison-table th {
-            background: var(--ozon-blue);
-            color: white;
-        }
-
-        .comparison-table td {
-            padding: 14px;
-            font-size: 14px;
-        }
-
-        .comparison-table tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-
-        .risk-high {
-            color: var(--danger);
-            font-weight: 600;
-        }
-
-        .risk-medium {
-            color: var(--warning);
-            font-weight: 600;
-        }
-
-        .risk-low {
-            color: var(--success);
-            font-weight: 600;
-        }
-
-        .placeholder-text {
-            font-size: 13px;
-            color: #999;
-            margin-bottom: 16px;
-            font-style: italic;
-        }
-
-        .counter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-            gap: 20px;
-        }
-
-        .counter-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .counter-card-title {
-            background: var(--ozon-blue);
-            color: white;
-            padding: 16px;
-            font-weight: 600;
-        }
-
-        .counter-card-body {
-            padding: 16px;
-        }
-
-        .arg-section {
-            margin-bottom: 16px;
-        }
-
-        .arg-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .arg-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: #999;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .arg-text {
-            padding: 12px;
-            border-radius: 4px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .arg-ozon {
-            background: #efefef;
-            border-left: 3px solid #999;
-        }
-
-        .arg-counter {
-            background: #e3f2fd;
-            border-left: 3px solid var(--ozon-blue);
-        }
-
-        .legal-badge {
-            display: inline-block;
-            background: #f0f4ff;
-            color: var(--ozon-blue);
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-top: 8px;
-            margin-bottom: 12px;
-        }
-
-        .sources {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border-gray);
-        }
-
-        .sources-title {
-            font-size: 11px;
-            font-weight: 700;
-            color: #999;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .source-item {
-            margin-bottom: 6px;
-        }
-
-        .source-item a {
-            color: var(--ozon-blue);
-            text-decoration: none;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .source-item a:hover {
-            text-decoration: underline;
-        }
-
-        .news-card {
-            background: white;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border-left: 4px solid var(--ozon-blue);
-        }
-
-        .news-date {
-            font-size: 12px;
-            color: #999;
-            margin-bottom: 6px;
-        }
-
-        .news-title {
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 8px;
-            color: var(--dark-gray);
-        }
-
-        .news-source {
-            font-size: 12px;
-            color: var(--ozon-blue);
-        }
-
-        .highlight-box {
-            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
-            border: 1px solid #ffc107;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-
-        .highlight-box-title {
-            font-weight: 600;
-            color: #856404;
-            margin-bottom: 8px;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 22px;
-            }
-
-            .header p {
-                font-size: 14px;
-            }
-
-            .kpi-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .nav-tabs {
-                padding: 0;
-                width: max-content;
-                min-width: 100%;
-            }
-
-            .nav-tab {
-                flex: 0 0 auto;
-            }
-
-            .nav-tab button {
-                padding: 10px 14px;
-                font-size: 13px;
-                white-space: nowrap;
-            }
-
-            .chart-container {
-                height: 300px;
-            }
-
-            .counter-arg-container {
-                grid-template-columns: 1fr;
-            }
-
-            .demand-steps {
-                grid-template-columns: 1fr;
-            }
-
-            .counter-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .regulatory-grid {
-                grid-template-columns: 1fr;
-            }
-
-            table {
-                font-size: 13px;
-            }
-
-            th, td {
-                padding: 10px;
-            }
-        }
-
-        .mon-filter-btn {
-            padding: 5px 12px;
-            border: 1px solid var(--border-gray);
-            border-radius: 20px;
-            background: white;
-            color: #666;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .mon-filter-btn.active {
-            background: var(--ozon-blue);
-            color: white;
-            border-color: var(--ozon-blue);
-        }
-        .mon-filter-btn:hover:not(.active) {
-            border-color: var(--ozon-blue);
-            color: var(--ozon-blue);
-        }
-        .flag-pill-mon {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: 600;
-            margin: 1px;
-        }
-        .fp-red { background:#ffebee; color:#c62828; }
-        .fp-yellow { background:#fffde7; color:#f57f17; }
-        .fp-orange { background:#fff3e0; color:#e65100; }
-        .fp-gray { background:#f5f5f5; color:#999; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мониторинг признаков контрафакта ПО</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#0E1726; --panel:#16213A; --panel2:#1B2A41; --line:#243a5a;
+    --tx:#E4ECF7; --muted:#8499B5; --grid:#1f3050; --pieborder:#16213A;
+    --ozon:#2E7DFF; --wb:#E84BC9; --yandex:#FFD43B; --avito:#A879FF; --accent:#33D6C8;
+  }
+  [data-theme="light"]{
+    --bg:#F4F6FB; --panel:#FFFFFF; --panel2:#F0F3F9; --line:#E4E9F2;
+    --tx:#1A2333; --muted:#6B7A90; --grid:#E8ECF4; --pieborder:#FFFFFF;
+    --ozon:#005BFF; --wb:#CB11AB; --yandex:#E8A800; --avito:#7B61FF; --accent:#0FA89A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
+  .layout{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+  .side{background:var(--panel);border-right:1px solid var(--line);padding:22px 18px;position:sticky;top:0;height:100vh;overflow:auto}
+  .brand{display:flex;align-items:center;gap:9px;margin-bottom:24px}
+  .brand b{font-size:14px;letter-spacing:.3px}
+  #themeToggle{display:inline-flex;align-items:center;justify-content:center;background:none;border:1px solid var(--line);border-radius:9px;width:36px;height:36px;cursor:pointer;color:var(--muted);flex:0 0 auto}
+  #themeToggle:hover{background:var(--panel2);color:var(--tx)}
+  #themeToggle svg{width:18px;height:18px}
+  .side h4{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:20px 0 9px}
+  .chk{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:9px;cursor:pointer;transition:.15s;font-size:13px}
+  .chk:hover{background:var(--panel2)}.chk.on{background:var(--panel2)}
+  .chk .sw{width:11px;height:11px;border-radius:50%;flex:0 0 auto}.chk .cnt{margin-left:auto;font-size:12px;color:var(--muted)}
+  .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px;margin-top:4px}
+  .seg button{flex:1;border:none;background:none;color:var(--muted);padding:7px 0;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
+  .seg button.on{background:var(--accent);color:#06231f}
+  .slider{width:100%;margin-top:10px;accent-color:var(--accent)}
+  .qf{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+  .qf button{text-align:left;border:1px solid var(--line);background:var(--panel2);color:var(--muted);padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12px}
+  .qf button.on{background:var(--panel2);color:var(--tx);border-color:var(--accent)}
+  .main{padding:22px 26px}
+  .top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;gap:14px;flex-wrap:wrap}
+  .top h1{font-size:21px;font-weight:700}.top p{color:var(--muted);font-size:13px;margin-top:3px}
+  /* инфо-иконка с всплывающей плашкой */
+  .info-h1{display:inline-flex;align-items:center;gap:8px}
+  .info-i{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);color:var(--muted);font-size:11px;font-style:italic;font-weight:700;cursor:help;position:relative}
+  .info-pop{display:none;position:absolute;top:24px;left:0;width:430px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 15px;font-size:12px;font-weight:400;line-height:1.5;color:var(--tx);box-shadow:0 8px 28px rgba(0,0,0,.4);z-index:50}
+  .info-i:hover .info-pop,.info-i:focus .info-pop{display:block}
+  /* переключатель версий */
+  .vswitch{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:12px;align-self:center}
+  .vswitch .on{padding:6px 12px;background:var(--accent);color:#06231f;font-weight:700}
+  .vswitch a{padding:6px 12px;color:var(--muted);text-decoration:none;font-weight:600}
+  .vswitch a:hover{background:var(--panel2);color:var(--tx)}
+  .scan-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:13px;font-weight:800;cursor:help;flex:0 0 auto}
+  .scan-ok{background:rgba(51,214,200,.18);color:var(--accent)}
+  .scan-warn{background:rgba(255,159,67,.18);color:#ff9f43}
+  .scan-bad{background:rgba(255,84,112,.18);color:#ff5470}
+  .btn{border:none;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .btn-pri{background:var(--accent);color:#06231f}.btn-gh{background:var(--panel2);color:var(--tx);border:1px solid var(--line)}
+  .kpis{display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:13px;margin-bottom:16px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px;display:flex;flex-direction:column;justify-content:center}
+  .kpi .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .kpi .val{font-size:25px;font-weight:800;margin-top:6px}.kpi .sub{font-size:12px;margin-top:4px;color:var(--accent)}
+  .kpi-pie{display:flex;flex-direction:row;justify-content:flex-start;align-items:center;gap:16px}
+  .kpi-pie>div:first-child{flex:0 0 auto}
+  .pie-legend{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+  .pie-legend span{display:flex;align-items:center;gap:7px;white-space:nowrap}
+  .pie-legend i{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+  .pie-legend b{color:var(--tx);margin-left:auto}
+  .grid{display:grid;grid-template-columns:1.7fr 1fr;gap:14px;margin-bottom:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:17px 19px}
+  .card h3{font-size:15px;font-weight:700}.card .cap{font-size:12px;color:var(--muted);margin:2px 0 12px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px;font-size:12px;color:var(--muted)}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:middle}
+  .toprow{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:13px;border-bottom:1px solid var(--line)}
+  .toprow:last-child{border-bottom:none}
+  .toprow .rank{width:20px;text-align:center;font-weight:800;color:var(--muted);flex:0 0 auto}
+  .toprow .tnm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx)}
+  .toprow .price{width:170px;text-align:right;flex:0 0 auto}
+  .toprow .price b{color:#ff8fd6;font-weight:800}
+  .toprow .price s{color:var(--muted);font-size:11px;margin-left:5px}
+  .toprow .pc{width:56px;text-align:right;font-weight:800;color:#ff5470;flex:0 0 auto}
+  .presets{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+  .presets button{border:1px solid var(--line);background:var(--panel2);color:var(--muted);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600}
+  .presets button.on{background:var(--accent);color:#06231f;border-color:var(--accent)}
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{text-align:left;padding:11px 12px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
+  tbody td{padding:11px 12px;border-bottom:1px solid var(--line)}
+  tbody tr:hover{background:var(--panel2)}
+  .plbadge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:11px;font-size:11px;font-weight:600;white-space:nowrap}
+  .apay{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#ff5470}
+  .disc{font-weight:800}
+  .si{color:var(--accent);font-size:10px;margin-left:2px;letter-spacing:0}
+  .si sup{font-size:8px;font-weight:700}
+  #pieTip{position:fixed;display:none;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:12px;color:var(--tx);box-shadow:0 6px 20px rgba(0,0,0,.45);z-index:200;white-space:nowrap}
+  .fp{display:inline-block;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;margin-right:3px}
+  .fp-r{background:#3a1622;color:#ff6b8a}.fp-y{background:#3a3415;color:#ffd43b}.fp-o{background:#3a2615;color:#ff9f43}.fp-g{background:#21304a;color:#7e92ad}
+  .pager{display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-top:14px;color:var(--muted);font-size:13px}
+  .pager button{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:6px 12px;cursor:pointer}
+  a.lnk{color:var(--accent);text-decoration:none;font-size:12px;white-space:nowrap}
+  .loading{color:var(--muted);padding:40px;text-align:center}
+</style>
 </head>
 <body>
-    <div class="header" style="position:relative;">
-        <h1>Мониторинг признаков контрафакта программного обеспечения на маркетплейсах</h1>
-        <p>Автоматически обновляемый дашборд для комплаенс-функций торговых площадок. Текущий охват — лицензии Microsoft; система расширяется на ПО других правообладателей.</p>
+<div class="layout">
+  <aside class="side">
+    <div class="brand">
+      <img src="assets/favicon-32.png" alt="" width="30" height="30" style="border-radius:8px;flex:0 0 auto">
+      <b>Контрафакт-мониторинг</b>
+    </div>
+    <h4>Площадки</h4>
+    <div id="platFilters"></div>
+    <h4 style="display:flex;align-items:center;justify-content:space-between">Поисковый запрос
+      <button id="addQBtn" title="Добавить запрос на мониторинг" style="border:1px solid var(--line);background:var(--panel2);color:var(--accent);width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1;padding:0">+</button>
+    </h4>
+    <div id="addQForm" style="display:none;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px">
+      <input id="newQ" placeholder="Напр.: Windows 11 ключ" style="width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--tx);font-size:12px;margin-bottom:7px" onkeydown="if(event.key==='Enter')addQuery()">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:7px">Потребуется ключевая фраза. После добавления запустится парсинг по нему (~3 мин).</div>
+      <div style="display:flex;gap:6px"><button onclick="addQuery()" style="flex:1;background:var(--accent);color:#06231f;border:none;border-radius:7px;padding:7px;font-weight:700;cursor:pointer;font-size:12px">Добавить</button><button onclick="document.getElementById('addQForm').style.display='none'" style="background:var(--panel2);color:var(--tx);border:1px solid var(--line);border-radius:7px;padding:7px 10px;cursor:pointer;font-size:12px">Отмена</button></div>
+    </div>
+    <div class="qf" id="queryFilters"></div>
+    <h4 style="display:flex;justify-content:space-between;align-items:baseline"><span>Мин. дисконт: <span id="discVal" style="color:var(--accent)">50%</span></span><span id="discCnt" style="color:var(--muted)">0</span></h4>
+    <input class="slider" type="range" min="0" max="99" value="50" id="discSlider">
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">
+        <div>
+          <h1 class="info-h1">Мониторинг признаков контрафакта ПО
+            <span class="info-i" tabindex="0">i<span class="info-pop">Таблица карточек с признаками контрафакта, найденных на маркетплейсах. Красные флажки F1–F6 вычисляются автоматически по п. 2.2 Модельных практик ФАС/МСАП СНГ 2025. Данные за январь–май 2026 — мониторинг АПКИТ, АРПП «Отечественный софт», НП «РУССОФТ», НП ППП.</span></span>
+          </h1>
+          <p>Командный центр · обновляется автоматически</p>
+        </div>
         <!-- Переключатель версий -->
-        <div style="display:inline-flex;margin-top:12px;border:1px solid rgba(255,255,255,0.4);border-radius:8px;overflow:hidden;font-size:12px;">
-            <span style="padding:6px 14px;background:rgba(255,255,255,0.95);color:#1565c0;font-weight:700;">⚙️ Авто-версия (актуальная)</span>
-            <a href="index.html" title="Старая версия — данные пополняются вручную" style="padding:6px 14px;color:#fff;text-decoration:none;font-weight:500;">Ручная версия →</a>
+        <div class="vswitch">
+          <span class="on">⚙️ Авто</span>
+          <a href="index.html" title="Старая версия — пополняется вручную">Ручная →</a>
         </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:nowrap">
+        <span id="scanStatus" class="scan-badge" style="display:none"></span>
+        <span style="font-size:11px;color:var(--muted);white-space:nowrap">обновлено: <span id="upd">…</span></span>
+        <button class="btn btn-gh" onclick="exportCSV()">📥 CSV</button>
+        <button class="btn btn-gh" onclick="exportXLSX()">📊 XLSX</button>
+        <button class="btn btn-pri" id="refreshBtn" onclick="runScan()">🔄 Обновить</button>
+        <button id="themeToggle" title="Светлая / тёмная тема" aria-label="Переключить тему"></button>
+      </div>
     </div>
 
-    <div class="content">
+    <div class="kpis" id="kpis"><div class="loading">Загрузка из Supabase…</div></div>
 
-        <!-- TAB 1: OVERVIEW -->
-        <div id="monitoring" class="tab-content active">
-            <div class="alert alert-warning" style="margin-bottom:20px;">
-                <div class="alert-title">🔍 Системный мониторинг нелицензионного ПО</div>
-                <p>Таблица карточек с признаками контрафакта, найденных на маркетплейсах. Красные флажки (F1–F6) вычисляются автоматически по п. 2.2 <a href="https://fas.gov.ru/news/34360" target="_blank" rel="noopener">Модельных практик ФАС/МСАП СНГ 2025 ↗</a>. Данные за январь-май 2026 г. — мониторинг <a href="https://apkit.ru/" target="_blank" rel="noopener">АПКИТ</a>, <a href="https://arppsoft.ru/" target="_blank" rel="noopener">АРПП «Отечественный софт»</a>, <a href="https://russoft.org/" target="_blank" rel="noopener">НП «РУССОФТ»</a>, <a href="https://npppp.ru/" target="_blank" rel="noopener">НП ППП</a>.</p>
-            </div>
-
-            <!-- СТАТУС СКАНИРОВАНИЯ -->
-            <div style="display:flex;align-items:center;gap:16px;padding:14px 18px;background:#f5f5f5;border-radius:8px;margin-bottom:20px;flex-wrap:wrap;">
-                <div><strong>Последнее сканирование:</strong> <span id="scanLastTime" style="margin-left:6px;color:#666;">27.05.2026, 01:43</span></div>
-                <div id="scanStatus" style="padding:4px 12px;border-radius:20px;background:#e8f5e9;color:#2e7d32;font-weight:600;font-size:13px;">✓ Актуально</div>
-                <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
-                    <button onclick="runScan()" style="padding:8px 16px;background:var(--ozon-blue);color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">🔄 Обновить</button>
-                    <button onclick="exportMonCSV()" style="padding:8px 16px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">📥 CSV</button>
-                    <button onclick="exportMonXLSX()" style="padding:8px 16px;background:#1565c0;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">📊 XLSX</button>
-                </div>
-            </div>
-
-            <!-- ЛЕГЕНДА ФЛАЖКОВ -->
-            <details style="margin-bottom:20px;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
-                <summary style="padding:12px 16px;cursor:pointer;font-weight:600;background:#f5f5f5;">🚩 Легенда красных флажков (п. 2.2 Модельных практик ФАС/МСАП СНГ 2025)</summary>
-                <div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:10px;">
-                    <div style="padding:10px;background:#ffebee;border-radius:6px;font-size:13px;"><strong>🔴 F1 — Аномальная цена:</strong> цена ниже официальной на ≥50%. <a href="https://fas.gov.ru/news/34360" target="_blank">п. 2.2 Модельных практик ФАС ↗</a></div>
-                    <div style="padding:10px;background:#ffebee;border-radius:6px;font-size:13px;"><strong>🔴 F2 — Критический дисконт:</strong> цена ниже официальной на ≥80%. Подкатегория F1.</div>
-                    <div style="padding:10px;background:#fffde7;border-radius:6px;font-size:13px;"><strong>🟡 F3 — Новый продавец:</strong> зарегистрирован менее 30 дней назад. п. 2.2.</div>
-                    <div style="padding:10px;background:#fffde7;border-radius:6px;font-size:13px;"><strong>🟡 F4 — Нет статуса партнёра:</strong> не в реестре авторизованных реселлеров Microsoft. п. 2.7.</div>
-                    <div style="padding:10px;background:#fffde7;border-radius:6px;font-size:13px;"><strong>🟡 F5 — Ключ неактивируемый:</strong> продукт Microsoft — телефонная активация в РФ отключена с декабря 2025 г.</div>
-                    <div style="padding:10px;background:#fff3e0;border-radius:6px;font-size:13px;"><strong>🟠 F6 — Использование ТЗ без «совместимо»:</strong> нарушение Постановление СИП №С01-1261/2024.</div>
-                </div>
-            </details>
-
-            <!-- ПОИСКОВЫЕ ЗАПРОСЫ НА МОНИТОРИНГЕ -->
-            <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-bottom:16px;">
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
-                    <div style="font-size:13px;font-weight:700;color:#333;">🔎 Поисковые запросы на мониторинге:</div>
-                    <div id="monQueryTags" style="display:flex;flex-wrap:wrap;gap:6px;flex:1;"></div>
-                    <button onclick="monQueryFormToggle()" style="padding:6px 14px;background:#1565c0;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;">+ Добавить запрос</button>
-                </div>
-                <div id="monQueryForm" style="display:none;padding:12px;background:#f5f5f5;border-radius:6px;">
-                    <div style="font-size:12px;color:#666;margin-bottom:8px;">Новый поисковый запрос для постановки на мониторинг (будет искаться на всех площадках). Потребуется ключевая фраза. После добавления сразу запустится парсинг только по нему (~3 мин):</div>
-                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                        <input type="text" id="monQueryInput" placeholder="Напр.: Windows 11 ключ активации"
-                            style="flex:1;min-width:220px;padding:8px 12px;border:1px solid #bdbdbd;border-radius:6px;font-size:14px;"
-                            onkeydown="if(event.key==='Enter')monQueryAdd()">
-                        <button onclick="monQueryAdd()" style="padding:8px 16px;background:#2e7d32;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">Добавить</button>
-                        <button onclick="monQueryFormToggle()" style="padding:8px 12px;background:#e0e0e0;color:#333;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Отмена</button>
-                    </div>
-                    <div style="margin-top:10px;">
-                        <div style="font-size:11px;color:#888;margin-bottom:6px;">Рекомендуемые запросы (нажмите, чтобы добавить):</div>
-                        <div id="monQuerySuggest" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ФИЛЬТРЫ -->
-            <div style="background:#f5f5f5;border-radius:8px;padding:16px;margin-bottom:16px;">
-                <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;">
-                    <div>
-                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Запрос</div>
-                        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="monQueryFilterBtns">
-                            <button class="mon-filter-btn active" onclick="monToggleQuery('',this)">Все</button>
-                        </div>
-                    </div>
-                    <div>
-                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Площадка</div>
-                        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="monPlatBtns">
-                            <button class="mon-filter-btn active" onclick="monTogglePlat('all',this)">Все</button>
-                            <button class="mon-filter-btn" onclick="monTogglePlat('ozon',this)">OZON</button>
-                            <button class="mon-filter-btn" onclick="monTogglePlat('wildberries',this)">Wildberries</button>
-                            <button class="mon-filter-btn" onclick="monTogglePlat('yandex',this)">Яндекс.Маркет</button>
-                            <button class="mon-filter-btn" onclick="monTogglePlat('avito',this)">Авито</button>
-                            <button class="mon-filter-btn" onclick="monTogglePlatApay(this)" title="Только объявления Avito с оплатой через инфраструктуру Avito (Авито Доставка / безопасная сделка) — прямая зона ответственности площадки">💳 Авито с оплатой</button>
-                            <button class="mon-filter-btn" onclick="monTogglePlat('aliexpress',this)">AliExpress</button>
-                        </div>
-                    </div>
-                    <div>
-                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Дисконт</div>
-                        <div style="display:flex;gap:6px;" id="monDiscBtns">
-                            <button class="mon-filter-btn active" onclick="monToggleDisc(0,this)">Любой</button>
-                            <button class="mon-filter-btn" onclick="monToggleDisc(50,this)">&gt;50%</button>
-                            <button class="mon-filter-btn" onclick="monToggleDisc(80,this)">&gt;80%</button>
-                            <button class="mon-filter-btn" onclick="monToggleDisc(95,this)">&gt;95%</button>
-                        </div>
-                    </div>
-                    <div>
-                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Флажков</div>
-                        <div style="display:flex;gap:6px;" id="monFlagBtns">
-                            <button class="mon-filter-btn active" onclick="monToggleFlag(0,this)">Любое</button>
-                            <button class="mon-filter-btn" onclick="monToggleFlag(2,this)">2+</button>
-                            <button class="mon-filter-btn" onclick="monToggleFlag(3,this)">3+</button>
-                        </div>
-                    </div>
-                    <div style="flex:1;min-width:180px;">
-                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#666;margin-bottom:6px;">Поиск по названию</div>
-                        <input type="text" id="monSearch" placeholder="Введите название..." oninput="monApplyFilters()"
-                            style="width:100%;padding:8px 12px;border:1px solid #e0e0e0;border-radius:6px;font-size:14px;">
-                    </div>
-                    <div style="font-size:13px;color:#666;align-self:flex-end;padding-bottom:4px;">
-                        Показано: <strong id="monCount">0</strong> из <strong id="monTotal">0</strong>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ПРЕСЕТЫ СОРТИРОВКИ -->
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:#f5f7fa;border:1px solid #e0e6ed;border-radius:8px;margin-bottom:12px;">
-                <span style="font-size:12px;font-weight:700;color:#555;letter-spacing:0.5px;">СОРТИРОВКА:</span>
-                <div id="monSortPresetBtns" style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <button class="mon-filter-btn active" data-preset="default" onclick="monSetPreset('default',this)" title="Дисконт ↓ → Цена ↑ → Название ↑">📊 По умолчанию</button>
-                    <button class="mon-filter-btn" data-preset="score" onclick="monSetPreset('score',this)" title="Индекс подозрительности (дисконт + флажки + аномально низкая цена)">🔥 Самые подозрительные</button>
-                    <button class="mon-filter-btn" data-preset="loss" onclick="monSetPreset('loss',this)" title="Абсолютная недоплата = Офиц. цена − Цена. Сверху товары, где потери Microsoft в рублях наибольшие">💸 Крупнейшие потери</button>
-                    <button class="mon-filter-btn" data-preset="family" onclick="monSetPreset('family',this)" title="Группировка карточек по нормализованному названию (например, «Office 2021 Pro Plus»). Сверху самые массовые виды контрафакта">👥 Группы товаров</button>
-                    <button class="mon-filter-btn" data-preset="pl" onclick="monSetPreset('pl',this)" title="Группировать по площадке. Внутри — дисконт ↓, цена ↑">🏪 По площадкам</button>
-                    <button class="mon-filter-btn" data-preset="recent" onclick="monSetPreset('recent',this)" title="Сначала самые свежие карточки (когда появится timeseries из Supabase)">🆕 Свежие</button>
-                </div>
-            </div>
-
-            <!-- ТАБЛИЦА -->
-            <div style="overflow-x:auto;">
-                <table id="monTable" style="font-size:13px;">
-                    <thead style="background:var(--ozon-dark);color:white;">
-                        <tr>
-                            <th onclick="monSortBy('date')" id="mth-date" style="cursor:pointer;user-select:none;white-space:nowrap;">Дата <span id="mts-date"></span></th>
-                            <th onclick="monSortBy('pl')" id="mth-pl" style="cursor:pointer;user-select:none;white-space:nowrap;">Площадка <span id="mts-pl"></span></th>
-                            <th onclick="monSortBy('title')" id="mth-title" style="cursor:pointer;user-select:none;white-space:nowrap;">Название товара <span id="mts-title"></span></th>
-                            <th>Ссылка</th>
-                            <th onclick="monSortBy('price')" id="mth-price" style="cursor:pointer;user-select:none;white-space:nowrap;">Цена <span id="mts-price"></span></th>
-                            <th onclick="monSortBy('op')" id="mth-op" style="cursor:pointer;user-select:none;white-space:nowrap;">Офиц. цена <span id="mts-op"></span></th>
-                            <th onclick="monSortBy('disc')" id="mth-disc" style="cursor:pointer;user-select:none;white-space:nowrap;">Дисконт <span id="mts-disc"></span></th>
-                            <th onclick="monSortBy('flags')" id="mth-flags" style="cursor:pointer;user-select:none;white-space:nowrap;">Флажки <span id="mts-flags"></span></th>
-                        </tr>
-                    </thead>
-                    <tbody id="monTableBody"></tbody>
-                </table>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px;">
-                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                    <div style="font-size:13px;color:#666;">Стр. <span id="monPageNum">1</span> / <span id="monPageTotal">1</span></div>
-                    <div style="display:flex;align-items:center;gap:6px;">
-                        <span style="font-size:12px;color:#888;">Показывать:</span>
-                        <div id="monPageSizeBtns" style="display:flex;gap:4px;">
-                            <button class="mon-filter-btn" onclick="monSetPageSize(10,this)">10</button>
-                            <button class="mon-filter-btn active" onclick="monSetPageSize(50,this)">50</button>
-                            <button class="mon-filter-btn" onclick="monSetPageSize(100,this)">100</button>
-                        </div>
-                    </div>
-                </div>
-                <div style="display:flex;gap:8px;">
-                    <button onclick="monPrev()" style="padding:6px 14px;border:1px solid #e0e0e0;background:white;border-radius:6px;cursor:pointer;">← Назад</button>
-                    <button onclick="monNext()" style="padding:6px 14px;border:1px solid #e0e0e0;background:white;border-radius:6px;cursor:pointer;">Вперёд →</button>
-                </div>
-            </div>
-        </div>
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div><h3>Динамика обнаружения контрафакта</h3><div class="cap">Уникальные карточки по дням, цвета площадок</div></div>
+        <div class="seg" style="width:auto;margin:0;gap:6px" id="granSeg"><button class="on" data-gran="day">Дни</button><button data-gran="week">Нед</button><button data-gran="month">Мес</button><button data-gran="year">Год</button></div>
+      </div>
+      <div class="legend"><span><i style="background:var(--ozon)"></i>Ozon</span><span><i style="background:var(--wb)"></i>Wildberries</span><span><i style="background:var(--yandex)"></i>Яндекс.Маркет</span><span><i style="background:var(--avito)"></i>Avito</span></div>
+      <div style="height:230px"><canvas id="dynChart"></canvas></div>
     </div>
 
-    <script>
+    <!-- Легенда флажков -->
+    <details class="card" style="margin-bottom:14px">
+      <summary style="cursor:pointer;font-weight:700;font-size:14px;list-style:none">🚩 Легенда красных флажков <span style="font-weight:400;font-size:12px;color:var(--muted)">— п.2.2 Модельных практик ФАС/МСАП СНГ 2025</span></summary>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:9px;margin-top:12px;font-size:12px">
+        <div style="padding:9px;background:#3a1622;border-radius:7px"><b style="color:#ff6b8a">🔴 F1 — Аномальная цена:</b> ниже официальной на ≥50%</div>
+        <div style="padding:9px;background:#3a1622;border-radius:7px"><b style="color:#ff6b8a">🔴 F2 — Критический дисконт:</b> ниже на ≥80%</div>
+        <div style="padding:9px;background:#3a3415;border-radius:7px"><b style="color:#ffd43b">🟡 F3 — Новый продавец:</b> зарегистрирован &lt;30 дней</div>
+        <div style="padding:9px;background:#3a3415;border-radius:7px"><b style="color:#ffd43b">🟡 F4 — Нет статуса партнёра:</b> не в реестре реселлеров MS</div>
+        <div style="padding:9px;background:#3a3415;border-radius:7px"><b style="color:#ffd43b">🟡 F5 — Ключ неактивируемый:</b> телефонная активация в РФ отключена</div>
+        <div style="padding:9px;background:#3a2615;border-radius:7px"><b style="color:#ff9f43">🟠 F6 — ТЗ без «совместимо»:</b> нарушение СИП №С01-1261/2024</div>
+      </div>
+    </details>
 
-    // ============================================================
-    // СИСТЕМНЫЙ МОНИТОРИНГ — данные и логика
-    // ============================================================
-    const MON_OFFICIAL = {
-        'MS365 Personal (12 мес.)': 6990,
-        'Office 2021 Home & Business': 14990,
-        'Office 2019 Home & Business': 8990,
-        'Windows 11 Home': 13990,
-        'Windows 11 Pro': 16990,
-        'Office 2021 Professional': 22990,
-    };
-    const TM_KW = ['microsoft','office','windows'];
-    
-    function monComputeFlags(item) {
-        const disc = Math.floor((item.op - item.price) / item.op * 100);
-        const tl = item.title.toLowerCase();
-        const hasTM = TM_KW.some(k => tl.includes(k));
-        const hasCompat = tl.includes('совместимо') || tl.includes('compat');
-        return {
-            F1: disc >= 50, F2: disc >= 80,
-            F3: item.regDays !== null ? item.regDays < 30 : null,
-            F4: item.auth !== null ? !item.auth : null,
-            F5: true, // все MS продукты — телефонная активация отключена
-            F6: hasTM && !hasCompat,
-            disc
-        };
-    }
-    function monFlagCount(f) {
-        return [f.F1,f.F2,f.F3===true,f.F4===true,f.F5,f.F6].filter(Boolean).length;
-    }
-    function monFlagPills(f) {
-        const parts = [];
-        if(f.F2) parts.push('<span class="flag-pill-mon fp-red" title="F2: Цена ниже официальной на '+f.disc+'%">🔴F2</span>');
-        else if(f.F1) parts.push('<span class="flag-pill-mon fp-red" title="F1: Цена ниже официальной на '+f.disc+'%">🔴F1</span>');
-        if(f.F3===true) parts.push('<span class="flag-pill-mon fp-yellow" title="F3: Продавец &lt;30 дней">🟡F3</span>');
-        else if(f.F3===null) parts.push('<span class="flag-pill-mon fp-gray" title="F3: требует проверки">F3?</span>');
-        if(f.F4===true) parts.push('<span class="flag-pill-mon fp-yellow" title="F4: Нет статуса авт. реселлера">🟡F4</span>');
-        else if(f.F4===null) parts.push('<span class="flag-pill-mon fp-gray" title="F4: требует проверки">F4?</span>');
-        if(f.F5) parts.push('<span class="flag-pill-mon fp-yellow" title="F5: Телефонная активация отключена с дек.2025">🟡F5</span>');
-        if(f.F6) parts.push('<span class="flag-pill-mon fp-orange" title="F6: ТЗ без пометки совместимо">🟠F6</span>');
-        return parts.join('') || '<span style="color:#999;font-size:11px;">нет</span>';
-    }
+    <!-- Полная таблица карточек -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <h3 style="margin:0">Карточки</h3>
+          <div class="presets" id="presetBtns" style="margin:0">
+            <button class="on" data-preset="default" title="Дисконт ↓ → Цена ↑ → Название ↑">📊 По умолчанию</button>
+            <button data-preset="score" title="Индекс подозрительности: дисконт + флажки + аномально низкая цена">🔥 Самые подозрительные</button>
+            <button data-preset="recent" title="Сначала самые свежие (по дате обнаружения)">🆕 Свежие</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)">На странице: <span class="seg" style="margin:0;display:inline-flex"><button class="ps" data-ps="10">10</button><button class="ps on" data-ps="50">50</button><button class="ps" data-ps="100">100</button></span></div>
+          <div style="font-size:13px;color:var(--muted)">Показано <b id="cnt" style="color:var(--tx)">0</b> из <b id="tot" style="color:var(--tx)">0</b></div>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th onclick="sortBy('date')">Найдена <span class="si" data-si="date"></span></th><th onclick="sortBy('pl')">Площадка <span class="si" data-si="pl"></span></th>
+            <th onclick="sortBy('title')">Название <span class="si" data-si="title"></span></th><th>Ссылка</th>
+            <th onclick="sortBy('price')">Цена <span class="si" data-si="price"></span></th><th onclick="sortBy('op')">Офиц. <span class="si" data-si="op"></span></th>
+            <th onclick="sortBy('disc')">Дисконт <span class="si" data-si="disc"></span></th><th>Флажки</th>
+          </tr></thead>
+          <tbody id="tbody"><tr><td colspan="8" class="loading">Загрузка…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pager"><button onclick="pg(-1)">← Назад</button><span>Стр. <b id="pnum">1</b> / <b id="ptot">1</b></span><button onclick="pg(1)">Вперёд →</button></div>
+    </div>
+  </main>
+</div>
+<div id="pieTip"></div>
 
-    // 23 карточки из реального мониторинга (январь-март 2026)
-    let MON_RAW = []; // загружается из Supabase, см. loadFromSupabase()
-    // ─────────────────────────────────────────────────────────────────────
-    // Supabase loader (заменяет inline MON_RAW из старой версии)
-    // ─────────────────────────────────────────────────────────────────────
-    const SUPABASE_URL = "https://yqfdbuiyfkzhkhpiknob.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_nZNZLCqx4e_7La8pfQmsjA_RSw0zT9t";
-
-    // titleOk на клиенте — точно как в scraper/import_cloak_full.py
-    function titleOkClient(title) {
-        const t = (title || '').toLowerCase();
-        // Включающие маркеры
-        const hasOffice = t.includes('office');
-        const has365MS = t.includes('365') && t.includes('microsoft');
-        const hasОфисMS = t.includes('офис') && t.includes('microsoft');
-        if (!(hasOffice || has365MS || hasОфисMS)) return false;
-        // Исключения: officesuite, российский софт
-        const excludes = ['officesuite', 'р7-', 'р7 офис', 'мойофис', 'redos', 'ред ос',
-                          'libreoffice', 'astra linux', 'базальт', 'rosa', 'кит офис'];
-        if (excludes.some(e => t.includes(e))) return false;
-        // Только Windows (не Office)
-        if (/^(код|ключ|лицензия)\s+windows\b/.test(t) || /^windows\s+\d/.test(t)) return false;
-        // Книги о Office
-        const bookKw = ['книга', 'руководство', 'учебник', 'учебное', 'пособие', 'самоучитель', 'шаг за шагом', 'методичк', 'power bi'];
-        if (bookKw.some(e => t.includes(e))) return false;
-        // Железо с предустановленным Office (ноутбук/моноблок/ПК) — не ключ.
-        // ВАЖНО: «ключ ДЛЯ ноутбука/macbook/планшета» — валидный ключ (предлог «для»).
-        const brandHW = /vivobook|ideapad|thinkbook|thinkpad|magicbook|matebook|aspire\s+go|ozon-?book|ninkear|super-?book/.test(t);
-        const genericHW = (/\bноутбук\b|\bnotebook\b|\blaptop\b|моноблок|неттоп|системный блок/.test(t)
-                           && !/для\s+(ноутбук|notebook|laptop|macbook|план|пк|компьютер|устройств)/.test(t));
-        if (brandHW || genericHW) return false;
-        return true;
-    }
-
-    // Фильтр «не контрафакт»: price >= 0.5×op
-    function isCounterfeit(r) {
-        return r.op && r.price && r.price < 0.5 * r.op;
-    }
-
-    async function supabaseFetchAll() {
-        const PAGE = 1000;
-        let all = [];
-        let from = 0;
-        while (true) {
-            const r = await fetch(SUPABASE_URL + '/rest/v1/listings?select=*&order=last_seen.desc.nullslast', {
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-                    'Range-Unit': 'items',
-                    'Range': from + '-' + (from + PAGE - 1),
-                },
-            });
-            if (!r.ok) throw new Error('listings ' + r.status);
-            const chunk = await r.json();
-            all = all.concat(chunk);
-            if (chunk.length < PAGE) break;
-            from += PAGE;
-            if (from > 100000) break;
-        }
-        return all;
-    }
-
-    async function supabaseFetchLatestRun() {
-        // ВАЖНО: сортируем по finished_at, а не started_at. Иначе ручной smoke-тест,
-        // запущенный позже cron-а, перекроет успешный cron в шапке "Актуальность".
-        // nullslast → running-прогоны (без finished_at) не лезут вперёд.
-        const r = await fetch(SUPABASE_URL + '/rest/v1/parser_runs?select=*&order=finished_at.desc.nullslast&limit=1', {
-            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-        });
-        if (!r.ok) return null;
-        const arr = await r.json();
-        return arr[0] || null;
-    }
-
-    // Активные поисковые запросы из monitor_queries (единый источник правды с парсером)
-    async function supabaseFetchQueries() {
-        try {
-            const r = await fetch(SUPABASE_URL + '/rest/v1/monitor_queries?select=query&active=eq.true&order=id', {
-                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-            });
-            if (!r.ok) return null;
-            const arr = await r.json();
-            return arr.map(x => x.query).filter(Boolean);
-        } catch (e) { return null; }
-    }
-
-    // Статус очереди парсинга (есть ли pending/running запросы)
-    async function supabaseFetchQueueActive() {
-        try {
-            const r = await fetch(SUPABASE_URL + "/rest/v1/parse_queue?select=id,query,status&status=in.(pending,running)&order=requested_at.asc", {
-                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-            });
-            if (!r.ok) return [];
-            return await r.json();
-        } catch (e) { return []; }
-    }
-
-    // RPC: запросить парсинг (с ключевой фразой). p_query=null → полный прогон.
-    async function supabaseRequestParse(secret, query) {
-        const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/request_parse', {
-            method: 'POST',
-            headers: {
-                'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ p_secret: secret, p_query: query || null }),
-        });
-        if (!r.ok) return { ok: false, error: 'HTTP ' + r.status };
-        return await r.json();
-    }
-
-    // Ключевая фраза: запоминаем в sessionStorage на время сессии (не localStorage —
-    // не храним секрет на диске). Сбрасываем при «Неверная ключевая фраза».
-    function getKeyPhrase(force) {
-        let p = force ? null : sessionStorage.getItem('mon_secret');
-        if (!p) {
-            p = prompt('Введите ключевую фразу для запуска парсинга / добавления запроса:');
-            if (p) sessionStorage.setItem('mon_secret', p);
-        }
-        return p;
-    }
-
-    // ── Кеш данных в localStorage ──
-    // Чтобы дашборд не открывался пустым: показываем последний снимок мгновенно,
-    // потом фоном грузим свежее из Supabase и заменяем.
-    const MON_CACHE_KEY = 'mon_cache_v1';
-    function saveCache(mapped, lastRun) {
-        try {
-            localStorage.setItem(MON_CACHE_KEY, JSON.stringify({
-                rows: mapped, lastRun: lastRun || null, savedAt: new Date().toISOString(),
-            }));
-        } catch (e) { /* quota — не критично */ }
-    }
-    function loadCache() {
-        try {
-            const raw = localStorage.getItem(MON_CACHE_KEY);
-            return raw ? JSON.parse(raw) : null;
-        } catch (e) { return null; }
-    }
-
-    // Маппинг Supabase row → формат MON_RAW
-    function mapSupabaseRow(r) {
-        return {
-            date: r.last_seen || r.date,
-            pl: r.pl,
-            id: r.product_id,
-            query: r.query,
-            title: r.title || '',
-            url: r.url || '',
-            price: r.price || 0,
-            op: r.op || 9990,
-            regDays: r.reg_days,
-            auth: r.auth,
-            apay: r.avito_pay === true,  // оплата через инфраструктуру Avito (зона ответственности площадки)
-        };
-    }
-
-    // Боковой индикатор фоновой загрузки
-    function showLoadingBadge(text) {
-        let b = document.getElementById('monLoadingBadge');
-        if (!b) {
-            b = document.createElement('div');
-            b.id = 'monLoadingBadge';
-            b.style.cssText = 'position:fixed;right:18px;bottom:18px;z-index:9999;background:#1565c0;color:#fff;'
-                + 'padding:10px 16px;border-radius:24px;font-size:13px;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,0.2);'
-                + 'display:flex;align-items:center;gap:8px;';
-            document.body.appendChild(b);
-        }
-        b.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid #fff;'
-            + 'border-top-color:transparent;border-radius:50%;animation:monspin 0.8s linear infinite;"></span>' + text;
-        b.style.display = 'flex';
-        if (!document.getElementById('monSpinStyle')) {
-            const st = document.createElement('style'); st.id='monSpinStyle';
-            st.textContent = '@keyframes monspin{to{transform:rotate(360deg)}}';
-            document.head.appendChild(st);
-        }
-    }
-    function hideLoadingBadge() {
-        const b = document.getElementById('monLoadingBadge');
-        if (b) b.style.display = 'none';
-    }
-
-    // Мгновенный показ из кеша при первом открытии (до сетевой загрузки)
-    function renderFromCache() {
-        const c = loadCache();
-        if (!c || !c.rows || !c.rows.length) return false;
-        MON_RAW = c.rows;
-        MON_DATA = c.rows.map(r => ({...r, flags: monComputeFlags(r)}));
-        monFiltered = [...MON_DATA];
-        const tsEl = document.getElementById('scanLastTime');
-        if (c.lastRun && tsEl) {
-            const d = new Date(c.lastRun.finished_at || c.lastRun.started_at);
-            tsEl.textContent = d.toLocaleDateString('ru') + ', ' + d.toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit'}) + ' (кеш)';
-        }
-        if (typeof monRenderQueryTags === 'function') monRenderQueryTags();
-        if (typeof monRebuildQueryFilterBtns === 'function') monRebuildQueryFilterBtns();
-        if (typeof monApplyFilters === 'function') monApplyFilters();
-        return true;
-    }
-
-    async function loadFromSupabase() {
-        try {
-            const tsEl = document.getElementById('scanLastTime');
-            const statusEl = document.getElementById('scanStatus');
-            showLoadingBadge('Загрузка обновлённых данных из Supabase…');
-            if (statusEl) { statusEl.style.background='#fff9c4'; statusEl.style.color='#f57f17'; statusEl.textContent='⏳ Обновление…'; }
-
-            const [rows, lastRun, dbQueries] = await Promise.all([
-                supabaseFetchAll(), supabaseFetchLatestRun(), supabaseFetchQueries(),
-            ]);
-            console.log('Supabase: загружено', rows.length, 'строк');
-
-            // Запросы — из БД (единый источник с парсером)
-            if (dbQueries && dbQueries.length) {
-                MON_QUERIES = dbQueries;
-            }
-
-            // Маппинг + клиентский фильтр titleOk + price<0.5×op
-            let mapped = rows.map(mapSupabaseRow).filter(r => r.title && titleOkClient(r.title) && isCounterfeit(r));
-            console.log('После titleOk + 0.5×op:', mapped.length);
-
-            // Дедуп на клиенте — страховка. БД имеет UNIQUE (pl, product_id),
-            // но если что-то пойдёт не так с миграцией, клиент возьмёт первую
-            // встреченную (свежую) карточку.
-            const seenIds = new Set();
-            const beforeDedup = mapped.length;
-            mapped = mapped.filter(r => {
-                const key = r.pl + '|' + r.id;
-                if (seenIds.has(key)) return false;
-                seenIds.add(key);
-                return true;
-            });
-            if (mapped.length < beforeDedup) {
-                console.warn('Client-side dedup убрал', beforeDedup - mapped.length, 'дубликатов — есть проблема в БД');
-            }
-
-            // ВАЖНО: показываем только last_seen свежий снимок маркетплейсов.
-            // В Supabase listings — накопительный архив (карточки от 19.03 + миграции
-            // + все cron-прогоны). Без этого фильтра одни и те же продавцы
-            // дублировались бы по разным дням. С фильтром остаются только
-            // карточки, которые были видны на последнем парсинге.
-            // (Карточки удалённые с маркетплейса автоматически выпадают, потому что
-            // их last_seen не обновился последним прогоном.)
-            if (mapped.length > 0) {
-                // r.date после mapSupabaseRow = last_seen || date в БД
-                const latestDate = mapped.reduce((max, r) => (r.date && r.date > max) ? r.date : max, mapped[0].date || '');
-                const beforeFresh = mapped.length;
-                mapped = mapped.filter(r => r.date === latestDate);
-                console.log('После фильтра date=' + latestDate + ':', mapped.length, '(из', beforeFresh + ')');
-            }
-
-            // Подменим MON_RAW и пересчитаем MON_DATA
-            MON_RAW = mapped;
-            MON_DATA = mapped.map(r => ({...r, flags: monComputeFlags(r)}));
-            monFiltered = [...MON_DATA];
-
-            // Обновим штамп «Последнее сканирование» из parser_runs
-            if (lastRun && tsEl) {
-                const d = new Date(lastRun.started_at);
-                tsEl.textContent = d.toLocaleDateString('ru') + ', ' + d.toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit'});
-            }
-            if (lastRun && statusEl) {
-                if (lastRun.status === 'ok') { statusEl.style.background='#e8f5e9'; statusEl.style.color='#2e7d32'; statusEl.textContent='✓ Актуально'; }
-                else if (lastRun.status === 'running') { statusEl.style.background='#fff9c4'; statusEl.style.color='#f57f17'; statusEl.textContent='⏳ Парсинг идёт'; }
-                else if (lastRun.status === 'partial') { statusEl.style.background='#fff3e0'; statusEl.style.color='#e65100'; statusEl.textContent='⚠ Частично'; }
-                else if (lastRun.status === 'failed') { statusEl.style.background='#ffebee'; statusEl.style.color='#c62828'; statusEl.textContent='✗ Ошибка'; }
-            }
-
-            // Перерисуем
-            if (typeof monRenderQueryTags === 'function') monRenderQueryTags();
-            if (typeof monRebuildQueryFilterBtns === 'function') monRebuildQueryFilterBtns();
-            if (typeof monApplyFilters === 'function') monApplyFilters();
-
-            // Сохраним свежий снимок в кеш для мгновенного показа при следующем открытии
-            saveCache(mapped, lastRun);
-            hideLoadingBadge();
-        } catch (e) {
-            console.error('Supabase loader error:', e);
-            hideLoadingBadge();
-            // Если есть кеш — оставляем его, не затираем ошибкой
-            if (!MON_DATA || !MON_DATA.length) {
-                const tbody = document.getElementById('monTableBody');
-                if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#c62828;padding:30px;">Не удалось загрузить из Supabase: ' + e.message + '</td></tr>';
-            } else {
-                showLoadingBadge('⚠ Не удалось обновить — показаны кешированные данные');
-                setTimeout(hideLoadingBadge, 4000);
-            }
-        }
-    }
-
-    // Кнопка «Обновить» = запустить парсинг (тяжёлая операция, нужна ключевая фраза).
-    // Просто перечитать данные можно обычным reload браузера (Cmd+Shift+R).
-    async function runScan() {
-        const secret = getKeyPhrase(false);
-        if (!secret) return;
-        const btn = event && event.target;
-        if (btn) { btn.disabled = true; btn.dataset.old = btn.textContent; btn.textContent = '⏳ Запуск…'; }
-        const res = await supabaseRequestParse(secret, null);
-        if (btn) { btn.disabled = false; btn.textContent = btn.dataset.old || '🔄 Обновить'; }
-        if (!res.ok) {
-            if ((res.error || '').includes('фраз')) sessionStorage.removeItem('mon_secret');
-            alert('Не удалось запустить парсинг: ' + (res.error || 'ошибка'));
-            return;
-        }
-        const statusEl = document.getElementById('scanStatus');
-        if (statusEl) { statusEl.style.background='#fff9c4'; statusEl.style.color='#f57f17'; statusEl.textContent='⏳ Парсинг запущен'; }
-        showLoadingBadge('Парсинг запущен — результат через ~15 мин. Можно закрыть страницу.');
-        setTimeout(hideLoadingBadge, 8000);
-        monPollQueue();  // следим за очередью, по завершении подтянем данные
-    }
-
-    // Опрос очереди: пока есть pending/running — показываем статус, по опустошению reload данных
-    let monQueuePollTimer = null;
-    async function monPollQueue() {
-        if (monQueuePollTimer) return;
-        let wasActive = false;
-        monQueuePollTimer = setInterval(async () => {
-            const active = await supabaseFetchQueueActive();
-            const statusEl = document.getElementById('scanStatus');
-            if (active.length) {
-                wasActive = true;
-                if (statusEl) { statusEl.style.background='#fff9c4'; statusEl.style.color='#f57f17';
-                    statusEl.textContent = '⏳ Парсинг идёт (' + active.length + ' в очереди)'; }
-            } else if (wasActive) {
-                clearInterval(monQueuePollTimer); monQueuePollTimer = null;
-                showLoadingBadge('Парсинг завершён — обновляю данные…');
-                await loadFromSupabase();
-            } else {
-                // очередь была пуста с самого начала — перестаём опрашивать через минуту
-            }
-        }, 20000);
-        // авто-стоп через 30 мин на всякий случай
-        setTimeout(() => { if (monQueuePollTimer) { clearInterval(monQueuePollTimer); monQueuePollTimer = null; } }, 1800000);
-    }
-
-
-
-
-    const MON_PL_LABEL = {ozon:'OZON',wildberries:'Wildberries',yandex:'Яндекс.Маркет',avito:'Авито',aliexpress:'AliExpress'};
-    const MON_PL_STYLE = {ozon:'background:#e3f2fd;color:#1565c0',wildberries:'background:#f3e5f5;color:#6a1b9a',yandex:'background:#fff3e0;color:#e65100',avito:'background:#e8f5e9;color:#2e7d32',aliexpress:'background:#fff8e1;color:#e65100'};
-    
-    let MON_DATA = MON_RAW.map(r => ({...r, flags: monComputeFlags(r)}));
-
-    // Поисковые запросы на мониторинге
-    const MON_QUERIES_SUGGEST = [
-        'Microsoft Office 2021 ключ активации',
-        'Microsoft Office 2021 Home Business ключ',
-        'Office 365 Personal ключ активации',
-        'Microsoft 365 Personal ключ',
-        'Office 2019 ключ активации',
-        'MS Office ключ активации онлайн',
-        'Office Home and Business 2021 ключ',
-        'Microsoft Office лицензионный ключ'
-    ];
-    // Активные поисковые запросы — ЕДИНЫЙ ИСТОЧНИК: таблица monitor_queries в Supabase.
-    // Этот список — fallback до первой загрузки; loadFromSupabase() перезапишет из БД.
-    const MON_QUERIES_DEFAULT = [
-        'Office ключ', 'Office активация', 'Microsoft 365',
-        'Office LTSC', 'Office 2024', 'Office 2019'
-    ];
-    let MON_QUERIES = MON_QUERIES_DEFAULT.slice();
-
-    // Сортировка по умолчанию — пресет 'default' (дисконт ↓ → цена ↑ → название ↑).
-    // Совпадает с предсортировкой в Python merge_mon_raw.py. Клик по заголовку
-    // колонки переключает на режим 'col' (sortPreset='col').
-    // sortCol/sortDir выставлены под пресет 'default' — индикатор ▼ на колонке «Дисконт».
-    let monState = {pl:'all', disc:0, flag:0, search:'', query:'', apay:'all', page:0, pageSize:50,
-                    sortCol:'disc', sortDir:-1, sortPreset:'default'};
-    let monFiltered = [...MON_DATA];
-
-    function monSaveQueries() {
-        try { localStorage.setItem('mon_queries', JSON.stringify(MON_QUERIES)); } catch(e) {}
-    }
-    function monQueryFormToggle() {
-        const f = document.getElementById('monQueryForm');
-        if(!f) return;
-        const show = f.style.display==='none';
-        f.style.display = show ? 'block' : 'none';
-        if(show) {
-            // Render suggested queries not yet added
-            const s = document.getElementById('monQuerySuggest');
-            if(s) s.innerHTML = MON_QUERIES_SUGGEST
-                .filter(q => !MON_QUERIES.includes(q))
-                .map(q => `<button onclick="monQueryAddSuggest(this,'${q.replace(/'/g,"\\'")}')" style="padding:4px 10px;background:#e3f2fd;color:#1565c0;border:1px solid #90caf9;border-radius:12px;cursor:pointer;font-size:12px;">${q}</button>`)
-                .join('');
-            document.getElementById('monQueryInput').focus();
-        }
-    }
-    // Добавление запроса: пишем в monitor_queries + ставим в очередь парсинг ТОЛЬКО
-    // по нему (через RPC request_parse с ключевой фразой). Парсер прогонит его за ~3 мин.
-    async function monQuerySubmit(q, btn) {
-        q = (q || '').trim();
-        if (!q) return false;
-        if (MON_QUERIES.includes(q)) { alert('Такой запрос уже на мониторинге'); return false; }
-        const secret = getKeyPhrase(false);
-        if (!secret) return false;
-        if (btn) { btn.disabled = true; }
-        const res = await supabaseRequestParse(secret, q);
-        if (btn) { btn.disabled = false; }
-        if (!res.ok) {
-            if ((res.error || '').includes('фраз')) sessionStorage.removeItem('mon_secret');
-            alert('Не удалось добавить запрос: ' + (res.error || 'ошибка'));
-            return false;
-        }
-        // Локально показываем сразу (БД-снимок подтянется после парсинга)
-        MON_QUERIES.push(q);
-        monRenderQueryTags();
-        monRebuildQueryFilterBtns();
-        showLoadingBadge('Запрос «' + q + '» добавлен, парсинг запущен (~3 мин)…');
-        setTimeout(hideLoadingBadge, 6000);
-        monPollQueue();
-        return true;
-    }
-    async function monQueryAddSuggest(btn, q) {
-        const ok = await monQuerySubmit(q, btn);
-        if (ok) { btn.disabled=true; btn.style.opacity='0.4'; }
-    }
-    async function monQueryAdd() {
-        const inp = document.getElementById('monQueryInput');
-        if(!inp) return;
-        const ok = await monQuerySubmit(inp.value, null);
-        if (ok) { inp.value=''; monQueryFormToggle(); }
-    }
-    // Удаление = деактивация в monitor_queries (тоже write, нужна фраза).
-    async function monQueryRemove(q) {
-        if (!confirm('Снять запрос «' + q + '» с мониторинга?')) return;
-        const secret = getKeyPhrase(false);
-        if (!secret) return;
-        const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/deactivate_query', {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ p_secret: secret, p_query: q }),
-        });
-        const res = r.ok ? await r.json() : { ok:false, error:'HTTP '+r.status };
-        if (!res.ok) {
-            if ((res.error || '').includes('фраз')) sessionStorage.removeItem('mon_secret');
-            alert('Не удалось снять запрос: ' + (res.error || 'ошибка'));
-            return;
-        }
-        MON_QUERIES = MON_QUERIES.filter(x=>x!==q);
-        if(monState.query===q) { monState.query=''; }
-        monRenderQueryTags();
-        monRebuildQueryFilterBtns();
-        monApplyFilters();
-    }
-    function monRenderQueryTags() {
-        const c = document.getElementById('monQueryTags');
-        if(!c) return;
-        c.innerHTML = MON_QUERIES.map(q => {
-            const active = monState.query===q;
-            const bg = active ? '#1565c0' : '#e3f2fd';
-            const col = active ? '#fff' : '#1565c0';
-            return `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:${bg};color:${col};border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #90caf9;"
-                onclick="monToggleQueryTag('${q.replace(/'/g,"\\'")}')">${q}
-                <span onclick="event.stopPropagation();monQueryRemove('${q.replace(/'/g,"\\'")}');"
-                    style="font-size:14px;line-height:1;opacity:0.7;margin-left:2px;" title="Удалить">x</span>
-            </span>`;
-        }).join('');
-        if(!MON_QUERIES.length) c.innerHTML = '<span style="font-size:12px;color:#999;font-style:italic;">Нет активных запросов</span>';
-    }
-    function monToggleQueryTag(q) {
-        monState.query = (monState.query===q) ? '' : q;
-        monRenderQueryTags();
-        // sync filter buttons
-        document.querySelectorAll('#monQueryFilterBtns .mon-filter-btn').forEach(b=>{
-            b.classList.toggle('active', b.dataset.q===(monState.query||''));
-        });
-        monState.page=0; monApplyFilters();
-    }
-    function monToggleQuery(v, btn) {
-        monState.query=v; monState.page=0;
-        document.querySelectorAll('#monQueryFilterBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        monRenderQueryTags();
-        monApplyFilters();
-    }
-    function monRebuildQueryFilterBtns() {
-        const c = document.getElementById('monQueryFilterBtns');
-        if(!c) return;
-        c.innerHTML = `<button class="mon-filter-btn${monState.query===''?' active':''}" data-q="" onclick="monToggleQuery('',this)">Все</button>`
-            + MON_QUERIES.map(q => `<button class="mon-filter-btn${monState.query===q?' active':''}" data-q="${q}" onclick="monToggleQuery('${q.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',this)">${q.length>25?q.slice(0,25)+'…':q}</button>`).join('');
-    }
-    function monTogglePlat(v, btn) {
-        monState.pl=v; monState.apay='all'; monState.page=0;  // обычная площадка сбрасывает фильтр оплаты
-        document.querySelectorAll('#monPlatBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active'); monApplyFilters();
-    }
-    // Подфильтр площадки Avito: только карточки с оплатой через инфраструктуру Avito
-    function monTogglePlatApay(btn) {
-        monState.pl='avito'; monState.apay='yes'; monState.page=0;
-        document.querySelectorAll('#monPlatBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active'); monApplyFilters();
-    }
-    function monToggleDisc(v, btn) {
-        monState.disc=v; monState.page=0;
-        document.querySelectorAll('#monDiscBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active'); monApplyFilters();
-    }
-    function monToggleFlag(v, btn) {
-        monState.flag=v; monState.page=0;
-        document.querySelectorAll('#monFlagBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active'); monApplyFilters();
-    }
-    function monToggleApay(v, btn) {
-        // legacy — оставлено для совместимости; фильтр теперь через monTogglePlatApay
-        monState.apay=v; monState.page=0;
-        btn.classList.add('active'); monApplyFilters();
-    }
-    function monApplyFilters() {
-        const s = (document.getElementById('monSearch')?.value||'').toLowerCase();
-        monFiltered = MON_DATA.filter(r => {
-            if(monState.pl!=='all' && r.pl!==monState.pl) return false;
-            if(r.flags.disc < monState.disc) return false;
-            if(monFlagCount(r.flags) < monState.flag) return false;
-            if(monState.apay==='yes' && r.apay !== true) return false;
-            if(s && !r.title.toLowerCase().includes(s)) return false;
-            if(monState.query && r.query && !r.query.toLowerCase().includes(monState.query.toLowerCase()) && !r.title.toLowerCase().includes(monState.query.toLowerCase())) return false;
-            return true;
-        }).sort((a,b) => b.date.localeCompare(a.date));
-        if(monState.sortCol) monApplySortToFiltered();
-        document.getElementById('monCount').textContent = monFiltered.length;
-        const tot = document.getElementById('monTotal');
-        if(tot) tot.textContent = MON_DATA.length;
-        monState.page = 0;
-        monUpdateSortIndicators();
-        monRender();
-    }
-    function monRender() {
-        const tbody = document.getElementById('monTableBody');
-        if(!tbody) return;
-        const start = monState.page * monState.pageSize;
-        const items = monFiltered.slice(start, start + monState.pageSize);
-        const totalPages = Math.max(1, Math.ceil(monFiltered.length / monState.pageSize));
-        document.getElementById('monPageNum').textContent = monState.page+1;
-        const pt = document.getElementById('monPageTotal'); if(pt) pt.textContent = totalPages;
-        tbody.innerHTML = items.map(r => {
-            const f = r.flags;
-            const dc = f.disc>=95?'color:#c62828':f.disc>=80?'color:#e65100':'color:#f57c00';
-            const d = r.date.split('-').reverse().join('.');
-            const qLabel = r.query ? `<div style="font-size:10px;color:#888;margin-top:2px;">🔎 ${r.query}</div>` : '';
-            // Компактный значок «Оплата через инфраструктуру Avito»: красный кружок
-            // с иконкой карты, в одну строку с меткой площадки (не расширяет ряд).
-            const apayBadge = r.apay === true
-                ? `<span title="Оплата через инфраструктуру Avito (Авито Доставка / безопасная сделка) — по заявлению самой площадки, за такие объявления она несёт ответственность." style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#c62828;flex:0 0 auto;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>`
-                : '';
-            return `<tr>
-                <td style="white-space:nowrap;font-size:12px;">${d}</td>
-                <td><span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><span style="display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;${MON_PL_STYLE[r.pl]}">${MON_PL_LABEL[r.pl]}</span>${apayBadge}</span></td>
-                <td style="max-width:220px;" title="${r.title}"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.title.length>55?r.title.slice(0,55)+'…':r.title}</div>${qLabel}</td>
-                <td><a href="${r.url}" target="_blank" rel="noopener" style="color:var(--ozon-blue);font-size:12px;white-space:nowrap;">Поиск ↗</a></td>
-                <td style="font-weight:700;">${r.price.toLocaleString('ru')} ₽</td>
-                <td style="color:#666;">${r.op.toLocaleString('ru')} ₽</td>
-                <td style="font-weight:700;${dc}">${f.disc}%</td>
-                <td style="white-space:nowrap;">${monFlagPills(f)}</td>
-            </tr>`;
-        }).join('');
-    }
-    function monSortBy(col) {
-        if(monState.sortCol === col) {
-            monState.sortDir = -monState.sortDir;
-        } else {
-            monState.sortCol = col;
-            monState.sortDir = 1;
-        }
-        // Клик по колонке выходит из режима пресета и снимает активную кнопку.
-        monState.sortPreset = 'col';
-        document.querySelectorAll('#monSortPresetBtns .mon-filter-btn').forEach(b => b.classList.remove('active'));
-        monApplySortToFiltered();
-        monState.page = 0;
-        monUpdateSortIndicators();
-        monRender();
-    }
-    function monApplySortToFiltered() {
-        // Если выбран пресет (а не клик по колонке) — он перехватывает сортировку.
-        if(monState.sortPreset && monState.sortPreset !== 'col') {
-            return monApplyPreset();
-        }
-        const col = monState.sortCol;
-        if(!col) return;
-        const dir = monState.sortDir;
-        // Геттер основного значения по колонке
-        const getMain = (r) => {
-            if(col==='disc') return r.flags.disc;
-            if(col==='flags') return monFlagCount(r.flags);
-            return r[col];
-        };
-        // Мультиключевая сортировка: первичный ключ + тайбрейкеры.
-        // Для дисконта: цена ↑, название ↑ — самые дешёвые в группе наверх.
-        // Для остальных: дисконт ↓, название ↑ — стабильность при равных.
-        monFiltered.sort((a, b) => {
-            const va = getMain(a), vb = getMain(b);
-            let cmp;
-            if(typeof va === 'number') cmp = (va - vb) * dir;
-            else cmp = String(va||'').localeCompare(String(vb||''),'ru') * dir;
-            if(cmp !== 0) return cmp;
-            // Тайбрейкеры (не зависят от dir):
-            if(col === 'disc') {
-                if(a.price !== b.price) return a.price - b.price;
-                return String(a.title||'').localeCompare(String(b.title||''),'ru');
-            }
-            // Для любых других колонок — стабилизация по дисконту ↓, потом по названию
-            if(a.flags.disc !== b.flags.disc) return b.flags.disc - a.flags.disc;
-            return String(a.title||'').localeCompare(String(b.title||''),'ru');
-        });
-    }
-
-    // Нормализация заголовка для группировки в «семьи» товаров.
-    // Убираем мусор и оставляем сигнатуру: версия Office + редакция.
-    function monFamilyKey(title) {
-        let s = String(title||'').toLowerCase();
-        // Версии года и редакции — основа кластера
-        const m = s.match(/(office\s+(?:365|2024|2021|2019|2016|2013|2010))\s*(pro\s*plus|home\s*and\s*business|home\s*and\s*student|professional\s*plus|professional|personal|family|standard|ltsc)?/i);
-        if(m) return (m[1] + ' ' + (m[2]||'')).replace(/\s+/g,' ').trim();
-        if(s.includes('365') && s.includes('microsoft')) return 'microsoft 365';
-        return 'прочее';
-    }
-
-    // Score «подозрительности»: чем выше — тем нагляднее нарушение.
-    // disc 0-100 + бонусы за низкую абсолютную цену и количество флажков.
-    function monScore(r) {
-        const f = r.flags || monComputeFlags(r);
-        let s = Math.max(0, f.disc);                          // 0..100
-        s += monFlagCount(f) * 3;                             // до +18
-        if(r.price < 100) s += 10;
-        else if(r.price < 300) s += 5;
-        // Аномально-низкая цена при высокой op = «приманка»
-        if(r.op > 10000 && r.price < r.op * 0.01) s += 5;
-        return s;
-    }
-
-    // Применить выбранный пресет сортировки.
-    function monApplyPreset() {
-        const preset = monState.sortPreset || 'default';
-        // Подсчитываем размеры «семей» один раз, если нужен family-режим
-        let famCount = null;
-        if(preset === 'family') {
-            famCount = new Map();
-            monFiltered.forEach(r => {
-                const k = monFamilyKey(r.title);
-                famCount.set(k, (famCount.get(k)||0) + 1);
-            });
-        }
-        const titleCmp = (a, b) => String(a.title||'').localeCompare(String(b.title||''),'ru');
-        monFiltered.sort((a, b) => {
-            const da = a.flags.disc, db = b.flags.disc;
-            if(preset === 'default') {
-                if(da !== db) return db - da;          // дисконт ↓
-                if(a.price !== b.price) return a.price - b.price;  // цена ↑
-                return titleCmp(a, b);                              // название ↑
-            }
-            if(preset === 'score') {
-                const sa = monScore(a), sb = monScore(b);
-                if(sa !== sb) return sb - sa;          // score ↓
-                if(a.price !== b.price) return a.price - b.price;
-                return titleCmp(a, b);
-            }
-            if(preset === 'loss') {
-                const la = (a.op||0) - a.price, lb = (b.op||0) - b.price;
-                if(la !== lb) return lb - la;          // потери ↓
-                if(da !== db) return db - da;
-                return titleCmp(a, b);
-            }
-            if(preset === 'family') {
-                const ka = monFamilyKey(a.title), kb = monFamilyKey(b.title);
-                const ca = famCount.get(ka)||0, cb = famCount.get(kb)||0;
-                if(ca !== cb) return cb - ca;          // массовость семьи ↓
-                if(ka !== kb) return ka.localeCompare(kb);
-                if(da !== db) return db - da;
-                return a.price - b.price;
-            }
-            if(preset === 'pl') {
-                if(a.pl !== b.pl) return String(a.pl).localeCompare(String(b.pl));
-                if(da !== db) return db - da;
-                if(a.price !== b.price) return a.price - b.price;
-                return titleCmp(a, b);
-            }
-            if(preset === 'recent') {
-                // Когда появится timeseries из Supabase, date будет содержать
-                // реальную дату появления карточки. Сейчас падаем обратно на default.
-                const d = String(b.date||'').localeCompare(String(a.date||''));
-                if(d !== 0) return d;                   // дата ↓
-                if(da !== db) return db - da;
-                return a.price - b.price;
-            }
-            return 0;
-        });
-    }
-
-    // Маппинг пресет → "эффективная" первичная колонка + направление.
-    // Используется для отображения стрелочки ▼/▲ на колонке, по которой
-    // пресет фактически сортирует (чтобы пользователь видел, что происходит).
-    const MON_PRESET_COLUMN = {
-        default: {col: 'disc', dir: -1},   // дисконт ↓
-        score:   {col: 'disc', dir: -1},   // приближённо: score сильно коррелирует с disc
-        loss:    {col: 'op',   dir: -1},   // (op-price)↓ — ближайшая колонка op↓
-        family:  {col: 'title', dir: 1},   // приближённо: внутри семьи — алфавит
-        pl:      {col: 'pl',   dir: 1},    // площадка ↑
-        recent:  {col: 'date', dir: -1},   // дата ↓
-    };
-
-    function monSetPreset(preset, btn) {
-        monState.sortPreset = preset;
-        // Выставляем sortCol/sortDir по маппингу — стрелка ▼/▲ появится на нужной колонке.
-        const mapping = MON_PRESET_COLUMN[preset] || {col: '', dir: 1};
-        monState.sortCol = mapping.col;
-        monState.sortDir = mapping.dir;
-        document.querySelectorAll('#monSortPresetBtns .mon-filter-btn').forEach(b => b.classList.remove('active'));
-        if(btn) btn.classList.add('active');
-        monState.page = 0;
-        monApplySortToFiltered();
-        monUpdateSortIndicators();
-        monRender();
-    }
-    function monUpdateSortIndicators() {
-        ['date','pl','title','price','op','disc','flags'].forEach(c => {
-            const el = document.getElementById('mts-'+c);
-            if(!el) return;
-            if(monState.sortCol===c) {
-                // Активная сортировка: контрастный треугольник
-                el.innerHTML = monState.sortDir===1
-                    ? ' <span style="color:#1a3a6b;font-weight:700;">▲</span>'
-                    : ' <span style="color:#1a3a6b;font-weight:700;">▼</span>';
-            } else {
-                // Подсказка что колонка сортируема (приглушённый ↕)
-                el.innerHTML = ' <span style="color:#ccc;font-size:10px;">↕</span>';
-            }
-        });
-    }
-    function monPrev() { if(monState.page>0){monState.page--;monRender();} }
-    function monNext() { if((monState.page+1)*monState.pageSize<monFiltered.length){monState.page++;monRender();} }
-    function monSetPageSize(n, btn) {
-        monState.pageSize = n; monState.page = 0;
-        document.querySelectorAll('#monPageSizeBtns .mon-filter-btn').forEach(b=>b.classList.remove('active'));
-        if(btn) btn.classList.add('active');
-        monRender();
-    }
-    function runScan() {
-        const s=document.getElementById('scanStatus');
-        s.style.background='#fff9c4';s.style.color='#f57f17';s.textContent='⏳ Обновляется...';
-        setTimeout(()=>{
-            s.style.background='#e8f5e9';s.style.color='#2e7d32';s.textContent='✓ Актуально';
-            const now=new Date();
-            document.getElementById('scanLastTime').textContent=now.toLocaleDateString('ru')+', '+now.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
-            monApplyFilters();
-        },2200);
-    }
-    function exportMonCSV() {
-        const d=new Date().toISOString().slice(0,10);
-        // RFC 4180: поля с "," '"' или \n заключаем в кавычки, внутренние " удваиваем.
-        // Без этого 225 карточек с запятыми в title ломали выгрузку.
-        const esc = v => {
-            const s = String(v == null ? '' : v);
-            return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-        };
-        const hdr = ['Площадка','ID','Название','URL','Цена (руб.)','Офиц. цена (руб.)','Дисконт (%)','Флажки','Оплата через Avito','Дата обнаружения','Дата выгрузки'];
-        const lines = [hdr.map(esc).join(',')];
-        monFiltered.forEach(r=>{
-            const f=r.flags;
-            const flags=[f.F1?'F1':'',f.F2?'F2':'',f.F3===true?'F3':f.F3===null?'F3?':'',f.F4===true?'F4':f.F4===null?'F4?':'',f.F5?'F5':'',f.F6?'F6':''].filter(Boolean).join(';');
-            const apay = r.apay===true ? 'да' : (r.pl==='avito' ? 'нет' : '');
-            lines.push([
-                MON_PL_LABEL[r.pl], r.id, r.title, r.url,
-                r.price, r.op, f.disc, flags, apay, r.date, d
-            ].map(esc).join(','));
-        });
-        // BOM (\uFEFF) для корректного UTF-8 в Excel + CRLF (RFC 4180)
-        const csv = '\uFEFF' + lines.join('\r\n') + '\r\n';
-        const a=document.createElement('a');
-        a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
-        a.download=`monitoring_${d}.csv`;a.click();
-    }
-    function exportMonXLSX() {
-        if(typeof XLSX==='undefined'){alert('SheetJS не загружен');return;}
-        const d=new Date().toISOString().slice(0,10);
-        const hdr=['Площадка','ID','Название','URL','Цена (руб.)','Офиц. цена (руб.)','Дисконт (%)','Флажки','Оплата через Avito','Дата обнаружения','Дата выгрузки'];
-        const rows=monFiltered.map(r=>{
-            const f=r.flags;
-            const flags=[f.F1?'F1':'',f.F2?'F2':'',f.F3===true?'F3':f.F3===null?'F3?':'',f.F4===true?'F4':f.F4===null?'F4?':'',f.F5?'F5':'',f.F6?'F6':''].filter(Boolean).join('; ');
-            const apay = r.apay===true ? 'да' : (r.pl==='avito' ? 'нет' : '');
-            return [MON_PL_LABEL[r.pl],r.id,r.title,r.url,r.price,r.op,f.disc,flags,apay,r.date,d];
-        });
-        const ws=XLSX.utils.aoa_to_sheet([hdr,...rows]);
-        ws['!cols']=[12,18,50,45,10,12,10,20,16,12,12].map(w=>({wch:w}));
-        const wb=XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Мониторинг');
-        XLSX.writeFile(wb, `monitoring_${d}.xlsx`);
-    }
-
-    // Инициализация мониторинга при загрузке
-    document.addEventListener('DOMContentLoaded', function() {
-        // Мгновенно показываем кеш (если есть), затем фоном грузим свежее из Supabase.
-        renderFromCache();
-        loadFromSupabase();
-    });
-
+<script>
+const SUPABASE_URL="https://yqfdbuiyfkzhkhpiknob.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_nZNZLCqx4e_7La8pfQmsjA_RSw0zT9t";
+const PL={ozon:{n:'Ozon',c:'#2E7DFF'},wildberries:{n:'Wildberries',c:'#E84BC9'},yandex:{n:'Яндекс.Маркет',c:'#FFD43B'},avito:{n:'Avito',c:'#A879FF'}};
+function op(t){t=(t||'').toLowerCase();if(t.includes('pro plus')||t.includes('proplus')||t.includes('ltsc')||t.includes('professional'))return 39990;if(t.includes('home')&&t.includes('business'))return 22990;if(t.includes('home')&&t.includes('student'))return 14990;if(t.includes('365')&&t.includes('family'))return 5290;if(t.includes('365'))return 2790;if(t.includes('box'))return 6990;return 9990;}
+// Железо с предустановленным Office — НЕ ключ. «ключ ДЛЯ ноутбука/macbook» — валидный ключ.
+function isHW(t){t=(t||'');const brand=/vivobook|ideapad|thinkbook|thinkpad|magicbook|matebook|aspire\s+go|ozon-?book|ninkear|super-?book/i.test(t);
+  const gen=/\bноутбук\b|\bnotebook\b|\blaptop\b|моноблок|неттоп|системный блок/i.test(t)&&!/для\s+(ноутбук|notebook|laptop|macbook|план|пк|компьютер|устройств)/i.test(t);
+  return brand||gen;}
+const TM=['microsoft','office','windows'];
+function flags(r){const d=r._disc,tl=(r.title||'').toLowerCase(),tm=TM.some(k=>tl.includes(k)),cmp=tl.includes('совместимо')||tl.includes('compat');
+  return{F1:d>=50,F2:d>=80,F5:true,F6:tm&&!cmp,disc:d};}
+function flagPills(f){let p=[];if(f.F2)p.push('<span class="fp fp-r">🔴F2</span>');else if(f.F1)p.push('<span class="fp fp-r">🔴F1</span>');p.push('<span class="fp fp-y">🟡F5</span>');if(f.F6)p.push('<span class="fp fp-o">🟠F6</span>');return p.join('');}
+let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false,gran:'day',preset:'default',sortCol:'disc',sortDir:-1,page:0,size:50},FILT=[];
+async function fetchAll(path){let all=[],from=0;while(true){const r=await fetch(`${SUPABASE_URL}${path}`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Range-Unit':'items',Range:`${from}-${from+999}`}});const b=await r.json();all=all.concat(b);if(b.length<1000)break;from+=1000;}return all;}
+let DAILY=[];
+async function load(){
+  const rows=await fetchAll(`/rest/v1/listings?select=pl,product_id,title,price,op,query,first_seen,last_seen,url,avito_pay&order=last_seen.desc`);
+  RAW=rows.map(r=>{const o=r.op||op(r.title);return{...r,_op:o,_disc:Math.round((1-r.price/o)*100),_cf:r.price>0&&r.price<0.5*o&&!isHW(r.title),apay:r.avito_pay===true};});
+  try{QUERIES=(await fetchAll(`/rest/v1/monitor_queries?select=query&active=eq.true&order=id`)).map(x=>x.query);}catch(e){QUERIES=[...new Set(RAW.map(r=>r.query).filter(Boolean))];}
+  // Дневная статистика для графика динамики (не зависит от схлопывания last_seen)
+  try{DAILY=await fetchAll(`/rest/v1/daily_stats?select=day,pl,total,counterfeit&order=day`);}catch(e){DAILY=[];}
+  // Статус последнего прогона парсера (по finished_at — не по started_at, иначе manual smoke-тест перекроет cron)
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/parser_runs?select=status,finished_at&order=finished_at.desc.nullslast&limit=1`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY}});
+    const lr=(await r.json())[0];if(lr)showScanStatus(lr);
+  }catch(e){}
+  document.getElementById('upd').textContent=new Date().toLocaleString('ru',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  buildQueryFilters();renderCharts();apply();
+  saveCache();
+}
+function showScanStatus(lr){
+  const el=document.getElementById('scanStatus');if(!el)return;
+  const map={ok:['scan-ok','✓','Актуально'],partial:['scan-warn','⚠','Частично — были ошибки'],failed:['scan-bad','✗','Сбой прогона'],hung:['scan-bad','✗','Прогон завис'],running:['scan-warn','⏳','Идёт прогон']};
+  const [cls,sym,txt]=map[lr.status]||['scan-warn','•',lr.status];
+  el.className='scan-badge '+cls;el.textContent=sym;el.style.display='';
+  el.title=txt+(lr.finished_at?' · '+new Date(lr.finished_at).toLocaleString('ru'):'');
+}
+// Кеш: мгновенный показ последнего снимка из localStorage, пока грузится свежее из Supabase
+const CACHE_KEY='proto_a_cache_v1';
+function saveCache(){try{localStorage.setItem(CACHE_KEY,JSON.stringify({RAW,DAILY,QUERIES,savedAt:Date.now()}));}catch(e){}}
+function tryCache(){try{const c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');if(c&&c.RAW&&c.RAW.length){RAW=c.RAW;DAILY=c.DAILY||[];QUERIES=c.QUERIES||[];buildQueryFilters();renderCharts();apply();return true;}}catch(e){}return false;}
+// ── RPC с ключевой фразой (как в index_new.html) ──
+function getKeyPhrase(force){let p=force?null:sessionStorage.getItem('mon_secret');if(!p){p=prompt('Введите ключевую фразу для запуска парсинга / добавления запроса:');if(p)sessionStorage.setItem('mon_secret',p);}return p;}
+async function requestParse(secret,query){const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/request_parse',{method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_secret:secret,p_query:query||null})});if(!r.ok)return{ok:false,error:'HTTP '+r.status};return await r.json();}
+async function runScan(){const s=getKeyPhrase();if(!s)return;const btn=document.getElementById('refreshBtn');btn.disabled=true;btn.textContent='⏳ Запуск…';
+  const res=await requestParse(s,null);
+  if(res&&res.ok){btn.textContent='✓ Парсинг запущен';setTimeout(()=>{btn.textContent='🔄 Обновить';btn.disabled=false;},4000);}
+  else{if((res.error||'').includes('фраз'))sessionStorage.removeItem('mon_secret');alert('Не удалось: '+(res.error||'ошибка'));btn.textContent='🔄 Обновить';btn.disabled=false;}}
+async function addQuery(){const inp=document.getElementById('newQ');const q=(inp.value||'').trim();if(!q){inp.focus();return;}
+  const s=getKeyPhrase();if(!s)return;
+  const res=await requestParse(s,q);
+  if(res&&res.ok){inp.value='';document.getElementById('addQForm').style.display='none';alert('Запрос «'+q+'» добавлен. Парсинг по нему запущен (~3 мин).');}
+  else{if((res.error||'').includes('фраз'))sessionStorage.removeItem('mon_secret');alert('Не удалось добавить: '+(res.error||'ошибка'));}}
+function maxDay(){return [...new Set(RAW.filter(r=>r._cf).map(r=>r.last_seen))].sort().pop();}
+// Гранулярность оси времени: day=YYYY-MM-DD, month=YYYY-MM, year=YYYY
+function bucket(d,g){
+  if(g==='year')return d.slice(0,4);
+  if(g==='month')return d.slice(0,7);
+  if(g==='week'){const t=new Date(d+'T00:00:00');const off=(t.getDay()+6)%7;t.setDate(t.getDate()-off);
+    return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');}
+  return d;
+}
+// Подпись: год=YYYY, месяц=YY-MM, день/неделя=ДД.ММ (неделя — по понедельнику)
+function bucketLabel(b,g){return g==='year'?b:g==='month'?b.slice(2):b.slice(5).split('-').reverse().join('.');}
+let dynChartObj=null,donutObj=null;
+function renderCharts(){
+  const cf=RAW.filter(r=>r._cf);const md=maxDay();const today=cf.filter(r=>r.last_seen===md);
+  const newToday=cf.filter(r=>r.first_seen===md).length,avg=Math.round(today.reduce((s,r)=>s+r._disc,0)/(today.length||1));
+  // KPI: 3 узкие карточки + широкая «Площадки» с круговой диаграммой справа до края
+  document.getElementById('kpis').innerHTML=[
+    ['Активный контрафакт',today.length,'на последнюю дату'],
+    ['Средний дисконт',avg+'%','ниже официальной'],
+    ['Новых за сутки','+'+newToday,'впервые замечены'],
+  ].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('')
+   +`<div class="kpi kpi-pie"><div><div class="lbl">Площадки</div><div class="val">${Object.keys(PL).length}</div><div class="sub">под наблюдением</div></div>`
+   +`<div style="width:84px;height:84px;flex:0 0 auto"><canvas id="pie"></canvas></div>`
+   +`<div class="pie-legend">${Object.entries(PL).map(([k,v])=>`<span><i style="background:${v.c}"></i>${v.n} <b>${today.filter(r=>r.pl===k).length}</b></span>`).join('')}</div></div>`;
+  const GRID=cssVar('--grid'),TICK=cssVar('--muted'),PIEB=cssVar('--pieborder');
+  // Круговая диаграмма долей площадок (pie, не бублик): названия в tooltip по hover + легенда справа
+  if(donutObj)donutObj.destroy();
+  donutObj=new Chart(document.getElementById('pie'),{type:'pie',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:PIEB,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false,external:pieTip}}}});
+  // Динамика из daily_stats (не из listings — иначе схлопывание last_seen даёт провал).
+  // Значение бакета = среднее (counterfeit, либо total для бэкфилла) по дням бакета.
+  const g=state.gran;const buckets=[...new Set(DAILY.map(r=>bucket(r.day,g)))].sort();
+  const ds=Object.keys(PL).map(p=>({label:PL[p].n,data:buckets.map(b=>{
+    const rs=DAILY.filter(r=>bucket(r.day,g)===b&&r.pl===p);
+    if(!rs.length)return 0;
+    return Math.round(rs.reduce((s,r)=>s+(r.counterfeit??r.total??0),0)/rs.length);
+  }),backgroundColor:PL[p].c+'cc',borderColor:PL[p].c,fill:true,tension:.4,pointRadius:2,borderWidth:2}));
+  if(dynChartObj)dynChartObj.destroy();
+  dynChartObj=new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:buckets.map(b=>bucketLabel(b,g)),datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:GRID},ticks:{color:TICK}},y:{stacked:true,grid:{color:GRID},ticks:{color:TICK}}}}});
+}
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()||'#888';}
+// Внешняя HTML-подсказка для круговой диаграммы — рисуется поверх страницы (position:fixed),
+// поэтому не обрезается маленьким контейнером canvas.
+function pieTip(ctx){
+  const t=ctx.tooltip,el=document.getElementById('pieTip');if(!el)return;
+  if(!t||t.opacity===0){el.style.display='none';return;}
+  if(t.dataPoints&&t.dataPoints.length){const p=t.dataPoints[0];el.innerHTML=`${p.label}: <b>${p.parsed}</b>`;}
+  const r=ctx.chart.canvas.getBoundingClientRect();
+  el.style.display='block';el.style.left=(r.left+t.caretX+12)+'px';el.style.top=(r.top+t.caretY-6)+'px';
+}
+// Индикаторы сортировки в заголовках: ▲/▼ + порядковый номер для многоуровневой сортировки.
+function updateSortInd(){
+  document.querySelectorAll('.si').forEach(s=>s.innerHTML='');
+  let pairs;
+  if(state.preset==='default')pairs=[{c:'disc',d:-1,n:1},{c:'price',d:1,n:2}]; // 2 уровня
+  else if(state.preset==='recent')pairs=[{c:'date',d:-1}];
+  else if(state.preset==='score')pairs=[{c:'disc',d:-1}]; // индекс подозрительности — дисконт доминирует
+  else pairs=[{c:state.sortCol,d:state.sortDir}]; // ручная сортировка по клику
+  pairs.forEach(p=>{const el=document.querySelector('.si[data-si="'+p.c+'"]');
+    if(el)el.innerHTML=(p.d<0?'▼':'▲')+(p.n?'<sup>'+p.n+'</sup>':'');});
+}
+function buildQueryFilters(){const c=document.getElementById('queryFilters');
+  c.innerHTML=`<button class="on" data-q="">Все запросы</button>`+QUERIES.map(q=>`<button data-q="${q}">${q}</button>`).join('');
+  c.querySelectorAll('button').forEach(b=>b.onclick=()=>{c.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.q=b.dataset.q;state.page=0;apply();});}
+// Пресеты сортировки (перенос из index_new): семья продукта, индекс подозрительности
+function monFamilyKey(t){t=String(t||'').toLowerCase();const m=t.match(/(office\s+(?:365|2024|2021|2019|2016|2013|2010))\s*(pro\s*plus|home\s*and\s*business|home\s*and\s*student|professional\s*plus|professional|personal|family|standard|ltsc)?/i);if(m)return (m[1]+' '+(m[2]||'')).replace(/\s+/g,' ').trim();if(t.includes('365')&&t.includes('microsoft'))return 'microsoft 365';return 'прочее';}
+function monScore(r){let s=Math.max(0,r._disc);const fc=[r._disc>=50,r._disc>=80,true,/microsoft|office|windows/i.test(r.title||'')].filter(Boolean).length;s+=fc*3;if(r.price<100)s+=10;else if(r.price<300)s+=5;if(r._op>10000&&r.price<r._op*0.01)s+=5;return s;}
+function applyPreset(arr,preset){
+  const tc=(a,b)=>String(a.title||'').localeCompare(String(b.title||''),'ru');
+  let fam=null;if(preset==='family'){fam=new Map();arr.forEach(r=>{const k=monFamilyKey(r.title);fam.set(k,(fam.get(k)||0)+1);});}
+  arr.sort((a,b)=>{const da=a._disc,db=b._disc;
+    if(preset==='score'){const sa=monScore(a),sb=monScore(b);if(sa!==sb)return sb-sa;if(a.price!==b.price)return a.price-b.price;return tc(a,b);}
+    if(preset==='loss'){const la=(a._op||0)-a.price,lb=(b._op||0)-b.price;if(la!==lb)return lb-la;if(da!==db)return db-da;return tc(a,b);}
+    if(preset==='family'){const ka=monFamilyKey(a.title),kb=monFamilyKey(b.title),ca=fam.get(ka)||0,cb=fam.get(kb)||0;if(ca!==cb)return cb-ca;if(ka!==kb)return ka.localeCompare(kb);if(da!==db)return db-da;return a.price-b.price;}
+    if(preset==='pl'){if(a.pl!==b.pl)return String(a.pl).localeCompare(String(b.pl));if(da!==db)return db-da;return a.price-b.price;}
+    if(preset==='recent'){const d=String(b.first_seen||b.last_seen||'').localeCompare(String(a.first_seen||a.last_seen||''));if(d)return d;if(da!==db)return db-da;return a.price-b.price;}
+    /* default */ if(da!==db)return db-da;if(a.price!==b.price)return a.price-b.price;return tc(a,b);});
+}
+function apply(){
+  const md=maxDay();
+  FILT=RAW.filter(r=>r._cf)
+    .filter(r=>r.last_seen===md)
+    .filter(r=>state.pl.has(r.pl))
+    .filter(r=>r._disc>=state.disc)
+    .filter(r=>!state.apay||r.apay)
+    .filter(r=>!state.q||r.query===state.q);
+  if(state.preset){applyPreset(FILT,state.preset);}
+  else{FILT.sort((a,b)=>{const k=state.sortCol;let av,bv;if(k==='date'){av=a.first_seen||a.last_seen;bv=b.first_seen||b.last_seen}else if(k==='pl'){av=a.pl;bv=b.pl}else if(k==='title'){av=a.title;bv=b.title}else if(k==='price'){av=a.price;bv=b.price}else if(k==='op'){av=a._op;bv=b._op}else{av=a._disc;bv=b._disc}return (av>bv?1:av<bv?-1:0)*state.sortDir;});}
+  document.getElementById('tot').textContent=FILT.length;document.getElementById('cnt').textContent=Math.min(FILT.length,state.size);
+  // счётчик у бегунка дисконта — сколько карточек проходит текущий порог (без учёта самого дисконт-фильтра)
+  const md2=maxDay();const dcBase=RAW.filter(r=>r._cf).filter(r=>r.last_seen===md2).filter(r=>state.pl.has(r.pl)).filter(r=>!state.apay||r.apay).filter(r=>!state.q||r.query===state.q);
+  document.getElementById('discCnt').textContent=dcBase.filter(r=>r._disc>=state.disc).length;
+  renderTable();
+  updateSortInd();
+}
+function renderTable(){
+  const st=state.page*state.size,items=FILT.slice(st,st+state.size);
+  document.getElementById('ptot').textContent=Math.max(1,Math.ceil(FILT.length/state.size));document.getElementById('pnum').textContent=state.page+1;
+  document.getElementById('tbody').innerHTML=items.map(r=>{const f=flags(r);const dc=r._disc>=95?'#ff5470':r._disc>=80?'#ff9f43':'#ffd43b';
+    return `<tr>
+      <td style="white-space:nowrap;color:var(--muted)" title="Дата первого обнаружения">${((r.first_seen||r.last_seen)||'').slice(5).split('-').reverse().join('.')}</td>
+      <td><span class="plbadge" style="background:${PL[r.pl].c}22;color:${PL[r.pl].c}">${PL[r.pl].n}</span> ${r.apay?'<span class="apay" title="Оплата через Avito"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>':''}</td>
+      <td style="max-width:280px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${(r.title||'').replace(/"/g,'&quot;')}">${(r.title||'').slice(0,55)}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">🔎 ${r.query||''}</div></td>
+      <td><a class="lnk" href="${r.url}" target="_blank" rel="noopener">Открыть ↗</a></td>
+      <td style="font-weight:700">${(r.price||0).toLocaleString('ru')} ₽</td>
+      <td style="color:var(--muted)">${r._op.toLocaleString('ru')} ₽</td>
+      <td class="disc" style="color:${dc}">${r._disc}%</td>
+      <td style="white-space:nowrap">${flagPills(f)}</td>
+    </tr>`;}).join('')||'<tr><td colspan="8" class="loading">Нет карточек под фильтры</td></tr>';
+}
+function sortBy(c){state.preset=null;document.querySelectorAll('#presetBtns button').forEach(x=>x.classList.remove('on'));if(state.sortCol===c)state.sortDir*=-1;else{state.sortCol=c;state.sortDir=(c==='title'||c==='pl')?1:-1;}apply();}
+function setPreset(p,btn){state.preset=p;state.page=0;document.querySelectorAll('#presetBtns button').forEach(x=>x.classList.remove('on'));btn.classList.add('on');apply();}
+function pg(d){const mx=Math.ceil(FILT.length/state.size);state.page=Math.max(0,Math.min(mx-1,state.page+d));renderTable();}
+function exportCSV(){const h=['Дата','Площадка','Название','URL','Цена','Офиц','Дисконт%','Оплата Avito','Запрос'];const esc=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const lines=[h.join(',')].concat(FILT.map(r=>[r.last_seen,PL[r.pl].n,r.title,r.url,r.price,r._op,r._disc,r.apay?'да':'',r.query].map(esc).join(',')));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv'}));a.download='contraband_'+maxDay()+'.csv';a.click();}
+function exportXLSX(){if(typeof XLSX==='undefined'){alert('SheetJS не загружен');return;}
+  const h=['Дата','Площадка','Название','URL','Цена','Офиц.','Дисконт %','Оплата Avito','Запрос'];
+  const rows=FILT.map(r=>[r.last_seen,PL[r.pl].n,r.title,r.url,r.price,r._op,r._disc,r.apay?'да':(r.pl==='avito'?'нет':''),r.query]);
+  const ws=XLSX.utils.aoa_to_sheet([h,...rows]);ws['!cols']=[12,14,50,45,10,12,11,14,20].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Контрафакт');XLSX.writeFile(wb,'contraband_'+maxDay()+'.xlsx');}
+// Тема: тёмная/светлая, запоминаем в localStorage. Графики пересоздаём, чтобы grid/border подхватили цвета.
+const ICON_SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
+const ICON_MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);const b=document.getElementById('themeToggle');if(b)b.innerHTML=t==='light'?ICON_MOON:ICON_SUN;localStorage.setItem('mon_theme',t);if(RAW.length)renderCharts();}
+// sidebar wiring
+function buildPlat(){
+  const reg=['ozon','wildberries','yandex'];
+  let html=reg.map(p=>`<label class="chk on" data-pl="${p}"><span class="sw" style="background:${PL[p].c}"></span>${PL[p].n}</label>`).join('');
+  // Avito — поле разделено пополам: слева вся Avito, справа только оплата через Avito
+  html+=`<div class="chk on" id="avRow" style="padding:0;gap:0;overflow:hidden">
+    <div id="avFull" style="flex:1;display:flex;align-items:center;gap:9px;padding:7px 10px;cursor:pointer"><span class="sw" style="background:${PL.avito.c}"></span>Avito</div>
+    <div id="avPay" title="Только оплата через Avito (зона ответственности площадки)" style="display:flex;align-items:center;gap:5px;padding:7px 11px;border-left:1px solid var(--line);cursor:pointer;color:var(--muted)"><span style="display:inline-flex;width:15px;height:15px;border-radius:50%;background:#445;align-items:center;justify-content:center"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>с&nbsp;картой</div>
+  </div>`;
+  document.getElementById('platFilters').innerHTML=html;
+  document.querySelectorAll('#platFilters label.chk').forEach(c=>c.onclick=()=>{c.classList.toggle('on');const p=c.dataset.pl;if(c.classList.contains('on'))state.pl.add(p);else state.pl.delete(p);state.page=0;apply();});
+  // левая половина Avito — toggle площадки
+  document.getElementById('avFull').onclick=()=>{const row=document.getElementById('avRow');row.classList.toggle('on');if(row.classList.contains('on'))state.pl.add('avito');else state.pl.delete('avito');state.page=0;apply();};
+  // правая половина — toggle «только оплата через Avito»
+  document.getElementById('avPay').onclick=function(){state.apay=!state.apay;this.style.background=state.apay?'#1d3a32':'';this.style.color=state.apay?'var(--accent)':'var(--muted)';if(state.apay){state.pl.add('avito');document.getElementById('avRow').classList.add('on');}state.page=0;apply();};
+}
+document.getElementById('discSlider').oninput=e=>{document.getElementById('discVal').textContent=e.target.value+'%';state.disc=+e.target.value;state.page=0;apply();};
+document.querySelectorAll('.ps').forEach(b=>b.onclick=()=>{document.querySelectorAll('.ps').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.size=+b.dataset.ps;state.page=0;apply();});
+document.getElementById('addQBtn').onclick=()=>{const f=document.getElementById('addQForm');f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')document.getElementById('newQ').focus();};
+// Переключатель гранулярности графика: дни/месяцы/годы (с прицелом на накопление истории)
+document.querySelectorAll('#granSeg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#granSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.gran=b.dataset.gran;renderCharts();});
+document.querySelectorAll('#presetBtns button').forEach(b=>b.onclick=()=>setPreset(b.dataset.preset,b));
+document.getElementById('themeToggle').onclick=()=>applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');
+applyTheme(localStorage.getItem('mon_theme')||'dark');
+buildPlat();tryCache();load();
 </script>
 </body>
 </html>
