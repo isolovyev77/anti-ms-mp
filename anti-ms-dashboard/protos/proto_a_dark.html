@@ -107,8 +107,6 @@
       <img src="../assets/favicon-32.png" alt="" width="30" height="30" style="border-radius:8px;flex:0 0 auto">
       <b>Контрафакт-мониторинг</b>
     </div>
-    <h4>Период</h4>
-    <div class="seg"><button class="on" data-per="day">День</button><button data-per="week">Неделя</button><button data-per="all">Всё</button></div>
     <h4>Площадки</h4>
     <div id="platFilters"></div>
     <h4 style="display:flex;align-items:center;justify-content:space-between">Поисковый запрос
@@ -219,7 +217,7 @@ const TM=['microsoft','office','windows'];
 function flags(r){const d=r._disc,tl=(r.title||'').toLowerCase(),tm=TM.some(k=>tl.includes(k)),cmp=tl.includes('совместимо')||tl.includes('compat');
   return{F1:d>=50,F2:d>=80,F5:true,F6:tm&&!cmp,disc:d};}
 function flagPills(f){let p=[];if(f.F2)p.push('<span class="fp fp-r">🔴F2</span>');else if(f.F1)p.push('<span class="fp fp-r">🔴F1</span>');p.push('<span class="fp fp-y">🟡F5</span>');if(f.F6)p.push('<span class="fp fp-o">🟠F6</span>');return p.join('');}
-let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false,per:'day',gran:'day',preset:'default',sortCol:'disc',sortDir:-1,page:0,size:50},FILT=[];
+let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false,gran:'day',preset:'default',sortCol:'disc',sortDir:-1,page:0,size:50},FILT=[];
 async function fetchAll(path){let all=[],from=0;while(true){const r=await fetch(`${SUPABASE_URL}${path}`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Range-Unit':'items',Range:`${from}-${from+999}`}});const b=await r.json();all=all.concat(b);if(b.length<1000)break;from+=1000;}return all;}
 let DAILY=[];
 async function load(){
@@ -313,7 +311,7 @@ function applyPreset(arr,preset){
 function apply(){
   const md=maxDay();
   FILT=RAW.filter(r=>r._cf)
-    .filter(r=>state.per==='all'?true:r.last_seen===md)
+    .filter(r=>r.last_seen===md)
     .filter(r=>state.pl.has(r.pl))
     .filter(r=>r._disc>=state.disc)
     .filter(r=>!state.apay||r.apay)
@@ -322,7 +320,7 @@ function apply(){
   else{FILT.sort((a,b)=>{const k=state.sortCol;let av,bv;if(k==='date'){av=a.last_seen;bv=b.last_seen}else if(k==='pl'){av=a.pl;bv=b.pl}else if(k==='title'){av=a.title;bv=b.title}else if(k==='price'){av=a.price;bv=b.price}else if(k==='op'){av=a._op;bv=b._op}else{av=a._disc;bv=b._disc}return (av>bv?1:av<bv?-1:0)*state.sortDir;});}
   document.getElementById('tot').textContent=FILT.length;document.getElementById('cnt').textContent=Math.min(FILT.length,state.size);
   // счётчик у бегунка дисконта — сколько карточек проходит текущий порог (без учёта самого дисконт-фильтра)
-  const md2=maxDay();const dcBase=RAW.filter(r=>r._cf).filter(r=>state.per==='all'?true:r.last_seen===md2).filter(r=>state.pl.has(r.pl)).filter(r=>!state.apay||r.apay).filter(r=>!state.q||r.query===state.q);
+  const md2=maxDay();const dcBase=RAW.filter(r=>r._cf).filter(r=>r.last_seen===md2).filter(r=>state.pl.has(r.pl)).filter(r=>!state.apay||r.apay).filter(r=>!state.q||r.query===state.q);
   document.getElementById('discCnt').textContent=dcBase.filter(r=>r._disc>=state.disc).length;
   renderTable();
 }
@@ -373,7 +371,6 @@ function buildPlat(){
   document.getElementById('avPay').onclick=function(){state.apay=!state.apay;this.style.background=state.apay?'#1d3a32':'';this.style.color=state.apay?'var(--accent)':'var(--muted)';if(state.apay){state.pl.add('avito');document.getElementById('avRow').classList.add('on');}state.page=0;apply();};
 }
 document.getElementById('discSlider').oninput=e=>{document.getElementById('discVal').textContent=e.target.value+'%';state.disc=+e.target.value;state.page=0;apply();};
-document.querySelectorAll('.seg button[data-per]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.seg button[data-per]').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.per=b.dataset.per;state.page=0;apply();});
 document.querySelectorAll('.ps').forEach(b=>b.onclick=()=>{document.querySelectorAll('.ps').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.size=+b.dataset.ps;state.page=0;apply();});
 document.getElementById('addQBtn').onclick=()=>{const f=document.getElementById('addQForm');f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')document.getElementById('newQ').focus();};
 // Переключатель гранулярности графика: дни/месяцы/годы (с прицелом на накопление истории)
