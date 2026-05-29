@@ -544,7 +544,10 @@ def upsert_listings(rows: list[dict]) -> int:
             "url": r.get("url"),
             "price": int(r["price"]) if r.get("price") else None,
             "op": official_price(r["title"]),
-            "first_seen": today,
+            # first_seen НЕ шлём: триггер listings_first_seen_trg ставит его при
+            # ПЕРВОЙ вставке (= last_seen), а при повторном upsert (merge-duplicates)
+            # отсутствие поля сохраняет исходную дату. Иначе first_seen затирался на
+            # сегодня каждый прогон → ломались «Свежие» и «Новых за сутки».
             "last_seen": today,
         }
         for r in rows
