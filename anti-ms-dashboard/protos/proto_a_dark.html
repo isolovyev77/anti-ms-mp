@@ -34,10 +34,12 @@
   .top h1{font-size:21px;font-weight:700}.top p{color:var(--muted);font-size:13px;margin-top:3px}
   .btn{border:none;border-radius:9px;padding:9px 15px;font-size:13px;font-weight:600;cursor:pointer}
   .btn-pri{background:var(--accent);color:#06231f}.btn-gh{background:#1d2c45;color:var(--tx);border:1px solid var(--line)}
-  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin-bottom:16px}
+  .kpis{display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:13px;margin-bottom:16px}
   .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}
   .kpi .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
   .kpi .val{font-size:25px;font-weight:800;margin-top:6px}.kpi .sub{font-size:12px;margin-top:4px;color:var(--accent)}
+  .kpi-pie{display:flex;align-items:center;gap:14px}
+  .kpi-pie>div:first-child{flex:0 0 auto}
   .grid{display:grid;grid-template-columns:1.7fr 1fr;gap:14px;margin-bottom:14px}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:17px 19px}
   .card h3{font-size:15px;font-weight:700}.card .cap{font-size:12px;color:var(--muted);margin:2px 0 12px}
@@ -74,7 +76,6 @@
     <h4>Период</h4>
     <div class="seg"><button class="on" data-per="day">День</button><button data-per="week">Неделя</button><button data-per="all">Всё</button></div>
     <h4>Площадки</h4>
-    <div style="height:128px;margin:2px 0 10px;position:relative"><canvas id="donut"></canvas></div>
     <div id="platFilters"></div>
     <h4 style="display:flex;align-items:center;justify-content:space-between">Поисковый запрос
       <button id="addQBtn" title="Добавить запрос на мониторинг" style="border:1px solid var(--line);background:#101a2e;color:var(--accent);width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1;padding:0">+</button>
@@ -163,10 +164,13 @@ function flags(r){const d=r._disc,tl=(r.title||'').toLowerCase(),tm=TM.some(k=>t
 function flagPills(f){let p=[];if(f.F2)p.push('<span class="fp fp-r">🔴F2</span>');else if(f.F1)p.push('<span class="fp fp-r">🔴F1</span>');p.push('<span class="fp fp-y">🟡F5</span>');if(f.F6)p.push('<span class="fp fp-o">🟠F6</span>');return p.join('');}
 let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false,per:'day',gran:'day',sortCol:'disc',sortDir:-1,page:0,size:50},FILT=[];
 async function fetchAll(path){let all=[],from=0;while(true){const r=await fetch(`${SUPABASE_URL}${path}`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Range-Unit':'items',Range:`${from}-${from+999}`}});const b=await r.json();all=all.concat(b);if(b.length<1000)break;from+=1000;}return all;}
+let DAILY=[];
 async function load(){
   const rows=await fetchAll(`/rest/v1/listings?select=pl,product_id,title,price,op,query,first_seen,last_seen,url,avito_pay&order=last_seen.desc`);
   RAW=rows.map(r=>{const o=r.op||op(r.title);return{...r,_op:o,_disc:Math.round((1-r.price/o)*100),_cf:r.price>0&&r.price<0.5*o&&!isHW(r.title),apay:r.avito_pay===true};});
   try{QUERIES=(await fetchAll(`/rest/v1/monitor_queries?select=query&active=eq.true&order=id`)).map(x=>x.query);}catch(e){QUERIES=[...new Set(RAW.map(r=>r.query).filter(Boolean))];}
+  // Дневная статистика для графика динамики (не зависит от схлопывания last_seen)
+  try{DAILY=await fetchAll(`/rest/v1/daily_stats?select=day,pl,total,counterfeit&order=day`);}catch(e){DAILY=[];}
   document.getElementById('upd').textContent=new Date().toLocaleString('ru',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   buildQueryFilters();renderCharts();apply();
 }
@@ -190,15 +194,26 @@ let dynChartObj=null,donutObj=null;
 function renderCharts(){
   const cf=RAW.filter(r=>r._cf);const md=maxDay();const today=cf.filter(r=>r.last_seen===md);
   const newToday=cf.filter(r=>r.first_seen===md).length,avg=Math.round(today.reduce((s,r)=>s+r._disc,0)/(today.length||1));
-  document.getElementById('kpis').innerHTML=[['Активный контрафакт',today.length,'на последнюю дату'],['Средний дисконт',avg+'%','ниже официальной'],['Новых за сутки','+'+newToday,'впервые замечены'],['Площадок',Object.keys(PL).length,'под наблюдением']].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('');
-  // Динамика на всю ширину с выбранной гранулярностью (дни/месяцы/годы)
-  const g=state.gran;const buckets=[...new Set(cf.map(r=>bucket(r.last_seen,g)))].sort();
-  const ds=Object.keys(PL).map(p=>({label:PL[p].n,data:buckets.map(b=>cf.filter(r=>bucket(r.last_seen,g)===b&&r.pl===p).length),backgroundColor:PL[p].c+'cc',borderColor:PL[p].c,fill:true,tension:.4,pointRadius:2,borderWidth:2}));
+  // KPI: 3 узкие карточки + широкая «Площадки» с круговой диаграммой справа до края
+  document.getElementById('kpis').innerHTML=[
+    ['Активный контрафакт',today.length,'на последнюю дату'],
+    ['Средний дисконт',avg+'%','ниже официальной'],
+    ['Новых за сутки','+'+newToday,'впервые замечены'],
+  ].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('')
+   +`<div class="kpi kpi-pie"><div><div class="lbl">Площадки</div><div class="val">${Object.keys(PL).length}</div><div class="sub">под наблюдением</div></div><div style="flex:1;height:84px"><canvas id="pie"></canvas></div></div>`;
+  // Круговая диаграмма долей площадок (pie, не бублик): названия в tooltip по hover
+  if(donutObj)donutObj.destroy();
+  donutObj=new Chart(document.getElementById('pie'),{type:'pie',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:'#16213A',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}}}});
+  // Динамика из daily_stats (не из listings — иначе схлопывание last_seen даёт провал).
+  // Значение бакета = среднее (counterfeit, либо total для бэкфилла) по дням бакета.
+  const g=state.gran;const buckets=[...new Set(DAILY.map(r=>bucket(r.day,g)))].sort();
+  const ds=Object.keys(PL).map(p=>({label:PL[p].n,data:buckets.map(b=>{
+    const rs=DAILY.filter(r=>bucket(r.day,g)===b&&r.pl===p);
+    if(!rs.length)return 0;
+    return Math.round(rs.reduce((s,r)=>s+(r.counterfeit??r.total??0),0)/rs.length);
+  }),backgroundColor:PL[p].c+'cc',borderColor:PL[p].c,fill:true,tension:.4,pointRadius:2,borderWidth:2}));
   if(dynChartObj)dynChartObj.destroy();
   dynChartObj=new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:buckets.map(b=>bucketLabel(b,g)),datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}},y:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}}}}});
-  // Донат-кольцо в sidebar: без легенды, название площадки — в tooltip по сегменту
-  if(donutObj)donutObj.destroy();
-  donutObj=new Chart(document.getElementById('donut'),{type:'doughnut',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:'#101a2e',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}}}});
 }
 function buildQueryFilters(){const c=document.getElementById('queryFilters');
   c.innerHTML=`<button class="on" data-q="">Все запросы</button>`+QUERIES.map(q=>`<button data-q="${q}">${q}</button>`).join('');

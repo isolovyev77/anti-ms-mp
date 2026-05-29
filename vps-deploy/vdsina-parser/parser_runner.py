@@ -649,6 +649,44 @@ def finalize_parser_run(run_id: int, totals: dict, errors: list[dict], status: s
     urllib.request.urlopen(req, timeout=20).read()
 
 
+def upsert_daily_stats(rows: list[dict]) -> None:
+    """Дневной снимок статистики в daily_stats (upsert по day,pl). Решает проблему
+    схлопывания listings.last_seen — история динамики живёт здесь, не в листингах."""
+    if not rows:
+        return
+    data = json.dumps(rows, ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(
+        f"{SUPABASE_URL}/rest/v1/daily_stats?on_conflict=day,pl",
+        data=data,
+        method="POST",
+        headers={
+            "apikey": SUPABASE_SERVICE_ROLE_KEY,
+            "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates,return=minimal",
+        },
+    )
+    try:
+        urllib.request.urlopen(req, timeout=20).read()
+    except Exception as e:
+        log("daily_stats upsert failed (не критично)", err=str(e)[:200])
+
+
+def platform_daily_stat(plat: str, items_d: list[dict]) -> dict:
+    """Считает дневной срез по платформе: всего, контрафакт, средний дисконт."""
+    today = dt.datetime.now(dt.timezone.utc).date().isoformat()
+    cf = []
+    for c in items_d:
+        price = c.get("price") or 0
+        op = official_price(c.get("title") or "")
+        if price > 0 and op > 0 and price < 0.5 * op:
+            cf.append(round((1 - price / op) * 100))
+    avg_disc = round(sum(cf) / len(cf)) if cf else None
+    return {"day": today, "pl": plat, "total": len(items_d),
+            "counterfeit": len(cf), "avg_disc": avg_disc,
+            "updated_at": dt.datetime.now(dt.timezone.utc).isoformat()}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--platforms", default=",".join(PLATFORMS), help="ozon,wildberries,yandex,avito")
@@ -677,6 +715,7 @@ def main() -> int:
 
     totals: dict = {}
     all_errors: list[dict] = []
+    daily_rows: list[dict] = []
 
     launch_kwargs = {"headless": True, "humanize": True}
     if SCRAPER_PROXY:
@@ -699,6 +738,7 @@ def main() -> int:
                 items_d = dedup(items)
                 ok = upsert_listings(items_d)
                 totals[plat] = {"found": len(items), "unique": len(items_d), "upserted": ok}
+                daily_rows.append(platform_daily_stat(plat, items_d))
                 all_errors.extend(errors)
                 log(f"  [{plat}] done", **totals[plat])
             except Exception as e:
@@ -720,6 +760,13 @@ def main() -> int:
         runs_deleted = cleanup_old_parser_runs(retention_days=90)
         if runs_deleted > 0:
             log("retention: удалено parser_runs старше 90 дней", deleted=runs_deleted)
+
+    # Дневной снимок статистики (для графика динамики — не зависит от схлопывания
+    # last_seen). Пишем только при полном прогоне (все площадки, без --only-query),
+    # иначе single-query прогон затрёт дневной срез частичными цифрами.
+    if has_data and not args.only_query:
+        upsert_daily_stats(daily_rows)
+        log("daily_stats обновлён", platforms=len(daily_rows))
 
     # Отметим запросы как обработанные (для дашборда — когда последний раз парсился)
     if has_data:
