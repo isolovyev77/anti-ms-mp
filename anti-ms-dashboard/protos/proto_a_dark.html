@@ -3,49 +3,72 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Прототип A — Командный центр (полный)</title>
+<title>Мониторинг признаков контрафакта ПО</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/favicon-180.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --bg:#0E1726; --panel:#16213A; --panel2:#1B2A41; --line:#243a5a;
-    --tx:#E4ECF7; --muted:#8499B5;
+    --tx:#E4ECF7; --muted:#8499B5; --grid:#1f3050; --pieborder:#16213A;
     --ozon:#2E7DFF; --wb:#E84BC9; --yandex:#FFD43B; --avito:#A879FF; --accent:#33D6C8;
+  }
+  [data-theme="light"]{
+    --bg:#F4F6FB; --panel:#FFFFFF; --panel2:#F0F3F9; --line:#E4E9F2;
+    --tx:#1A2333; --muted:#6B7A90; --grid:#E8ECF4; --pieborder:#FFFFFF;
+    --ozon:#005BFF; --wb:#CB11AB; --yandex:#E8A800; --avito:#7B61FF; --accent:#0FA89A;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
   .layout{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
-  .side{background:linear-gradient(180deg,#16213A,#101a2e);border-right:1px solid var(--line);padding:22px 18px;position:sticky;top:0;height:100vh;overflow:auto}
-  .brand{display:flex;align-items:center;gap:10px;margin-bottom:24px}
-  .brand .dot{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--ozon));display:flex;align-items:center;justify-content:center;font-size:16px}
-  .brand b{font-size:15px;letter-spacing:.3px}
+  .side{background:var(--panel);border-right:1px solid var(--line);padding:22px 18px;position:sticky;top:0;height:100vh;overflow:auto}
+  .brand{display:flex;align-items:center;gap:9px;margin-bottom:24px}
+  .brand b{font-size:14px;letter-spacing:.3px}
+  #themeToggle{background:none;border:1px solid var(--line);border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:14px;flex:0 0 auto;line-height:1}
+  #themeToggle:hover{background:var(--panel2)}
   .side h4{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:20px 0 9px}
   .chk{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:9px;cursor:pointer;transition:.15s;font-size:13px}
-  .chk:hover{background:#1d2c45}.chk.on{background:#1d2c45}
+  .chk:hover{background:var(--panel2)}.chk.on{background:var(--panel2)}
   .chk .sw{width:11px;height:11px;border-radius:50%;flex:0 0 auto}.chk .cnt{margin-left:auto;font-size:12px;color:var(--muted)}
-  .seg{display:flex;background:#101a2e;border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px;margin-top:4px}
+  .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px;margin-top:4px}
   .seg button{flex:1;border:none;background:none;color:var(--muted);padding:7px 0;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
   .seg button.on{background:var(--accent);color:#06231f}
   .slider{width:100%;margin-top:10px;accent-color:var(--accent)}
   .qf{display:flex;flex-direction:column;gap:4px;margin-top:4px}
-  .qf button{text-align:left;border:1px solid var(--line);background:#101a2e;color:var(--muted);padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12px}
-  .qf button.on{background:#1d2c45;color:var(--tx);border-color:var(--accent)}
+  .qf button{text-align:left;border:1px solid var(--line);background:var(--panel2);color:var(--muted);padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12px}
+  .qf button.on{background:var(--panel2);color:var(--tx);border-color:var(--accent)}
   .main{padding:22px 26px}
-  .top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+  .top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;gap:14px;flex-wrap:wrap}
   .top h1{font-size:21px;font-weight:700}.top p{color:var(--muted);font-size:13px;margin-top:3px}
+  /* инфо-иконка с всплывающей плашкой */
+  .info-h1{display:inline-flex;align-items:center;gap:8px}
+  .info-i{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);color:var(--muted);font-size:11px;font-style:italic;font-weight:700;cursor:help;position:relative}
+  .info-pop{display:none;position:absolute;top:24px;left:0;width:430px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 15px;font-size:12px;font-weight:400;line-height:1.5;color:var(--tx);box-shadow:0 8px 28px rgba(0,0,0,.4);z-index:50}
+  .info-i:hover .info-pop,.info-i:focus .info-pop{display:block}
+  /* переключатель версий */
+  .vswitch{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:12px;align-self:center}
+  .vswitch .on{padding:6px 12px;background:var(--accent);color:#06231f;font-weight:700}
+  .vswitch a{padding:6px 12px;color:var(--muted);text-decoration:none;font-weight:600}
+  .vswitch a:hover{background:var(--panel2);color:var(--tx)}
   .btn{border:none;border-radius:9px;padding:9px 15px;font-size:13px;font-weight:600;cursor:pointer}
-  .btn-pri{background:var(--accent);color:#06231f}.btn-gh{background:#1d2c45;color:var(--tx);border:1px solid var(--line)}
+  .btn-pri{background:var(--accent);color:#06231f}.btn-gh{background:var(--panel2);color:var(--tx);border:1px solid var(--line)}
   .kpis{display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:13px;margin-bottom:16px}
   .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}
   .kpi .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
   .kpi .val{font-size:25px;font-weight:800;margin-top:6px}.kpi .sub{font-size:12px;margin-top:4px;color:var(--accent)}
-  .kpi-pie{display:flex;align-items:center;gap:14px}
+  .kpi-pie{display:flex;align-items:center;gap:16px}
   .kpi-pie>div:first-child{flex:0 0 auto}
+  .pie-legend{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+  .pie-legend span{display:flex;align-items:center;gap:7px;white-space:nowrap}
+  .pie-legend i{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+  .pie-legend b{color:var(--tx);margin-left:auto}
   .grid{display:grid;grid-template-columns:1.7fr 1fr;gap:14px;margin-bottom:14px}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:17px 19px}
   .card h3{font-size:15px;font-weight:700}.card .cap{font-size:12px;color:var(--muted);margin:2px 0 12px}
   .legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px;font-size:12px;color:var(--muted)}
   .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:middle}
-  .toprow{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:13px;border-bottom:1px solid #1c2c46}
+  .toprow{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:13px;border-bottom:1px solid var(--line)}
   .toprow:last-child{border-bottom:none}
   .toprow .rank{width:20px;text-align:center;font-weight:800;color:var(--muted);flex:0 0 auto}
   .toprow .tnm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx)}
@@ -56,15 +79,15 @@
   /* table */
   table{width:100%;border-collapse:collapse;font-size:13px}
   thead th{text-align:left;padding:11px 12px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
-  tbody td{padding:11px 12px;border-bottom:1px solid #1c2c46}
-  tbody tr:hover{background:#19283f}
+  tbody td{padding:11px 12px;border-bottom:1px solid var(--line)}
+  tbody tr:hover{background:var(--panel2)}
   .plbadge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:11px;font-size:11px;font-weight:600;white-space:nowrap}
   .apay{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#ff5470}
   .disc{font-weight:800}
   .fp{display:inline-block;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;margin-right:3px}
   .fp-r{background:#3a1622;color:#ff6b8a}.fp-y{background:#3a3415;color:#ffd43b}.fp-o{background:#3a2615;color:#ff9f43}.fp-g{background:#21304a;color:#7e92ad}
   .pager{display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-top:14px;color:var(--muted);font-size:13px}
-  .pager button{background:#1d2c45;border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:6px 12px;cursor:pointer}
+  .pager button{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:6px 12px;cursor:pointer}
   a.lnk{color:var(--accent);text-decoration:none;font-size:12px;white-space:nowrap}
   .loading{color:var(--muted);padding:40px;text-align:center}
 </style>
@@ -72,18 +95,22 @@
 <body>
 <div class="layout">
   <aside class="side">
-    <div class="brand"><div class="dot">◉</div><b>Контрафакт-мониторинг</b></div>
+    <div class="brand">
+      <button id="themeToggle" title="Светлая / тёмная тема" aria-label="Переключить тему">🌙</button>
+      <img src="../assets/favicon-32.png" alt="" width="30" height="30" style="border-radius:8px;flex:0 0 auto">
+      <b>Контрафакт-мониторинг</b>
+    </div>
     <h4>Период</h4>
     <div class="seg"><button class="on" data-per="day">День</button><button data-per="week">Неделя</button><button data-per="all">Всё</button></div>
     <h4>Площадки</h4>
     <div id="platFilters"></div>
     <h4 style="display:flex;align-items:center;justify-content:space-between">Поисковый запрос
-      <button id="addQBtn" title="Добавить запрос на мониторинг" style="border:1px solid var(--line);background:#101a2e;color:var(--accent);width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1;padding:0">+</button>
+      <button id="addQBtn" title="Добавить запрос на мониторинг" style="border:1px solid var(--line);background:var(--panel2);color:var(--accent);width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1;padding:0">+</button>
     </h4>
-    <div id="addQForm" style="display:none;background:#101a2e;border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px">
-      <input id="newQ" placeholder="Напр.: Windows 11 ключ" style="width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:#16213A;color:var(--tx);font-size:12px;margin-bottom:7px" onkeydown="if(event.key==='Enter')addQuery()">
+    <div id="addQForm" style="display:none;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px">
+      <input id="newQ" placeholder="Напр.: Windows 11 ключ" style="width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--tx);font-size:12px;margin-bottom:7px" onkeydown="if(event.key==='Enter')addQuery()">
       <div style="font-size:10px;color:var(--muted);margin-bottom:7px">Потребуется ключевая фраза. После добавления запустится парсинг по нему (~3 мин).</div>
-      <div style="display:flex;gap:6px"><button onclick="addQuery()" style="flex:1;background:var(--accent);color:#06231f;border:none;border-radius:7px;padding:7px;font-weight:700;cursor:pointer;font-size:12px">Добавить</button><button onclick="document.getElementById('addQForm').style.display='none'" style="background:#1d2c45;color:var(--tx);border:1px solid var(--line);border-radius:7px;padding:7px 10px;cursor:pointer;font-size:12px">Отмена</button></div>
+      <div style="display:flex;gap:6px"><button onclick="addQuery()" style="flex:1;background:var(--accent);color:#06231f;border:none;border-radius:7px;padding:7px;font-weight:700;cursor:pointer;font-size:12px">Добавить</button><button onclick="document.getElementById('addQForm').style.display='none'" style="background:var(--panel2);color:var(--tx);border:1px solid var(--line);border-radius:7px;padding:7px 10px;cursor:pointer;font-size:12px">Отмена</button></div>
     </div>
     <div class="qf" id="queryFilters"></div>
     <h4>Мин. дисконт: <span id="discVal" style="color:var(--accent)">50%</span> · <span id="discCnt" style="color:var(--muted)">0</span> карт.</h4>
@@ -92,10 +119,23 @@
 
   <main class="main">
     <div class="top">
-      <div><h1>Мониторинг признаков контрафакта ПО</h1><p>Командный центр · обновляется автоматически</p></div>
-      <div style="display:flex;gap:8px;align-items:center">
+      <div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">
+        <div>
+          <h1 class="info-h1">Мониторинг признаков контрафакта ПО
+            <span class="info-i" tabindex="0">i<span class="info-pop">Таблица карточек с признаками контрафакта, найденных на маркетплейсах. Красные флажки F1–F6 вычисляются автоматически по п. 2.2 Модельных практик ФАС/МСАП СНГ 2025. Данные за январь–май 2026 — мониторинг АПКИТ, АРПП «Отечественный софт», НП «РУССОФТ», НП ППП.</span></span>
+          </h1>
+          <p>Командный центр · обновляется автоматически</p>
+        </div>
+        <!-- Переключатель версий -->
+        <div class="vswitch">
+          <span class="on">⚙️ Авто</span>
+          <a href="../index.html" title="Старая версия — пополняется вручную">Ручная →</a>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <span style="font-size:12px;color:var(--muted)">обновлено: <span id="upd">…</span></span>
         <button class="btn btn-gh" onclick="exportCSV()">📥 CSV</button>
+        <button class="btn btn-gh" onclick="exportXLSX()">📊 XLSX</button>
         <button class="btn btn-pri" id="refreshBtn" onclick="runScan()">🔄 Обновить</button>
       </div>
     </div>
@@ -200,10 +240,13 @@ function renderCharts(){
     ['Средний дисконт',avg+'%','ниже официальной'],
     ['Новых за сутки','+'+newToday,'впервые замечены'],
   ].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('')
-   +`<div class="kpi kpi-pie"><div><div class="lbl">Площадки</div><div class="val">${Object.keys(PL).length}</div><div class="sub">под наблюдением</div></div><div style="flex:1;height:84px"><canvas id="pie"></canvas></div></div>`;
-  // Круговая диаграмма долей площадок (pie, не бублик): названия в tooltip по hover
+   +`<div class="kpi kpi-pie"><div><div class="lbl">Площадки</div><div class="val">${Object.keys(PL).length}</div><div class="sub">под наблюдением</div></div>`
+   +`<div style="width:96px;height:96px;flex:0 0 auto"><canvas id="pie"></canvas></div>`
+   +`<div class="pie-legend">${Object.entries(PL).map(([k,v])=>`<span><i style="background:${v.c}"></i>${v.n} <b>${today.filter(r=>r.pl===k).length}</b></span>`).join('')}</div></div>`;
+  const GRID=cssVar('--grid'),TICK=cssVar('--muted'),PIEB=cssVar('--pieborder');
+  // Круговая диаграмма долей площадок (pie, не бублик): названия в tooltip по hover + легенда справа
   if(donutObj)donutObj.destroy();
-  donutObj=new Chart(document.getElementById('pie'),{type:'pie',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:'#16213A',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}}}});
+  donutObj=new Chart(document.getElementById('pie'),{type:'pie',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:PIEB,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}}}});
   // Динамика из daily_stats (не из listings — иначе схлопывание last_seen даёт провал).
   // Значение бакета = среднее (counterfeit, либо total для бэкфилла) по дням бакета.
   const g=state.gran;const buckets=[...new Set(DAILY.map(r=>bucket(r.day,g)))].sort();
@@ -213,8 +256,9 @@ function renderCharts(){
     return Math.round(rs.reduce((s,r)=>s+(r.counterfeit??r.total??0),0)/rs.length);
   }),backgroundColor:PL[p].c+'cc',borderColor:PL[p].c,fill:true,tension:.4,pointRadius:2,borderWidth:2}));
   if(dynChartObj)dynChartObj.destroy();
-  dynChartObj=new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:buckets.map(b=>bucketLabel(b,g)),datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}},y:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}}}}});
+  dynChartObj=new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:buckets.map(b=>bucketLabel(b,g)),datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:GRID},ticks:{color:TICK}},y:{stacked:true,grid:{color:GRID},ticks:{color:TICK}}}}});
 }
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()||'#888';}
 function buildQueryFilters(){const c=document.getElementById('queryFilters');
   c.innerHTML=`<button class="on" data-q="">Все запросы</button>`+QUERIES.map(q=>`<button data-q="${q}">${q}</button>`).join('');
   c.querySelectorAll('button').forEach(b=>b.onclick=()=>{c.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.q=b.dataset.q;state.page=0;apply();});}
@@ -253,6 +297,13 @@ function pg(d){const mx=Math.ceil(FILT.length/state.size);state.page=Math.max(0,
 function exportCSV(){const h=['Дата','Площадка','Название','URL','Цена','Офиц','Дисконт%','Оплата Avito','Запрос'];const esc=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
   const lines=[h.join(',')].concat(FILT.map(r=>[r.last_seen,PL[r.pl].n,r.title,r.url,r.price,r._op,r._disc,r.apay?'да':'',r.query].map(esc).join(',')));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv'}));a.download='contraband_'+maxDay()+'.csv';a.click();}
+function exportXLSX(){if(typeof XLSX==='undefined'){alert('SheetJS не загружен');return;}
+  const h=['Дата','Площадка','Название','URL','Цена','Офиц.','Дисконт %','Оплата Avito','Запрос'];
+  const rows=FILT.map(r=>[r.last_seen,PL[r.pl].n,r.title,r.url,r.price,r._op,r._disc,r.apay?'да':(r.pl==='avito'?'нет':''),r.query]);
+  const ws=XLSX.utils.aoa_to_sheet([h,...rows]);ws['!cols']=[12,14,50,45,10,12,11,14,20].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Контрафакт');XLSX.writeFile(wb,'contraband_'+maxDay()+'.xlsx');}
+// Тема: тёмная/светлая, запоминаем в localStorage. Графики пересоздаём, чтобы grid/border подхватили цвета.
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);const b=document.getElementById('themeToggle');if(b)b.textContent=t==='light'?'☀️':'🌙';localStorage.setItem('mon_theme',t);if(RAW.length)renderCharts();}
 // sidebar wiring
 function buildPlat(){
   const reg=['ozon','wildberries','yandex'];
@@ -275,6 +326,8 @@ document.querySelectorAll('.ps').forEach(b=>b.onclick=()=>{document.querySelecto
 document.getElementById('addQBtn').onclick=()=>{const f=document.getElementById('addQForm');f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')document.getElementById('newQ').focus();};
 // Переключатель гранулярности графика: дни/месяцы/годы (с прицелом на накопление истории)
 document.querySelectorAll('#granSeg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#granSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.gran=b.dataset.gran;renderCharts();});
+document.getElementById('themeToggle').onclick=()=>applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');
+applyTheme(localStorage.getItem('mon_theme')||'dark');
 buildPlat();load();
 </script>
 </body>
