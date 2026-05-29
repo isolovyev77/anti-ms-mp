@@ -25,8 +25,9 @@
   .side{background:var(--panel);border-right:1px solid var(--line);padding:22px 18px;position:sticky;top:0;height:100vh;overflow:auto}
   .brand{display:flex;align-items:center;gap:9px;margin-bottom:24px}
   .brand b{font-size:14px;letter-spacing:.3px}
-  #themeToggle{background:none;border:1px solid var(--line);border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:14px;flex:0 0 auto;line-height:1}
-  #themeToggle:hover{background:var(--panel2)}
+  #themeToggle{display:inline-flex;align-items:center;justify-content:center;background:none;border:1px solid var(--line);border-radius:9px;width:36px;height:36px;cursor:pointer;color:var(--muted);flex:0 0 auto}
+  #themeToggle:hover{background:var(--panel2);color:var(--tx)}
+  #themeToggle svg{width:18px;height:18px}
   .side h4{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:20px 0 9px}
   .chk{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:9px;cursor:pointer;transition:.15s;font-size:13px}
   .chk:hover{background:var(--panel2)}.chk.on{background:var(--panel2)}
@@ -103,7 +104,6 @@
 <div class="layout">
   <aside class="side">
     <div class="brand">
-      <button id="themeToggle" title="Светлая / тёмная тема" aria-label="Переключить тему">🌙</button>
       <img src="../assets/favicon-32.png" alt="" width="30" height="30" style="border-radius:8px;flex:0 0 auto">
       <b>Контрафакт-мониторинг</b>
     </div>
@@ -145,6 +145,7 @@
         <button class="btn btn-gh" onclick="exportCSV()">📥 CSV</button>
         <button class="btn btn-gh" onclick="exportXLSX()">📊 XLSX</button>
         <button class="btn btn-pri" id="refreshBtn" onclick="runScan()">🔄 Обновить</button>
+        <button id="themeToggle" title="Светлая / тёмная тема" aria-label="Переключить тему"></button>
       </div>
     </div>
 
@@ -352,7 +353,9 @@ function exportXLSX(){if(typeof XLSX==='undefined'){alert('SheetJS не загр
   const ws=XLSX.utils.aoa_to_sheet([h,...rows]);ws['!cols']=[12,14,50,45,10,12,11,14,20].map(w=>({wch:w}));
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Контрафакт');XLSX.writeFile(wb,'contraband_'+maxDay()+'.xlsx');}
 // Тема: тёмная/светлая, запоминаем в localStorage. Графики пересоздаём, чтобы grid/border подхватили цвета.
-function applyTheme(t){document.documentElement.setAttribute('data-theme',t);const b=document.getElementById('themeToggle');if(b)b.textContent=t==='light'?'☀️':'🌙';localStorage.setItem('mon_theme',t);if(RAW.length)renderCharts();}
+const ICON_SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
+const ICON_MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);const b=document.getElementById('themeToggle');if(b)b.innerHTML=t==='light'?ICON_MOON:ICON_SUN;localStorage.setItem('mon_theme',t);if(RAW.length)renderCharts();}
 // sidebar wiring
 function buildPlat(){
   const reg=['ozon','wildberries','yandex'];
