@@ -59,10 +59,10 @@
   .btn{border:none;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
   .btn-pri{background:var(--accent);color:#06231f}.btn-gh{background:var(--panel2);color:var(--tx);border:1px solid var(--line)}
   .kpis{display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:13px;margin-bottom:16px}
-  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px;display:flex;flex-direction:column;justify-content:center}
   .kpi .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
   .kpi .val{font-size:25px;font-weight:800;margin-top:6px}.kpi .sub{font-size:12px;margin-top:4px;color:var(--accent)}
-  .kpi-pie{display:flex;align-items:center;gap:16px}
+  .kpi-pie{display:flex;flex-direction:row;justify-content:flex-start;align-items:center;gap:16px}
   .kpi-pie>div:first-child{flex:0 0 auto}
   .pie-legend{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
   .pie-legend span{display:flex;align-items:center;gap:7px;white-space:nowrap}
@@ -118,7 +118,7 @@
       <div style="display:flex;gap:6px"><button onclick="addQuery()" style="flex:1;background:var(--accent);color:#06231f;border:none;border-radius:7px;padding:7px;font-weight:700;cursor:pointer;font-size:12px">Добавить</button><button onclick="document.getElementById('addQForm').style.display='none'" style="background:var(--panel2);color:var(--tx);border:1px solid var(--line);border-radius:7px;padding:7px 10px;cursor:pointer;font-size:12px">Отмена</button></div>
     </div>
     <div class="qf" id="queryFilters"></div>
-    <h4>Мин. дисконт: <span id="discVal" style="color:var(--accent)">50%</span> · <span id="discCnt" style="color:var(--muted)">0</span> карт.</h4>
+    <h4 style="display:flex;justify-content:space-between;align-items:baseline"><span>Мин. дисконт: <span id="discVal" style="color:var(--accent)">50%</span></span><span id="discCnt" style="color:var(--muted)">0</span></h4>
     <input class="slider" type="range" min="0" max="99" value="50" id="discSlider">
   </aside>
 
@@ -273,7 +273,7 @@ function renderCharts(){
     ['Новых за сутки','+'+newToday,'впервые замечены'],
   ].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('')
    +`<div class="kpi kpi-pie"><div><div class="lbl">Площадки</div><div class="val">${Object.keys(PL).length}</div><div class="sub">под наблюдением</div></div>`
-   +`<div style="width:96px;height:96px;flex:0 0 auto"><canvas id="pie"></canvas></div>`
+   +`<div style="width:84px;height:84px;flex:0 0 auto"><canvas id="pie"></canvas></div>`
    +`<div class="pie-legend">${Object.entries(PL).map(([k,v])=>`<span><i style="background:${v.c}"></i>${v.n} <b>${today.filter(r=>r.pl===k).length}</b></span>`).join('')}</div></div>`;
   const GRID=cssVar('--grid'),TICK=cssVar('--muted'),PIEB=cssVar('--pieborder');
   // Круговая диаграмма долей площадок (pie, не бублик): названия в tooltip по hover + легенда справа
