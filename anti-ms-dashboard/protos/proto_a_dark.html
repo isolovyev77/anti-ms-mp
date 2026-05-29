@@ -51,6 +51,10 @@
   .vswitch .on{padding:6px 12px;background:var(--accent);color:#06231f;font-weight:700}
   .vswitch a{padding:6px 12px;color:var(--muted);text-decoration:none;font-weight:600}
   .vswitch a:hover{background:var(--panel2);color:var(--tx)}
+  .scan-badge{padding:4px 11px;border-radius:20px;font-size:12px;font-weight:700}
+  .scan-ok{background:rgba(51,214,200,.15);color:var(--accent)}
+  .scan-warn{background:rgba(255,159,67,.15);color:#ff9f43}
+  .scan-bad{background:rgba(255,84,112,.15);color:#ff5470}
   .btn{border:none;border-radius:9px;padding:9px 15px;font-size:13px;font-weight:600;cursor:pointer}
   .btn-pri{background:var(--accent);color:#06231f}.btn-gh{background:var(--panel2);color:var(--tx);border:1px solid var(--line)}
   .kpis{display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:13px;margin-bottom:16px}
@@ -76,6 +80,9 @@
   .toprow .price b{color:#ff8fd6;font-weight:800}
   .toprow .price s{color:var(--muted);font-size:11px;margin-left:5px}
   .toprow .pc{width:56px;text-align:right;font-weight:800;color:#ff5470;flex:0 0 auto}
+  .presets{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+  .presets button{border:1px solid var(--line);background:var(--panel2);color:var(--muted);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600}
+  .presets button.on{background:var(--accent);color:#06231f;border-color:var(--accent)}
   /* table */
   table{width:100%;border-collapse:collapse;font-size:13px}
   thead th{text-align:left;padding:11px 12px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
@@ -133,6 +140,7 @@
         </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span id="scanStatus" class="scan-badge" style="display:none"></span>
         <span style="font-size:12px;color:var(--muted)">обновлено: <span id="upd">…</span></span>
         <button class="btn btn-gh" onclick="exportCSV()">📥 CSV</button>
         <button class="btn btn-gh" onclick="exportXLSX()">📊 XLSX</button>
@@ -173,6 +181,14 @@
           <div style="font-size:13px;color:var(--muted)">Показано <b id="cnt" style="color:var(--tx)">0</b> из <b id="tot" style="color:var(--tx)">0</b></div>
         </div>
       </div>
+      <div class="presets" id="presetBtns">
+        <button class="on" data-preset="default" title="Дисконт ↓ → Цена ↑ → Название ↑">📊 По умолчанию</button>
+        <button data-preset="score" title="Индекс подозрительности: дисконт + флажки + аномально низкая цена">🔥 Самые подозрительные</button>
+        <button data-preset="loss" title="Абсолютная недоплата = Офиц. − Цена. Сверху наибольшие потери в рублях">💸 Крупнейшие потери</button>
+        <button data-preset="family" title="Группировка по виду продукта (Office 2021 Pro Plus и т.п.). Сверху самые массовые">👥 Группы товаров</button>
+        <button data-preset="pl" title="Группировать по площадке, внутри — дисконт ↓">🏪 По площадкам</button>
+        <button data-preset="recent" title="Сначала самые свежие (по дате обнаружения)">🆕 Свежие</button>
+      </div>
       <div style="overflow-x:auto">
         <table>
           <thead><tr>
@@ -202,7 +218,7 @@ const TM=['microsoft','office','windows'];
 function flags(r){const d=r._disc,tl=(r.title||'').toLowerCase(),tm=TM.some(k=>tl.includes(k)),cmp=tl.includes('совместимо')||tl.includes('compat');
   return{F1:d>=50,F2:d>=80,F5:true,F6:tm&&!cmp,disc:d};}
 function flagPills(f){let p=[];if(f.F2)p.push('<span class="fp fp-r">🔴F2</span>');else if(f.F1)p.push('<span class="fp fp-r">🔴F1</span>');p.push('<span class="fp fp-y">🟡F5</span>');if(f.F6)p.push('<span class="fp fp-o">🟠F6</span>');return p.join('');}
-let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false,per:'day',gran:'day',sortCol:'disc',sortDir:-1,page:0,size:50},FILT=[];
+let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false,per:'day',gran:'day',preset:'default',sortCol:'disc',sortDir:-1,page:0,size:50},FILT=[];
 async function fetchAll(path){let all=[],from=0;while(true){const r=await fetch(`${SUPABASE_URL}${path}`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Range-Unit':'items',Range:`${from}-${from+999}`}});const b=await r.json();all=all.concat(b);if(b.length<1000)break;from+=1000;}return all;}
 let DAILY=[];
 async function load(){
@@ -211,9 +227,26 @@ async function load(){
   try{QUERIES=(await fetchAll(`/rest/v1/monitor_queries?select=query&active=eq.true&order=id`)).map(x=>x.query);}catch(e){QUERIES=[...new Set(RAW.map(r=>r.query).filter(Boolean))];}
   // Дневная статистика для графика динамики (не зависит от схлопывания last_seen)
   try{DAILY=await fetchAll(`/rest/v1/daily_stats?select=day,pl,total,counterfeit&order=day`);}catch(e){DAILY=[];}
+  // Статус последнего прогона парсера (по finished_at — не по started_at, иначе manual smoke-тест перекроет cron)
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/parser_runs?select=status,finished_at&order=finished_at.desc.nullslast&limit=1`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY}});
+    const lr=(await r.json())[0];if(lr)showScanStatus(lr);
+  }catch(e){}
   document.getElementById('upd').textContent=new Date().toLocaleString('ru',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   buildQueryFilters();renderCharts();apply();
+  saveCache();
 }
+function showScanStatus(lr){
+  const el=document.getElementById('scanStatus');if(!el)return;
+  const map={ok:['scan-ok','✓ Актуально'],partial:['scan-warn','⚠ Частично'],failed:['scan-bad','✗ Сбой'],hung:['scan-bad','✗ Завис'],running:['scan-warn','⏳ Идёт']};
+  const [cls,txt]=map[lr.status]||['scan-warn',lr.status];
+  el.className='scan-badge '+cls;el.textContent=txt;el.style.display='';
+  if(lr.finished_at)el.title='Последний прогон: '+new Date(lr.finished_at).toLocaleString('ru');
+}
+// Кеш: мгновенный показ последнего снимка из localStorage, пока грузится свежее из Supabase
+const CACHE_KEY='proto_a_cache_v1';
+function saveCache(){try{localStorage.setItem(CACHE_KEY,JSON.stringify({RAW,DAILY,QUERIES,savedAt:Date.now()}));}catch(e){}}
+function tryCache(){try{const c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');if(c&&c.RAW&&c.RAW.length){RAW=c.RAW;DAILY=c.DAILY||[];QUERIES=c.QUERIES||[];buildQueryFilters();renderCharts();apply();return true;}}catch(e){}return false;}
 // ── RPC с ключевой фразой (как в index_new.html) ──
 function getKeyPhrase(force){let p=force?null:sessionStorage.getItem('mon_secret');if(!p){p=prompt('Введите ключевую фразу для запуска парсинга / добавления запроса:');if(p)sessionStorage.setItem('mon_secret',p);}return p;}
 async function requestParse(secret,query){const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/request_parse',{method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_secret:secret,p_query:query||null})});if(!r.ok)return{ok:false,error:'HTTP '+r.status};return await r.json();}
@@ -262,6 +295,20 @@ function cssVar(n){return getComputedStyle(document.documentElement).getProperty
 function buildQueryFilters(){const c=document.getElementById('queryFilters');
   c.innerHTML=`<button class="on" data-q="">Все запросы</button>`+QUERIES.map(q=>`<button data-q="${q}">${q}</button>`).join('');
   c.querySelectorAll('button').forEach(b=>b.onclick=()=>{c.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.q=b.dataset.q;state.page=0;apply();});}
+// Пресеты сортировки (перенос из index_new): семья продукта, индекс подозрительности
+function monFamilyKey(t){t=String(t||'').toLowerCase();const m=t.match(/(office\s+(?:365|2024|2021|2019|2016|2013|2010))\s*(pro\s*plus|home\s*and\s*business|home\s*and\s*student|professional\s*plus|professional|personal|family|standard|ltsc)?/i);if(m)return (m[1]+' '+(m[2]||'')).replace(/\s+/g,' ').trim();if(t.includes('365')&&t.includes('microsoft'))return 'microsoft 365';return 'прочее';}
+function monScore(r){let s=Math.max(0,r._disc);const fc=[r._disc>=50,r._disc>=80,true,/microsoft|office|windows/i.test(r.title||'')].filter(Boolean).length;s+=fc*3;if(r.price<100)s+=10;else if(r.price<300)s+=5;if(r._op>10000&&r.price<r._op*0.01)s+=5;return s;}
+function applyPreset(arr,preset){
+  const tc=(a,b)=>String(a.title||'').localeCompare(String(b.title||''),'ru');
+  let fam=null;if(preset==='family'){fam=new Map();arr.forEach(r=>{const k=monFamilyKey(r.title);fam.set(k,(fam.get(k)||0)+1);});}
+  arr.sort((a,b)=>{const da=a._disc,db=b._disc;
+    if(preset==='score'){const sa=monScore(a),sb=monScore(b);if(sa!==sb)return sb-sa;if(a.price!==b.price)return a.price-b.price;return tc(a,b);}
+    if(preset==='loss'){const la=(a._op||0)-a.price,lb=(b._op||0)-b.price;if(la!==lb)return lb-la;if(da!==db)return db-da;return tc(a,b);}
+    if(preset==='family'){const ka=monFamilyKey(a.title),kb=monFamilyKey(b.title),ca=fam.get(ka)||0,cb=fam.get(kb)||0;if(ca!==cb)return cb-ca;if(ka!==kb)return ka.localeCompare(kb);if(da!==db)return db-da;return a.price-b.price;}
+    if(preset==='pl'){if(a.pl!==b.pl)return String(a.pl).localeCompare(String(b.pl));if(da!==db)return db-da;return a.price-b.price;}
+    if(preset==='recent'){const d=String(b.last_seen||'').localeCompare(String(a.last_seen||''));if(d)return d;if(da!==db)return db-da;return a.price-b.price;}
+    /* default */ if(da!==db)return db-da;if(a.price!==b.price)return a.price-b.price;return tc(a,b);});
+}
 function apply(){
   const md=maxDay();
   FILT=RAW.filter(r=>r._cf)
@@ -270,7 +317,8 @@ function apply(){
     .filter(r=>r._disc>=state.disc)
     .filter(r=>!state.apay||r.apay)
     .filter(r=>!state.q||r.query===state.q);
-  FILT.sort((a,b)=>{const k=state.sortCol;let av,bv;if(k==='date'){av=a.last_seen;bv=b.last_seen}else if(k==='pl'){av=a.pl;bv=b.pl}else if(k==='title'){av=a.title;bv=b.title}else if(k==='price'){av=a.price;bv=b.price}else if(k==='op'){av=a._op;bv=b._op}else{av=a._disc;bv=b._disc}return (av>bv?1:av<bv?-1:0)*state.sortDir;});
+  if(state.preset){applyPreset(FILT,state.preset);}
+  else{FILT.sort((a,b)=>{const k=state.sortCol;let av,bv;if(k==='date'){av=a.last_seen;bv=b.last_seen}else if(k==='pl'){av=a.pl;bv=b.pl}else if(k==='title'){av=a.title;bv=b.title}else if(k==='price'){av=a.price;bv=b.price}else if(k==='op'){av=a._op;bv=b._op}else{av=a._disc;bv=b._disc}return (av>bv?1:av<bv?-1:0)*state.sortDir;});}
   document.getElementById('tot').textContent=FILT.length;document.getElementById('cnt').textContent=Math.min(FILT.length,state.size);
   // счётчик у бегунка дисконта — сколько карточек проходит текущий порог (без учёта самого дисконт-фильтра)
   const md2=maxDay();const dcBase=RAW.filter(r=>r._cf).filter(r=>state.per==='all'?true:r.last_seen===md2).filter(r=>state.pl.has(r.pl)).filter(r=>!state.apay||r.apay).filter(r=>!state.q||r.query===state.q);
@@ -292,7 +340,8 @@ function renderTable(){
       <td style="white-space:nowrap">${flagPills(f)}</td>
     </tr>`;}).join('')||'<tr><td colspan="8" class="loading">Нет карточек под фильтры</td></tr>';
 }
-function sortBy(c){if(state.sortCol===c)state.sortDir*=-1;else{state.sortCol=c;state.sortDir=(c==='title'||c==='pl')?1:-1;}apply();}
+function sortBy(c){state.preset=null;document.querySelectorAll('#presetBtns button').forEach(x=>x.classList.remove('on'));if(state.sortCol===c)state.sortDir*=-1;else{state.sortCol=c;state.sortDir=(c==='title'||c==='pl')?1:-1;}apply();}
+function setPreset(p,btn){state.preset=p;state.page=0;document.querySelectorAll('#presetBtns button').forEach(x=>x.classList.remove('on'));btn.classList.add('on');apply();}
 function pg(d){const mx=Math.ceil(FILT.length/state.size);state.page=Math.max(0,Math.min(mx-1,state.page+d));renderTable();}
 function exportCSV(){const h=['Дата','Площадка','Название','URL','Цена','Офиц','Дисконт%','Оплата Avito','Запрос'];const esc=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
   const lines=[h.join(',')].concat(FILT.map(r=>[r.last_seen,PL[r.pl].n,r.title,r.url,r.price,r._op,r._disc,r.apay?'да':'',r.query].map(esc).join(',')));
@@ -326,9 +375,10 @@ document.querySelectorAll('.ps').forEach(b=>b.onclick=()=>{document.querySelecto
 document.getElementById('addQBtn').onclick=()=>{const f=document.getElementById('addQForm');f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')document.getElementById('newQ').focus();};
 // Переключатель гранулярности графика: дни/месяцы/годы (с прицелом на накопление истории)
 document.querySelectorAll('#granSeg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#granSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.gran=b.dataset.gran;renderCharts();});
+document.querySelectorAll('#presetBtns button').forEach(b=>b.onclick=()=>setPreset(b.dataset.preset,b));
 document.getElementById('themeToggle').onclick=()=>applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');
 applyTheme(localStorage.getItem('mon_theme')||'dark');
-buildPlat();load();
+buildPlat();tryCache();load();
 </script>
 </body>
 </html>
