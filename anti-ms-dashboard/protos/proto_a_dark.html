@@ -73,7 +73,9 @@
     <div class="brand"><div class="dot">◉</div><b>Контрафакт-мониторинг</b></div>
     <h4>Период</h4>
     <div class="seg"><button class="on" data-per="day">День</button><button data-per="week">Неделя</button><button data-per="all">Всё</button></div>
-    <h4>Площадки</h4><div id="platFilters"></div>
+    <h4>Площадки</h4>
+    <div style="height:128px;margin:2px 0 10px;position:relative"><canvas id="donut"></canvas></div>
+    <div id="platFilters"></div>
     <h4 style="display:flex;align-items:center;justify-content:space-between">Поисковый запрос
       <button id="addQBtn" title="Добавить запрос на мониторинг" style="border:1px solid var(--line);background:#101a2e;color:var(--accent);width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1;padding:0">+</button>
     </h4>
@@ -99,13 +101,13 @@
 
     <div class="kpis" id="kpis"><div class="loading">Загрузка из Supabase…</div></div>
 
-    <div class="grid">
-      <div class="card">
-        <h3>Динамика обнаружения по дням</h3><div class="cap">Уникальные карточки контрафакта, цвета площадок</div>
-        <div class="legend"><span><i style="background:var(--ozon)"></i>Ozon</span><span><i style="background:var(--wb)"></i>Wildberries</span><span><i style="background:var(--yandex)"></i>Яндекс.Маркет</span><span><i style="background:var(--avito)"></i>Avito</span></div>
-        <div style="height:200px"><canvas id="dynChart"></canvas></div>
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div><h3>Динамика обнаружения контрафакта</h3><div class="cap">Уникальные карточки по дням, цвета площадок</div></div>
+        <div class="seg" style="width:auto;margin:0" id="granSeg"><button class="on" data-gran="day">Дни</button><button data-gran="month">Месяцы</button><button data-gran="year">Годы</button></div>
       </div>
-      <div class="card"><h3>Доля площадок</h3><div class="cap">Активный контрафакт сейчас</div><div style="height:200px"><canvas id="donut"></canvas></div></div>
+      <div class="legend"><span><i style="background:var(--ozon)"></i>Ozon</span><span><i style="background:var(--wb)"></i>Wildberries</span><span><i style="background:var(--yandex)"></i>Яндекс.Маркет</span><span><i style="background:var(--avito)"></i>Avito</span></div>
+      <div style="height:230px"><canvas id="dynChart"></canvas></div>
     </div>
 
     <!-- Легенда флажков -->
@@ -159,7 +161,7 @@ const TM=['microsoft','office','windows'];
 function flags(r){const d=r._disc,tl=(r.title||'').toLowerCase(),tm=TM.some(k=>tl.includes(k)),cmp=tl.includes('совместимо')||tl.includes('compat');
   return{F1:d>=50,F2:d>=80,F5:true,F6:tm&&!cmp,disc:d};}
 function flagPills(f){let p=[];if(f.F2)p.push('<span class="fp fp-r">🔴F2</span>');else if(f.F1)p.push('<span class="fp fp-r">🔴F1</span>');p.push('<span class="fp fp-y">🟡F5</span>');if(f.F6)p.push('<span class="fp fp-o">🟠F6</span>');return p.join('');}
-let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false,per:'day',sortCol:'disc',sortDir:-1,page:0,size:50},FILT=[];
+let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false,per:'day',gran:'day',sortCol:'disc',sortDir:-1,page:0,size:50},FILT=[];
 async function fetchAll(path){let all=[],from=0;while(true){const r=await fetch(`${SUPABASE_URL}${path}`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Range-Unit':'items',Range:`${from}-${from+999}`}});const b=await r.json();all=all.concat(b);if(b.length<1000)break;from+=1000;}return all;}
 async function load(){
   const rows=await fetchAll(`/rest/v1/listings?select=pl,product_id,title,price,op,query,first_seen,last_seen,url,avito_pay&order=last_seen.desc`);
@@ -181,13 +183,22 @@ async function addQuery(){const inp=document.getElementById('newQ');const q=(inp
   if(res&&res.ok){inp.value='';document.getElementById('addQForm').style.display='none';alert('Запрос «'+q+'» добавлен. Парсинг по нему запущен (~3 мин).');}
   else{if((res.error||'').includes('фраз'))sessionStorage.removeItem('mon_secret');alert('Не удалось добавить: '+(res.error||'ошибка'));}}
 function maxDay(){return [...new Set(RAW.filter(r=>r._cf).map(r=>r.last_seen))].sort().pop();}
+// Гранулярность оси времени: day=YYYY-MM-DD, month=YYYY-MM, year=YYYY
+function bucket(d,g){return g==='year'?d.slice(0,4):g==='month'?d.slice(0,7):d;}
+function bucketLabel(b,g){return g==='year'?b:g==='month'?b.slice(2):b.slice(5);}
+let dynChartObj=null,donutObj=null;
 function renderCharts(){
-  const cf=RAW.filter(r=>r._cf);const days=[...new Set(cf.map(r=>r.last_seen))].sort();const md=maxDay();const today=cf.filter(r=>r.last_seen===md);
-  const newToday=cf.filter(r=>r.first_seen===md).length,apay=cf.filter(r=>r.apay).length,avg=Math.round(today.reduce((s,r)=>s+r._disc,0)/(today.length||1));
+  const cf=RAW.filter(r=>r._cf);const md=maxDay();const today=cf.filter(r=>r.last_seen===md);
+  const newToday=cf.filter(r=>r.first_seen===md).length,avg=Math.round(today.reduce((s,r)=>s+r._disc,0)/(today.length||1));
   document.getElementById('kpis').innerHTML=[['Активный контрафакт',today.length,'на последнюю дату'],['Средний дисконт',avg+'%','ниже официальной'],['Новых за сутки','+'+newToday,'впервые замечены'],['Площадок',Object.keys(PL).length,'под наблюдением']].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('');
-  const ds=Object.keys(PL).map(p=>({label:PL[p].n,data:days.map(d=>cf.filter(r=>r.last_seen===d&&r.pl===p).length),backgroundColor:PL[p].c+'cc',borderColor:PL[p].c,fill:true,tension:.4,pointRadius:2,borderWidth:2}));
-  new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:days.map(d=>d.slice(5)),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}},y:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}}}}});
-  new Chart(document.getElementById('donut'),{type:'doughnut',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:'#16213A',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'66%',plugins:{legend:{position:'bottom',labels:{color:'#8499B5',font:{size:11},padding:9}}}}});
+  // Динамика на всю ширину с выбранной гранулярностью (дни/месяцы/годы)
+  const g=state.gran;const buckets=[...new Set(cf.map(r=>bucket(r.last_seen,g)))].sort();
+  const ds=Object.keys(PL).map(p=>({label:PL[p].n,data:buckets.map(b=>cf.filter(r=>bucket(r.last_seen,g)===b&&r.pl===p).length),backgroundColor:PL[p].c+'cc',borderColor:PL[p].c,fill:true,tension:.4,pointRadius:2,borderWidth:2}));
+  if(dynChartObj)dynChartObj.destroy();
+  dynChartObj=new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:buckets.map(b=>bucketLabel(b,g)),datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}},y:{stacked:true,grid:{color:'#1f3050'},ticks:{color:'#8499B5'}}}}});
+  // Донат-кольцо в sidebar: без легенды, название площадки — в tooltip по сегменту
+  if(donutObj)donutObj.destroy();
+  donutObj=new Chart(document.getElementById('donut'),{type:'doughnut',data:{labels:Object.values(PL).map(x=>x.n),datasets:[{data:Object.keys(PL).map(p=>today.filter(r=>r.pl===p).length),backgroundColor:Object.values(PL).map(x=>x.c),borderColor:'#101a2e',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}}}});
 }
 function buildQueryFilters(){const c=document.getElementById('queryFilters');
   c.innerHTML=`<button class="on" data-q="">Все запросы</button>`+QUERIES.map(q=>`<button data-q="${q}">${q}</button>`).join('');
@@ -247,6 +258,8 @@ document.getElementById('discSlider').oninput=e=>{document.getElementById('discV
 document.querySelectorAll('.seg button[data-per]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.seg button[data-per]').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.per=b.dataset.per;state.page=0;apply();});
 document.querySelectorAll('.ps').forEach(b=>b.onclick=()=>{document.querySelectorAll('.ps').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.size=+b.dataset.ps;state.page=0;apply();});
 document.getElementById('addQBtn').onclick=()=>{const f=document.getElementById('addQForm');f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')document.getElementById('newQ').focus();};
+// Переключатель гранулярности графика: дни/месяцы/годы (с прицелом на накопление истории)
+document.querySelectorAll('#granSeg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#granSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.gran=b.dataset.gran;renderCharts();});
 buildPlat();load();
 </script>
 </body>
