@@ -52,11 +52,11 @@
   .vswitch .on{padding:6px 12px;background:var(--accent);color:#06231f;font-weight:700}
   .vswitch a{padding:6px 12px;color:var(--muted);text-decoration:none;font-weight:600}
   .vswitch a:hover{background:var(--panel2);color:var(--tx)}
-  .scan-badge{padding:4px 11px;border-radius:20px;font-size:12px;font-weight:700}
-  .scan-ok{background:rgba(51,214,200,.15);color:var(--accent)}
-  .scan-warn{background:rgba(255,159,67,.15);color:#ff9f43}
-  .scan-bad{background:rgba(255,84,112,.15);color:#ff5470}
-  .btn{border:none;border-radius:9px;padding:9px 15px;font-size:13px;font-weight:600;cursor:pointer}
+  .scan-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:13px;font-weight:800;cursor:help;flex:0 0 auto}
+  .scan-ok{background:rgba(51,214,200,.18);color:var(--accent)}
+  .scan-warn{background:rgba(255,159,67,.18);color:#ff9f43}
+  .scan-bad{background:rgba(255,84,112,.18);color:#ff5470}
+  .btn{border:none;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
   .btn-pri{background:var(--accent);color:#06231f}.btn-gh{background:var(--panel2);color:var(--tx);border:1px solid var(--line)}
   .kpis{display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:13px;margin-bottom:16px}
   .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}
@@ -139,9 +139,9 @@
           <a href="../index.html" title="Старая версия — пополняется вручную">Ручная →</a>
         </div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:nowrap">
         <span id="scanStatus" class="scan-badge" style="display:none"></span>
-        <span style="font-size:12px;color:var(--muted)">обновлено: <span id="upd">…</span></span>
+        <span style="font-size:11px;color:var(--muted);white-space:nowrap">обновлено: <span id="upd">…</span></span>
         <button class="btn btn-gh" onclick="exportCSV()">📥 CSV</button>
         <button class="btn btn-gh" onclick="exportXLSX()">📊 XLSX</button>
         <button class="btn btn-pri" id="refreshBtn" onclick="runScan()">🔄 Обновить</button>
@@ -239,10 +239,10 @@ async function load(){
 }
 function showScanStatus(lr){
   const el=document.getElementById('scanStatus');if(!el)return;
-  const map={ok:['scan-ok','✓ Актуально'],partial:['scan-warn','⚠ Частично'],failed:['scan-bad','✗ Сбой'],hung:['scan-bad','✗ Завис'],running:['scan-warn','⏳ Идёт']};
-  const [cls,txt]=map[lr.status]||['scan-warn',lr.status];
-  el.className='scan-badge '+cls;el.textContent=txt;el.style.display='';
-  if(lr.finished_at)el.title='Последний прогон: '+new Date(lr.finished_at).toLocaleString('ru');
+  const map={ok:['scan-ok','✓','Актуально'],partial:['scan-warn','⚠','Частично — были ошибки'],failed:['scan-bad','✗','Сбой прогона'],hung:['scan-bad','✗','Прогон завис'],running:['scan-warn','⏳','Идёт прогон']};
+  const [cls,sym,txt]=map[lr.status]||['scan-warn','•',lr.status];
+  el.className='scan-badge '+cls;el.textContent=sym;el.style.display='';
+  el.title=txt+(lr.finished_at?' · '+new Date(lr.finished_at).toLocaleString('ru'):'');
 }
 // Кеш: мгновенный показ последнего снимка из localStorage, пока грузится свежее из Supabase
 const CACHE_KEY='proto_a_cache_v1';
