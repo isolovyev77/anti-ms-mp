@@ -340,39 +340,27 @@ EXTRACT_JS = {
         if (!m) return;
         const title = (card.querySelector('[data-auto="snippet-title"]')?.textContent || link.textContent || '').trim();
 
-        // Цена — берём ровно ту, что показана покупателю.
-        // Требуем наличие \u20BD в тексте (защита от рейтингов/отзывов без валюты).
-        // Низкие цены (18\u20BD, 28\u20BD и т.п.) — это РЕАЛЬНЫЕ предложения контрафакта,
-        // их НЕ отсекаем — это самые яркие сигналы для мониторинга.
+        // Цена — берём ту, что показана покупателю. Яндекс сменил вёрстку:
+        // data-auto-селекторы цены мертвы, классы обфусцированы (_26ABJ, ds-text).
+        // Цена теперь в листовом элементе с текстом вида "72 ₽Пэй" (число + ₽ +
+        // ярлык Yandex Pay). Требуем, чтобы текст НАЧИНАЛСЯ с числа перед ₽ —
+        // якорь ^ отсекает "от 72 ₽" (рассрочка), "+5 ₽" (кешбэк), рейтинги без валюты.
+        // Низкие цены (14₽, 22₽) НЕ отсекаем — это РЕАЛЬНЫЙ контрафакт.
+        const norm = s => (s || '').replace(/[  ]/g, ' ');
         let price = 0;
-        const sels = ['[data-auto="snippet-price"]', '[data-auto="price-value"]',
-                      '[data-auto="mainPrice"]', '[class*="snippetPrice"]',
-                      '[class*="priceText"]', '[class*="price"][class*="value"]'];
-        for (const sel of sels) {
-          const els = card.querySelectorAll(sel);
-          for (const el of els) {
-            const t = (el.textContent || '').replace(/[\u00A0\u202F]/g, ' ');
-            if (!t.includes('\u20BD')) continue;
-            // Берём первое число перед \u20BD — это всегда основная (видимая) цена.
-            // Зачёркнутая старая цена — отдельный элемент.
-            const m = t.match(/(\d[\d ]{0,8})\s*\u20BD/);
-            if (m) {
-              const n = parseInt(m[1].replace(/\D/g, ''), 10);
-              if (n > 0) { price = n; break; }
-            }
-          }
-          if (price > 0) break;
+        // 1) старые data-auto (вдруг для части карточек ещё живы)
+        for (const sel of ['[data-auto="snippet-price"]', '[data-auto="price-value"]', '[data-auto="mainPrice"]']) {
+          const el = card.querySelector(sel);
+          if (!el) continue;
+          const m = norm(el.textContent).match(/(\d[\d ]{0,8})\s*₽/);
+          if (m) { const n = parseInt(m[1].replace(/\D/g, ''), 10); if (n > 0) { price = n; break; } }
         }
-        // Fallback: текстовый узел вида "N \u20BD"
+        // 2) первый листовой элемент, чей текст начинается с "<число> ₽"
         if (!price) {
-          const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
-          let node;
-          while (node = walker.nextNode()) {
-            const t = (node.textContent || '').replace(/[\u00A0\u202F]/g, ' ').trim();
-            if (/^\d[\d ]{0,8}\s*\u20BD$/.test(t)) {
-              const v = parseInt(t.replace(/\D/g, ''), 10);
-              if (v > 0) { price = v; break; }
-            }
+          for (const el of card.querySelectorAll('*')) {
+            if (el.children.length > 1) continue;
+            const m = norm(el.textContent).trim().match(/^(\d[\d ]{0,8})\s*₽/);
+            if (m) { const n = parseInt(m[1].replace(/\D/g, ''), 10); if (n > 0) { price = n; break; } }
           }
         }
 
