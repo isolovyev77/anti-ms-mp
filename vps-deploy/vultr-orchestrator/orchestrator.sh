@@ -33,15 +33,47 @@ fi
 # 1) Детектор аномалий
 HEALTH=$(python3 "$HERE/healthcheck.py" 2>/dev/null) || HEALTH='{"error":"healthcheck упал","anomalies":[]}'
 echo "[$TS] health: $HEALTH"
-# Авто-починку запускаем ТОЛЬКО для проблем экстрактора (found_but_invisible /
-# low_price_coverage). «run_incomplete» (прогон завис/не дошёл) — не чиним код,
-# про это просто пишем в отчёт (нужен перезапуск парсера, а не правка).
+A_KINDS="('found_but_invisible','low_price_coverage')"
 ANOMALY_PLS=$(echo "$HEALTH" | python3 -c "import json,sys
-try: print(' '.join(a['pl'] for a in json.load(sys.stdin).get('anomalies',[]) if a.get('kind') in ('found_but_invisible','low_price_coverage')))
+try: print(' '.join(a['pl'] for a in json.load(sys.stdin).get('anomalies',[]) if a.get('kind') in $A_KINDS))
 except: pass" 2>/dev/null)
 
-# 2) Авто-починка (если есть аномалии и не выключено)
+# 1b) АВТО-ПЕРЕЗАПУСК зависших/недошедших площадок (kind=run_incomplete). Парсер
+# стартует в 00:00 МСК, у нас до 04:00 есть время повторить. Перезапускаем
+# детерминированно (без правки кода), ждём ~12 мин, пере-проверяем здоровье.
+INCOMPLETE_PLS=$(echo "$HEALTH" | python3 -c "import json,sys
+try: print(','.join(a['pl'] for a in json.load(sys.stdin).get('anomalies',[]) if a.get('kind')=='run_incomplete'))
+except: pass" 2>/dev/null)
+RERUN_LOG=""
+if [ -n "$INCOMPLETE_PLS" ]; then
+  echo "[$TS] RERUN недошедших площадок: $INCOMPLETE_PLS"
+  python3 "$HERE/logmem.py" orchestrator WARN "Незавершённый ночной прогон — не обновились: $INCOMPLETE_PLS. Авто-перезапуск." 2>/dev/null || true
+  $SSH_VDSINA "cd /opt/anti-ms-mp && rm -f /var/log/rerun.log && nohup .venv/bin/python parser_runner.py --trigger watcher --platforms '$INCOMPLETE_PLS' --no-notify > /var/log/rerun.log 2>&1 & echo started" 2>/dev/null || true
+  for _i in $(seq 1 48); do
+    sleep 15
+    $SSH_VDSINA 'grep -qiE "run end|Traceback" /var/log/rerun.log 2>/dev/null' && break
+  done
+  HEALTH=$(python3 "$HERE/healthcheck.py" 2>/dev/null) || true
+  STILL=$(echo "$HEALTH" | python3 -c "import json,sys
+try: print(','.join(a['pl'] for a in json.load(sys.stdin).get('anomalies',[]) if a.get('kind')=='run_incomplete'))
+except: pass" 2>/dev/null)
+  if [ -z "$STILL" ]; then
+    RERUN_LOG="перезапуск [$INCOMPLETE_PLS] — данные восстановлены."
+    python3 "$HERE/logmem.py" orchestrator RESOLVED "Авто-перезапуск [$INCOMPLETE_PLS] успешен — данные восстановлены." 2>/dev/null || true
+  else
+    RERUN_LOG="перезапуск [$INCOMPLETE_PLS] выполнен, но не всё восстановилось (осталось: $STILL) — нужна ручная проверка."
+    python3 "$HERE/logmem.py" orchestrator NEEDS-CHECK "Авто-перезапуск не восстановил всё. Осталось: $STILL. Нужна ручная проверка." 2>/dev/null || true
+  fi
+  # пересчёт экстрактор-аномалий на обновлённом HEALTH
+  ANOMALY_PLS=$(echo "$HEALTH" | python3 -c "import json,sys
+try: print(' '.join(a['pl'] for a in json.load(sys.stdin).get('anomalies',[]) if a.get('kind') in $A_KINDS))
+except: pass" 2>/dev/null)
+fi
+
+# 2) Авто-починка экстрактора (если есть аномалии и не выключено)
 FIXLOG=""
+[ -n "$RERUN_LOG" ] && FIXLOG="
+• перезапуск зависших площадок: $RERUN_LOG"
 if [ -n "$ANOMALY_PLS" ] && [ "$AUTOFIX" != "0" ]; then
   for PL in $ANOMALY_PLS; do
     DETAIL=$(echo "$HEALTH" | python3 -c "import json,sys
@@ -103,11 +135,14 @@ $HEALTH
 
 Что делала авто-починка этой ночью (пусто = аномалий не было):${FIXLOG:- нет}
 
-Напиши ОДИН отчёт на русском для Telegram (до 800 символов, без markdown-таблиц):
-- Первой строкой по площадкам: «Площадка: N контрафакта (нашли M)».
-- Если аномалий не было — заверши «✅ Все площадки в норме».
-- Если была починка — отдельным блоком «🔧 Авто-починка:» простыми словами: что было сломано
-  и чем закончилось (починено/откачено/нужна ручная проверка).
+Напиши ОДИН отчёт на русском для Telegram (до 900 символов, без markdown-таблиц):
+- Первой строкой по площадкам: «Площадка: N контрафакта (нашли M)». Если площадка
+  показала старые данные (прогон не обновил) — пометь это словами «данные от ПРОШЛОГО прогона».
+- Если всё хорошо — заверши «✅ Все площадки в норме».
+- Если оркестратор что-то делал (перезапуск зависших площадок и/или авто-починка
+  экстрактора) — отдельным блоком «🔧 Что предпринято:» простыми словами: что было не так
+  и чем закончилось (восстановлено / откачено / нужна ручная проверка). Не пиши «всё плохо» —
+  пиши, что именно сделано и что осталось проверить.
 Деловой русский, без англицизмов (upserted/coverage), без воды."
 REPORT=$(cd "$HERE" && "$CLAUDE" --print --output-format text 2>/dev/null <<<"$PROMPT" || true)
 
@@ -145,4 +180,11 @@ print(json.dumps({'run_id':'orchestrator','status':'orchestrator','totals':{},
 else
   echo "[$TS] TG_CHAT_ID пуст — отчёт только в лог"
 fi
+
+# 5) Итог в общий лог (для утренней рутины и сессий Claude)
+HEALTHY=$(echo "$HEALTH" | python3 -c "import json,sys
+try: print('ok' if json.load(sys.stdin).get('healthy') else 'anomalies')
+except: print('?')" 2>/dev/null)
+SUMMARY=$(echo "$REPORT" | head -1)
+python3 "$HERE/logmem.py" orchestrator INFO "Утренний прогон оркестратора: здоровье=$HEALTHY. $SUMMARY" 2>/dev/null || true
 echo "[$TS] === orchestrator done ==="

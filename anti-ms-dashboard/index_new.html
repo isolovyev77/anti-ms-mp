@@ -153,6 +153,7 @@
     </div>
 
     <div class="kpis" id="kpis"><div class="loading">Загрузка из Supabase…</div></div>
+    <div id="staleBanner" style="display:none;margin:-4px 0 16px;padding:9px 14px;border-radius:10px;background:rgba(255,159,67,.12);border:1px solid rgba(255,159,67,.35);color:#ff9f43;font-size:13px"></div>
 
     <div class="card" style="margin-bottom:14px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -268,6 +269,13 @@ async function addQuery(){const inp=document.getElementById('newQ');const q=(inp
   if(res&&res.ok){inp.value='';document.getElementById('addQForm').style.display='none';alert('Запрос «'+q+'» добавлен. Парсинг по нему запущен (~3 мин).');}
   else{if((res.error||'').includes('фраз'))sessionStorage.removeItem('mon_secret');alert('Не удалось добавить: '+(res.error||'ошибка'));}}
 function maxDay(){return [...new Set(RAW.filter(r=>r._cf).map(r=>r.last_seen))].sort().pop();}
+// Последняя дата ПО КАЖДОЙ площадке отдельно. Если прогон не обновил площадку
+// (зависание/сбой), показываем её ПОСЛЕДНИЕ данные со старой датой, а не пустоту —
+// чтобы сбой одной площадки не стирал её с дашборда.
+function platMax(){const m={};RAW.forEach(r=>{if(r._cf&&(!m[r.pl]||r.last_seen>m[r.pl]))m[r.pl]=r.last_seen;});return m;}
+function freshDay(){return Object.values(platMax()).sort().pop()||maxDay();}
+function isStale(pl,PM,fresh){return PM[pl]&&fresh&&PM[pl]<fresh;}
+function ddmm(d){return (d||'').slice(5).split('-').reverse().join('.');}
 // Гранулярность оси времени: day=YYYY-MM-DD, month=YYYY-MM, year=YYYY
 function bucket(d,g){
   if(g==='year')return d.slice(0,4);
@@ -280,8 +288,14 @@ function bucket(d,g){
 function bucketLabel(b,g){return g==='year'?b:g==='month'?b.slice(2):b.slice(5).split('-').reverse().join('.');}
 let dynChartObj=null,donutObj=null;
 function renderCharts(){
-  const cf=RAW.filter(r=>r._cf);const md=maxDay();const today=cf.filter(r=>r.last_seen===md);
-  const newToday=cf.filter(r=>r.first_seen===md).length,avg=Math.round(today.reduce((s,r)=>s+r._disc,0)/(today.length||1));
+  const cf=RAW.filter(r=>r._cf);const PM=platMax();const fresh=freshDay();
+  // «today» = по каждой площадке её последняя дата (устаревшие не пропадают)
+  const today=cf.filter(r=>r.last_seen===PM[r.pl]);
+  const newToday=cf.filter(r=>r.first_seen===fresh).length,avg=Math.round(today.reduce((s,r)=>s+r._disc,0)/(today.length||1));
+  // Баннер: какие площадки показывают данные прошлого прогона (не обновились)
+  const staleList=Object.entries(PL).filter(([k])=>isStale(k,PM,fresh)).map(([k,v])=>`${v.n} (от ${ddmm(PM[k])})`);
+  const sb=document.getElementById('staleBanner');
+  if(sb){if(staleList.length){sb.style.display='';sb.innerHTML='⚠️ Данные прошлого прогона (площадка не обновилась): <b>'+staleList.join(', ')+'</b>. Последний прогон не дошёл — оркестратор перезапустит автоматически ночью.';}else sb.style.display='none';}
   // KPI: 3 узкие карточки + широкая «Площадки» с круговой диаграммой справа до края
   document.getElementById('kpis').innerHTML=[
     ['Активный контрафакт',today.length,'на последнюю дату'],
@@ -290,7 +304,7 @@ function renderCharts(){
   ].map(([l,v,s])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('')
    +`<div class="kpi kpi-pie"><div><div class="lbl">Площадки</div><div class="val">${Object.keys(PL).length}</div><div class="sub">под наблюдением</div></div>`
    +`<div style="width:84px;height:84px;flex:0 0 auto"><canvas id="pie"></canvas></div>`
-   +`<div class="pie-legend">${Object.entries(PL).map(([k,v])=>`<span><i style="background:${v.c}"></i>${v.n} <b>${today.filter(r=>r.pl===k).length}</b></span>`).join('')}</div></div>`;
+   +`<div class="pie-legend">${Object.entries(PL).map(([k,v])=>`<span><i style="background:${v.c}"></i>${v.n}${isStale(k,PM,fresh)?` <span style="color:#ff9f43;font-size:10px" title="данные от прошлого прогона — площадка не обновилась">⚠${ddmm(PM[k])}</span>`:''} <b>${today.filter(r=>r.pl===k).length}</b></span>`).join('')}</div></div>`;
   const GRID=cssVar('--grid'),TICK=cssVar('--muted'),PIEB=cssVar('--pieborder');
   // Круговая диаграмма долей площадок (pie, не бублик): названия в tooltip по hover + легенда справа
   if(donutObj)donutObj.destroy();
@@ -345,9 +359,9 @@ function applyPreset(arr,preset){
     /* default */ if(da!==db)return db-da;if(a.price!==b.price)return a.price-b.price;return tc(a,b);});
 }
 function apply(){
-  const md=maxDay();
+  const PM=platMax();  // последняя дата по каждой площадке — устаревшие не пропадают
   FILT=RAW.filter(r=>r._cf)
-    .filter(r=>r.last_seen===md)
+    .filter(r=>r.last_seen===PM[r.pl])
     .filter(r=>state.pl.has(r.pl))
     .filter(r=>r._disc>=state.disc)
     .filter(r=>!state.apay||r.apay)
@@ -356,7 +370,7 @@ function apply(){
   else{FILT.sort((a,b)=>{const k=state.sortCol;let av,bv;if(k==='date'){av=a.first_seen||a.last_seen;bv=b.first_seen||b.last_seen}else if(k==='pl'){av=a.pl;bv=b.pl}else if(k==='title'){av=a.title;bv=b.title}else if(k==='price'){av=a.price;bv=b.price}else if(k==='op'){av=a._op;bv=b._op}else{av=a._disc;bv=b._disc}return (av>bv?1:av<bv?-1:0)*state.sortDir;});}
   document.getElementById('tot').textContent=FILT.length;document.getElementById('cnt').textContent=Math.min(FILT.length,state.size);
   // счётчик у бегунка дисконта — сколько карточек проходит текущий порог (без учёта самого дисконт-фильтра)
-  const md2=maxDay();const dcBase=RAW.filter(r=>r._cf).filter(r=>r.last_seen===md2).filter(r=>state.pl.has(r.pl)).filter(r=>!state.apay||r.apay).filter(r=>!state.q||r.query===state.q);
+  const dcBase=RAW.filter(r=>r._cf).filter(r=>r.last_seen===PM[r.pl]).filter(r=>state.pl.has(r.pl)).filter(r=>!state.apay||r.apay).filter(r=>!state.q||r.query===state.q);
   document.getElementById('discCnt').textContent=dcBase.filter(r=>r._disc>=state.disc).length;
   renderTable();
   updateSortInd();
