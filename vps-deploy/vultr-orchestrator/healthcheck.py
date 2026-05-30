@@ -70,6 +70,12 @@ def main():
         last = next((r for r in runs if r.get("status") in ("ok", "partial") and r.get("totals")), None)
     run_totals = (last or {}).get("totals") or {}
 
+    # Самый свежий прогон (любой статус, по id) — чтобы отличить «прогон завис/упал
+    # и не дошёл до площадки» от «экстрактор сломан».
+    latest = max(runs, key=lambda r: r.get("id") or 0) if runs else None
+    latest_status = (latest or {}).get("status")
+    run_incomplete = latest_status in ("hung", "failed", "running")
+
     # Карточки за сегодня (только нужные поля)
     rows = _get_all(f"listings?select=pl,price,op&last_seen=eq.{msk_today}")
 
@@ -86,8 +92,19 @@ def main():
         platforms.append({"pl": p, "found": found, "seen": seen,
                           "with_price": withp, "counterfeit": cf, "coverage": cov})
 
+        # Аномалия 0: площадка без данных за сегодня + последний прогон не завершился
+        # штатно → причина в зависании/сбое прогона, НЕ в экстракторе (не чинить код,
+        # нужен перезапуск парсера).
+        if seen == 0 and run_incomplete:
+            anomalies.append({
+                "pl": p, "kind": "run_incomplete",
+                "detail": (f"{PL_RU[p]}: нет данных за сегодня — ночной прогон "
+                           f"#{(latest or {}).get('id')} завершился со статусом "
+                           f"'{latest_status}' и не дошёл до этой площадки. "
+                           f"Экстрактор в порядке — нужен перезапуск парсера.")
+            })
         # Аномалия 1: нашли много, но контрафакт не виден вообще
-        if found >= MIN_FOUND and cf == 0:
+        elif found >= MIN_FOUND and cf == 0:
             anomalies.append({
                 "pl": p, "kind": "found_but_invisible",
                 "detail": (f"{PL_RU[p]}: парсер нашёл {found} карточек, но на дашборде "
@@ -107,7 +124,8 @@ def main():
         "healthy": len(anomalies) == 0,
         "run": {"id": (last or {}).get("id"), "status": (last or {}).get("status"),
                 "trigger": (last or {}).get("trigger"),
-                "finished_at": (last or {}).get("finished_at")},
+                "finished_at": (last or {}).get("finished_at"),
+                "latest_id": (latest or {}).get("id"), "latest_status": latest_status},
         "platforms": platforms,
         "anomalies": anomalies,
     }

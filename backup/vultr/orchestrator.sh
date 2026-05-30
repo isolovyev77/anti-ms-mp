@@ -33,8 +33,11 @@ fi
 # 1) Детектор аномалий
 HEALTH=$(python3 "$HERE/healthcheck.py" 2>/dev/null) || HEALTH='{"error":"healthcheck упал","anomalies":[]}'
 echo "[$TS] health: $HEALTH"
+# Авто-починку запускаем ТОЛЬКО для проблем экстрактора (found_but_invisible /
+# low_price_coverage). «run_incomplete» (прогон завис/не дошёл) — не чиним код,
+# про это просто пишем в отчёт (нужен перезапуск парсера, а не правка).
 ANOMALY_PLS=$(echo "$HEALTH" | python3 -c "import json,sys
-try: print(' '.join(a['pl'] for a in json.load(sys.stdin).get('anomalies',[])))
+try: print(' '.join(a['pl'] for a in json.load(sys.stdin).get('anomalies',[]) if a.get('kind') in ('found_but_invisible','low_price_coverage')))
 except: pass" 2>/dev/null)
 
 # 2) Авто-починка (если есть аномалии и не выключено)
