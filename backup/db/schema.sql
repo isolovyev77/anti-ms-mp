@@ -156,3 +156,28 @@ $function$;
 -- presenter_owner_token_hash_from_request, presenter_touch_updated_at) — не относятся
 -- к anti-ms-mp (остались от другого функционала проекта Supabase), для восстановления
 -- мониторинга не требуются.
+
+-- Удаление запросов мониторинга с дашборда (режим управления, кнопка «−» + «Удалить»).
+CREATE OR REPLACE FUNCTION public.remove_queries(p_secret text, p_queries text[], p_delete_cards boolean DEFAULT false)
+ RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_secret text := '<<PARSE_KEY_PHRASE>>';  -- реальное значение в backup/secrets
+  v_qdel int := 0; v_cdel int := 0;
+BEGIN
+  IF p_secret IS DISTINCT FROM v_secret THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'Неверная ключевая фраза');
+  END IF;
+  IF p_queries IS NULL OR array_length(p_queries, 1) IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'Список запросов пуст');
+  END IF;
+  IF p_delete_cards THEN
+    DELETE FROM listings WHERE query = ANY(p_queries);
+    GET DIAGNOSTICS v_cdel = ROW_COUNT;
+  END IF;
+  DELETE FROM monitor_queries WHERE query = ANY(p_queries);
+  GET DIAGNOSTICS v_qdel = ROW_COUNT;
+  RETURN jsonb_build_object('ok', true, 'queries_removed', v_qdel, 'cards_removed', v_cdel);
+END;
+$function$;
+GRANT EXECUTE ON FUNCTION public.remove_queries(text, text[], boolean) TO anon, authenticated;

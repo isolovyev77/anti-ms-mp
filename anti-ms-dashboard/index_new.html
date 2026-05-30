@@ -39,6 +39,9 @@
   .qf{display:flex;flex-direction:column;gap:4px;margin-top:4px}
   .qf button{text-align:left;border:1px solid var(--line);background:var(--panel2);color:var(--muted);padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12px}
   .qf button.on{background:var(--panel2);color:var(--tx);border-color:var(--accent)}
+  .qrow{display:flex;gap:4px;align-items:stretch}
+  .qf .qdel{flex:0 0 30px;text-align:center;color:#ff5470;font-size:16px;font-weight:700;padding:0}
+  .qf .qbtn.marked{text-decoration:line-through;color:#ff5470;border-color:#ff5470;opacity:.85}
   .main{padding:22px 26px}
   .top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;gap:14px;flex-wrap:wrap}
   .top h1{font-size:21px;font-weight:700}.top p{color:var(--muted);font-size:13px;margin-top:3px}
@@ -115,7 +118,7 @@
     <h4>Площадки</h4>
     <div id="platFilters"></div>
     <h4 style="display:flex;align-items:center;justify-content:space-between">Поисковый запрос
-      <button id="addQBtn" title="Добавить запрос на мониторинг" style="border:1px solid var(--line);background:var(--panel2);color:var(--accent);width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1;padding:0">+</button>
+      <button id="addQBtn" title="Добавить / удалить запросы" style="border:1px solid var(--line);background:var(--panel2);color:var(--accent);width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1;padding:0">+</button>
     </h4>
     <div id="addQForm" style="display:none;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px">
       <input id="newQ" placeholder="Напр.: Windows 11 ключ" style="width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--tx);font-size:12px;margin-bottom:7px" onkeydown="if(event.key==='Enter')addQuery()">
@@ -123,6 +126,10 @@
       <div style="display:flex;gap:6px"><button onclick="addQuery()" style="flex:1;background:var(--accent);color:#06231f;border:none;border-radius:7px;padding:7px;font-weight:700;cursor:pointer;font-size:12px">Добавить</button><button onclick="document.getElementById('addQForm').style.display='none'" style="background:var(--panel2);color:var(--tx);border:1px solid var(--line);border-radius:7px;padding:7px 10px;cursor:pointer;font-size:12px">Отмена</button></div>
     </div>
     <div class="qf" id="queryFilters"></div>
+    <div id="qEditBar" style="display:none;margin-top:8px">
+      <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);cursor:pointer;margin-bottom:7px"><input type="checkbox" id="delCards" style="accent-color:#ff5470"> удалить найденные карточки</label>
+      <button id="qDelBtn" onclick="deleteMarkedQueries()" disabled style="width:100%;background:#3a1622;color:#ff6b8a;border:1px solid #ff5470;border-radius:8px;padding:8px;cursor:pointer;font-size:12px;font-weight:700">Удалить (0)</button>
+    </div>
     <h4 style="display:flex;justify-content:space-between;align-items:baseline"><span>Мин. дисконт: <span id="discVal" style="color:var(--accent)">50%</span></span><span id="discCnt" style="color:var(--muted)">0</span></h4>
     <input class="slider" type="range" min="0" max="99" value="50" id="discSlider">
   </aside>
@@ -224,6 +231,7 @@ function flags(r){const d=r._disc,tl=(r.title||'').toLowerCase(),tm=TM.some(k=>t
   return{F1:d>=50,F2:d>=80,F5:true,F6:tm&&!cmp,disc:d};}
 function flagPills(f){let p=[];if(f.F2)p.push('<span class="fp fp-r">🔴F2</span>');else if(f.F1)p.push('<span class="fp fp-r">🔴F1</span>');p.push('<span class="fp fp-y">🟡F5</span>');if(f.F6)p.push('<span class="fp fp-o">🟠F6</span>');return p.join('');}
 let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false,gran:'day',preset:'default',sortCol:'disc',sortDir:-1,page:0,size:50},FILT=[];
+let editMode=false, markedQ=new Set();  // режим управления запросами: пометка на удаление
 async function fetchAll(path){let all=[],from=0;while(true){const r=await fetch(`${SUPABASE_URL}${path}`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Range-Unit':'items',Range:`${from}-${from+999}`}});const b=await r.json();all=all.concat(b);if(b.length<1000)break;from+=1000;}return all;}
 let DAILY=[];
 async function load(){
@@ -268,6 +276,22 @@ async function addQuery(){const inp=document.getElementById('newQ');const q=(inp
   const res=await requestParse(s,q);
   if(res&&res.ok){inp.value='';document.getElementById('addQForm').style.display='none';alert('Запрос «'+q+'» добавлен. Парсинг по нему запущен (~3 мин).');}
   else{if((res.error||'').includes('фраз'))sessionStorage.removeItem('mon_secret');alert('Не удалось добавить: '+(res.error||'ошибка'));}}
+// Удаление запросов из мониторинга (RPC remove_queries, под ключевой фразой)
+async function removeQueries(secret,queries,deleteCards){
+  const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/remove_queries',{method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_secret:secret,p_queries:queries,p_delete_cards:!!deleteCards})});
+  if(!r.ok)return{ok:false,error:'HTTP '+r.status};return await r.json();}
+async function deleteMarkedQueries(){
+  const qs=[...markedQ];if(!qs.length)return;
+  const delCards=document.getElementById('delCards').checked;
+  if(!confirm('Убрать из мониторинга '+qs.length+' запрос(ов):\n• '+qs.join('\n• ')+(delCards?'\n\nИ УДАЛИТЬ найденные по ним карточки.':'')+'\n\nПродолжить?'))return;
+  const s=getKeyPhrase();if(!s)return;
+  const res=await removeQueries(s,qs,delCards);
+  if(res&&res.ok){
+    alert('Удалено запросов: '+res.queries_removed+(delCards?(', карточек: '+res.cards_removed):''));
+    markedQ.clear();editMode=false;document.getElementById('addQForm').style.display='none';updateDelBar();
+    if(state.q&&qs.includes(state.q))state.q='';
+    load();  // перезагрузка списка запросов и данных
+  }else{if((res.error||'').includes('фраз'))sessionStorage.removeItem('mon_secret');alert('Не удалось удалить: '+(res.error||'ошибка'));}}
 function maxDay(){return [...new Set(RAW.filter(r=>r._cf).map(r=>r.last_seen))].sort().pop();}
 // Последняя дата ПО КАЖДОЙ площадке отдельно. Если прогон не обновил площадку
 // (зависание/сбой), показываем её ПОСЛЕДНИЕ данные со старой датой, а не пустоту —
@@ -342,8 +366,20 @@ function updateSortInd(){
     if(el)el.innerHTML=(p.d<0?'▼':'▲')+(p.n?'<sup>'+p.n+'</sup>':'');});
 }
 function buildQueryFilters(){const c=document.getElementById('queryFilters');
-  c.innerHTML=`<button class="on" data-q="">Все запросы</button>`+QUERIES.map(q=>`<button data-q="${q}">${q}</button>`).join('');
-  c.querySelectorAll('button').forEach(b=>b.onclick=()=>{c.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.q=b.dataset.q;state.page=0;apply();});}
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  c.innerHTML=`<button class="qbtn${state.q===''?' on':''}" data-q="">Все запросы</button>`+QUERIES.map(q=>{
+    const on=state.q===q?' on':'', mk=markedQ.has(q)?' marked':'';
+    const filt=`<button class="qbtn${on}${mk}" data-q="${esc(q)}" style="flex:1">${esc(q)}</button>`;
+    const del=editMode?`<button class="qdel" data-q="${esc(q)}" title="Пометить/снять на удаление">−</button>`:'';
+    return `<div class="qrow">${filt}${del}</div>`;
+  }).join('');
+  // клик по запросу — фильтр таблицы (как раньше)
+  c.querySelectorAll('.qbtn').forEach(b=>b.onclick=()=>{c.querySelectorAll('.qbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.q=b.dataset.q;state.page=0;apply();});
+  // клик по «−» — пометить/снять запрос на удаление
+  c.querySelectorAll('.qdel').forEach(b=>b.onclick=e=>{e.stopPropagation();const q=b.dataset.q;markedQ.has(q)?markedQ.delete(q):markedQ.add(q);buildQueryFilters();updateDelBar();});
+}
+function updateDelBar(){const bar=document.getElementById('qEditBar'),btn=document.getElementById('qDelBtn');if(!bar)return;
+  bar.style.display=editMode?'block':'none';if(btn){btn.textContent='Удалить ('+markedQ.size+')';btn.disabled=markedQ.size===0;}}
 // Пресеты сортировки (перенос из index_new): семья продукта, индекс подозрительности
 function monFamilyKey(t){t=String(t||'').toLowerCase();const m=t.match(/(office\s+(?:365|2024|2021|2019|2016|2013|2010))\s*(pro\s*plus|home\s*and\s*business|home\s*and\s*student|professional\s*plus|professional|personal|family|standard|ltsc)?/i);if(m)return (m[1]+' '+(m[2]||'')).replace(/\s+/g,' ').trim();if(t.includes('365')&&t.includes('microsoft'))return 'microsoft 365';return 'прочее';}
 function monScore(r){let s=Math.max(0,r._disc);const fc=[r._disc>=50,r._disc>=80,true,/microsoft|office|windows/i.test(r.title||'')].filter(Boolean).length;s+=fc*3;if(r.price<100)s+=10;else if(r.price<300)s+=5;if(r._op>10000&&r.price<r._op*0.01)s+=5;return s;}
@@ -423,7 +459,12 @@ function buildPlat(){
 }
 document.getElementById('discSlider').oninput=e=>{document.getElementById('discVal').textContent=e.target.value+'%';state.disc=+e.target.value;state.page=0;apply();};
 document.querySelectorAll('.ps').forEach(b=>b.onclick=()=>{document.querySelectorAll('.ps').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.size=+b.dataset.ps;state.page=0;apply();});
-document.getElementById('addQBtn').onclick=()=>{const f=document.getElementById('addQForm');f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')document.getElementById('newQ').focus();};
+// «+» включает/выключает режим управления: форма добавления + «−» на запросах + панель удаления
+document.getElementById('addQBtn').onclick=()=>{editMode=!editMode;
+  document.getElementById('addQForm').style.display=editMode?'block':'none';
+  if(!editMode)markedQ.clear();
+  buildQueryFilters();updateDelBar();
+  if(editMode)document.getElementById('newQ').focus();};
 // Переключатель гранулярности графика: дни/месяцы/годы (с прицелом на накопление истории)
 document.querySelectorAll('#granSeg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#granSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.gran=b.dataset.gran;renderCharts();});
 document.querySelectorAll('#presetBtns button').forEach(b=>b.onclick=()=>setPreset(b.dataset.preset,b));
