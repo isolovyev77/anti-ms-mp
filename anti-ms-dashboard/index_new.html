@@ -123,7 +123,7 @@
     <div id="addQForm" style="display:none;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px">
       <input id="newQ" placeholder="Напр.: Windows 11 ключ" style="width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--tx);font-size:12px;margin-bottom:7px" onkeydown="if(event.key==='Enter')addQuery()">
       <div style="font-size:10px;color:var(--muted);margin-bottom:7px">Потребуется ключевая фраза. После добавления запустится парсинг по нему (~3 мин).</div>
-      <div style="display:flex;gap:6px"><button onclick="addQuery()" style="flex:1;background:var(--accent);color:#06231f;border:none;border-radius:7px;padding:7px;font-weight:700;cursor:pointer;font-size:12px">Добавить</button><button onclick="document.getElementById('addQForm').style.display='none'" style="background:var(--panel2);color:var(--tx);border:1px solid var(--line);border-radius:7px;padding:7px 10px;cursor:pointer;font-size:12px">Отмена</button></div>
+      <div style="display:flex;gap:6px"><button onclick="addQuery()" style="flex:1;background:var(--accent);color:#06231f;border:none;border-radius:7px;padding:7px;font-weight:700;cursor:pointer;font-size:12px">Добавить</button><button onclick="exitEditMode()" style="background:var(--panel2);color:var(--tx);border:1px solid var(--line);border-radius:7px;padding:7px 10px;cursor:pointer;font-size:12px">Отмена</button></div>
     </div>
     <div class="qf" id="queryFilters"></div>
     <div id="qEditBar" style="display:none;margin-top:8px">
@@ -380,6 +380,8 @@ function buildQueryFilters(){const c=document.getElementById('queryFilters');
 }
 function updateDelBar(){const bar=document.getElementById('qEditBar'),btn=document.getElementById('qDelBtn');if(!bar)return;
   bar.style.display=editMode?'block':'none';if(btn){btn.textContent='Удалить ('+markedQ.size+')';btn.disabled=markedQ.size===0;}}
+// Полный выход из режима управления: скрыть форму добавления, «−» и панель «Удалить», снять пометки
+function exitEditMode(){editMode=false;markedQ.clear();document.getElementById('addQForm').style.display='none';buildQueryFilters();updateDelBar();}
 // Пресеты сортировки (перенос из index_new): семья продукта, индекс подозрительности
 function monFamilyKey(t){t=String(t||'').toLowerCase();const m=t.match(/(office\s+(?:365|2024|2021|2019|2016|2013|2010))\s*(pro\s*plus|home\s*and\s*business|home\s*and\s*student|professional\s*plus|professional|personal|family|standard|ltsc)?/i);if(m)return (m[1]+' '+(m[2]||'')).replace(/\s+/g,' ').trim();if(t.includes('365')&&t.includes('microsoft'))return 'microsoft 365';return 'прочее';}
 function monScore(r){let s=Math.max(0,r._disc);const fc=[r._disc>=50,r._disc>=80,true,/microsoft|office|windows/i.test(r.title||'')].filter(Boolean).length;s+=fc*3;if(r.price<100)s+=10;else if(r.price<300)s+=5;if(r._op>10000&&r.price<r._op*0.01)s+=5;return s;}
@@ -460,11 +462,10 @@ function buildPlat(){
 document.getElementById('discSlider').oninput=e=>{document.getElementById('discVal').textContent=e.target.value+'%';state.disc=+e.target.value;state.page=0;apply();};
 document.querySelectorAll('.ps').forEach(b=>b.onclick=()=>{document.querySelectorAll('.ps').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.size=+b.dataset.ps;state.page=0;apply();});
 // «+» включает/выключает режим управления: форма добавления + «−» на запросах + панель удаления
-document.getElementById('addQBtn').onclick=()=>{editMode=!editMode;
-  document.getElementById('addQForm').style.display=editMode?'block':'none';
-  if(!editMode)markedQ.clear();
-  buildQueryFilters();updateDelBar();
-  if(editMode)document.getElementById('newQ').focus();};
+document.getElementById('addQBtn').onclick=()=>{
+  if(editMode){exitEditMode();return;}
+  editMode=true;document.getElementById('addQForm').style.display='block';
+  buildQueryFilters();updateDelBar();document.getElementById('newQ').focus();};
 // Переключатель гранулярности графика: дни/месяцы/годы (с прицелом на накопление истории)
 document.querySelectorAll('#granSeg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#granSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.gran=b.dataset.gran;renderCharts();});
 document.querySelectorAll('#presetBtns button').forEach(b=>b.onclick=()=>setPreset(b.dataset.preset,b));
