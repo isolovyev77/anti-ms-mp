@@ -52,10 +52,12 @@
   .vswitch .on{padding:6px 12px;background:var(--accent);color:#06231f;font-weight:700}
   .vswitch a{padding:6px 12px;color:var(--muted);text-decoration:none;font-weight:600}
   .vswitch a:hover{background:var(--panel2);color:var(--tx)}
-  .scan-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:13px;font-weight:800;cursor:help;flex:0 0 auto}
+  .scan-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:13px;font-weight:800;cursor:help;flex:0 0 auto;position:relative}
   .scan-ok{background:rgba(51,214,200,.18);color:var(--accent)}
   .scan-warn{background:rgba(255,159,67,.18);color:#ff9f43}
   .scan-bad{background:rgba(255,84,112,.18);color:#ff5470}
+  .scan-pop{display:none;position:absolute;top:30px;right:0;white-space:nowrap;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:500;color:var(--tx);box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:60}
+  .scan-badge:hover .scan-pop,.scan-badge:focus .scan-pop{display:block}
   .btn{border:none;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
   .btn-pri{background:var(--accent);color:#06231f}.btn-gh{background:var(--panel2);color:var(--tx);border:1px solid var(--line)}
   .kpis{display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:13px;margin-bottom:16px}
@@ -242,8 +244,12 @@ function showScanStatus(lr){
   const el=document.getElementById('scanStatus');if(!el)return;
   const map={ok:['scan-ok','✓','Актуально'],partial:['scan-warn','⚠','Частично — были ошибки'],failed:['scan-bad','✗','Сбой прогона'],hung:['scan-bad','✗','Прогон завис'],running:['scan-warn','⏳','Идёт прогон']};
   const [cls,sym,txt]=map[lr.status]||['scan-warn','•',lr.status];
-  el.className='scan-badge '+cls;el.textContent=sym;el.style.display='';
-  el.title=txt+(lr.finished_at?' · '+new Date(lr.finished_at).toLocaleString('ru'):'');
+  const when=lr.finished_at?' · '+new Date(lr.finished_at).toLocaleString('ru'):'';
+  el.className='scan-badge '+cls;
+  el.innerHTML=sym+'<span class="scan-pop">'+txt+when+'</span>';
+  el.title=txt+when; // фолбэк
+  el.tabIndex=0;      // фокусируемый — подсказка видна и по клику/тапу
+  el.style.display='';
 }
 // Кеш: мгновенный показ последнего снимка из localStorage, пока грузится свежее из Supabase
 const CACHE_KEY='proto_a_cache_v1';
