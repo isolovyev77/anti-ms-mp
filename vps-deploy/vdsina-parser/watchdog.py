@@ -158,7 +158,7 @@ def main() -> int:
     # даже если их parser_runs уже finalized (status=ok). Был кейс: парсер дошёл
     # до "run end", но cloakbrowser оставил non-daemon потоки/chromium, и процесс
     # висел 17 часов, держа ресурс. Такой зомби не виден через parser_runs.
-    MAX_PROC_AGE_SEC = int(os.environ.get("WATCHDOG_MAX_PROC_AGE_SEC", "2700"))  # 45 мин
+    MAX_PROC_AGE_SEC = int(os.environ.get("WATCHDOG_MAX_PROC_AGE_SEC", "2700"))  # 45 мин — запас (здоровый полный прогон ~25-30 мин); основной ловец зависаний — застывший heartbeat (5 мин)
     try:
         import subprocess
         out = subprocess.run(

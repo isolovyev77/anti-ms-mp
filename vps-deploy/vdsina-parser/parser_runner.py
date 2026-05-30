@@ -171,10 +171,17 @@ SCRAPER_PROXY = env("SCRAPER_PROXY", "").strip() or None
 N8N_WEBHOOK = env("N8N_WEBHOOK_PARSER_DONE", "").strip() or None
 
 # === Утилиты ===
+# Время последнего лог-события = реальный прогресс скрейпа. heartbeat шлёт ЕГО,
+# а не now(), чтобы watchdog ловил зависания по остановке прогресса (за ~5 мин),
+# а не только по возрасту процесса (45 мин). При зависании log() не вызывается →
+# heartbeat «замирает» → watchdog убивает.
+_LAST_PROGRESS = {"ts": dt.datetime.now(dt.timezone.utc)}
+
 def log(msg: str, **fields) -> None:
-    ts = dt.datetime.now(dt.timezone.utc).isoformat()
+    now = dt.datetime.now(dt.timezone.utc)
+    _LAST_PROGRESS["ts"] = now
     extras = " ".join(f"{k}={v}" for k, v in fields.items())
-    print(f"[{ts}] {msg} {extras}", flush=True)
+    print(f"[{now.isoformat()}] {msg} {extras}", flush=True)
 
 def jitter(lo=1.0, hi=2.5):
     time.sleep(random.uniform(lo, hi))
@@ -585,8 +592,11 @@ def insert_parser_run(trigger: str) -> int:
 
 
 def heartbeat(run_id: int) -> None:
-    """Раз в 30 сек пишем last_heartbeat=NOW в parser_runs для watchdog."""
-    payload = json.dumps({"last_heartbeat": dt.datetime.now(dt.timezone.utc).isoformat()}).encode()
+    """Раз в 30 сек пишем last_heartbeat = время последнего ПРОГРЕССА (лог-события),
+    а не now(). Так при зависании heartbeat замирает и watchdog убивает прогон за
+    ~5 мин (STALE_AFTER), а не ждёт 45-мин возрастной kill."""
+    ts = _LAST_PROGRESS.get("ts") or dt.datetime.now(dt.timezone.utc)
+    payload = json.dumps({"last_heartbeat": ts.isoformat()}).encode()
     req = urllib.request.Request(
         f"{SUPABASE_URL}/rest/v1/parser_runs?id=eq.{run_id}",
         data=payload,
@@ -688,6 +698,11 @@ def main() -> int:
                     help="Не слать n8n/Telegram-уведомление (для ночного cron: один отчёт шлёт оркестратор в 04:00)")
     args = ap.parse_args()
     platforms = [p.strip() for p in args.platforms.split(",") if p.strip() in PLATFORMS]
+    # Порядок: сначала надёжные (ozon, wildberries), потом склонные к зависанию
+    # (avito SPA-redirect, yandex DataDome) — yandex ПОСЛЕДНИМ. Так зависание одной
+    # площадки не лишает данных остальные (каждая апсертится сразу после скрейпа).
+    SCRAPE_ORDER = {"ozon": 0, "wildberries": 1, "avito": 2, "yandex": 3}
+    platforms.sort(key=lambda p: SCRAPE_ORDER.get(p, 9))
 
     # QUERIES: либо один запрос (--only-query), либо активные из monitor_queries.
     global QUERIES
@@ -731,7 +746,15 @@ def main() -> int:
                 items_d = dedup(items)
                 ok = upsert_listings(items_d)
                 totals[plat] = {"found": len(items), "unique": len(items_d), "upserted": ok}
-                daily_rows.append(platform_daily_stat(plat, items_d))
+                ds = platform_daily_stat(plat, items_d)
+                daily_rows.append(ds)
+                # daily_stats пишем СРАЗУ по площадке (а не в конце прогона) — иначе
+                # зависание на последней площадке теряет дневной срез успевших.
+                if not args.only_query:
+                    try:
+                        upsert_daily_stats([ds])
+                    except Exception as e:
+                        log("daily_stats (инкр.) fail", err=str(e)[:150])
                 all_errors.extend(errors)
                 log(f"  [{plat}] done", **totals[plat])
             except Exception as e:
@@ -754,12 +777,11 @@ def main() -> int:
         if runs_deleted > 0:
             log("retention: удалено parser_runs старше 90 дней", deleted=runs_deleted)
 
-    # Дневной снимок статистики (для графика динамики — не зависит от схлопывания
-    # last_seen). Пишем только при полном прогоне (все площадки, без --only-query),
-    # иначе single-query прогон затрёт дневной срез частичными цифрами.
+    # daily_stats теперь пишется инкрементально внутри цикла (по каждой площадке
+    # сразу) — чтобы зависание на последней площадке не теряло дневной срез
+    # успевших. Здесь только логируем итог.
     if has_data and not args.only_query:
-        upsert_daily_stats(daily_rows)
-        log("daily_stats обновлён", platforms=len(daily_rows))
+        log("daily_stats записан инкрементально", platforms=len(daily_rows))
 
     # Отметим запросы как обработанные (для дашборда — когда последний раз парсился)
     if has_data:
