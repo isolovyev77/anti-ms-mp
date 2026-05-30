@@ -295,7 +295,7 @@ function renderCharts(){
   // Баннер: какие площадки показывают данные прошлого прогона (не обновились)
   const staleList=Object.entries(PL).filter(([k])=>isStale(k,PM,fresh)).map(([k,v])=>`${v.n} (от ${ddmm(PM[k])})`);
   const sb=document.getElementById('staleBanner');
-  if(sb){if(staleList.length){sb.style.display='';sb.innerHTML='⚠️ Данные прошлого прогона (площадка не обновилась): <b>'+staleList.join(', ')+'</b>. Последний прогон не дошёл — оркестратор перезапустит автоматически ночью.';}else sb.style.display='none';}
+  if(sb){if(staleList.length){sb.style.display='';sb.innerHTML='⚠️ Данные прошлого прогона (площадка не обновилась): <b>'+staleList.join(', ')+'</b>. Чтобы обновить сейчас — нажмите «Обновить» вверху (потребуется ключевая фраза, ~25 мин). Иначе оркестратор перезапустит автоматически ночью.';}else sb.style.display='none';}
   // KPI: 3 узкие карточки + широкая «Площадки» с круговой диаграммой справа до края
   document.getElementById('kpis').innerHTML=[
     ['Активный контрафакт',today.length,'на последнюю дату'],
