@@ -209,4 +209,10 @@ try: print('ok' if json.load(sys.stdin).get('healthy') else 'anomalies')
 except: print('?')" 2>/dev/null)
 SUMMARY=$(echo "$REPORT" | head -1)
 python3 "$HERE/logmem.py" orchestrator INFO "Утренний прогон оркестратора: здоровье=$HEALTHY. $SUMMARY" 2>/dev/null || true
+# #18: отметка живости для независимого сторожа на Oracle (он читает system_heartbeats
+# из Supabase и алертит напрямую в Telegram, если оркестратор замолчал >25ч).
+curl -sS --max-time 15 -X POST "$SUPABASE_URL/rest/v1/rpc/record_heartbeat" \
+  -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"p_component\":\"orchestrator\",\"p_note\":\"health=$HEALTHY\"}" >/dev/null 2>&1 || true
 echo "[$TS] === orchestrator done ==="

@@ -192,3 +192,30 @@ $function$;
 GRANT EXECUTE ON FUNCTION public.remove_queries(text, text[], boolean) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.request_parse(text, text) TO anon, authenticated;       -- #12
 GRANT EXECUTE ON FUNCTION public.deactivate_query(text, text) TO anon, authenticated;     -- #12
+
+-- #18: отметки живости (dead-man's switch). Независимый сторож на Oracle (clawbot)
+-- читает таблицу (anon, read-only) и алертит в Telegram напрямую, если оркестратор/
+-- парсер замолчали. Запись — через record_heartbeat (без фразы; компонент из белого списка).
+CREATE TABLE IF NOT EXISTS public.system_heartbeats (
+  component  text PRIMARY KEY,
+  beat_at    timestamptz NOT NULL DEFAULT now(),
+  note       text,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE public.system_heartbeats ENABLE ROW LEVEL SECURITY;
+CREATE POLICY system_heartbeats_read ON public.system_heartbeats FOR SELECT TO anon, authenticated USING (true);
+
+CREATE OR REPLACE FUNCTION public.record_heartbeat(p_component text, p_note text DEFAULT NULL)
+ RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'
+AS $function$
+BEGIN
+  IF p_component NOT IN ('orchestrator','parser','watchdog') THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'unknown component');
+  END IF;
+  INSERT INTO public.system_heartbeats(component, beat_at, note, updated_at)
+  VALUES (p_component, now(), p_note, now())
+  ON CONFLICT (component) DO UPDATE SET beat_at = now(), note = EXCLUDED.note, updated_at = now();
+  RETURN jsonb_build_object('ok', true, 'component', p_component);
+END;
+$function$;
+GRANT EXECUTE ON FUNCTION public.record_heartbeat(text, text) TO anon, authenticated;
