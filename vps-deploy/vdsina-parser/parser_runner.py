@@ -551,7 +551,10 @@ def cleanup_old_listings(retention_days: int = 14) -> int:
 
 def cleanup_old_parser_runs(retention_days: int = 90) -> int:
     """Удалить parser_runs старше N дней. Тоже не блокирующая."""
-    cutoff_dt = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=retention_days)).isoformat()
+    # strftime без таймзоны: .isoformat() даёт "...+00:00", а '+' в URL читается
+    # как пробел → PostgREST 400 (фильтр невалиден). Из-за этого чистка parser_runs
+    # раньше молча падала и таблица росла. Naive-timestamp PostgREST принимает.
+    cutoff_dt = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=retention_days)).strftime("%Y-%m-%dT%H:%M:%S")
     try:
         req = urllib.request.Request(
             f"{SUPABASE_URL}/rest/v1/parser_runs?started_at=lt.{cutoff_dt}",
