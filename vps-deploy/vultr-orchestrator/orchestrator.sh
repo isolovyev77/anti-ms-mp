@@ -20,11 +20,13 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 cd "$HERE"
 [ -f "$HERE/.env" ] && set -a && . "$HERE/.env" && set +a
 CLAUDE=/home/linuxuser/.local/bin/claude
-VDSINA_KEY="$HERE/vdsina_key"
+VDSINA_KEY="$HERE/vdsina_orch"   # #5: выделенный restricted-ключ (непривилегированный юзер orch, не root)
 # #13: проверяем host-key VDSina по зафиксированному known_hosts (ssh-keyscan снят
 # 2026-05-31), вместо слепого StrictHostKeyChecking=no. Защита от MITM/подмены хоста.
 # При плановой смене host-key VDSina обновить: ssh-keyscan 94.103.89.251 > $HERE/known_hosts
-SSH_VDSINA="ssh -o UserKnownHostsFile=$HERE/known_hosts -o StrictHostKeyChecking=yes -o ConnectTimeout=15 -i $VDSINA_KEY root@94.103.89.251"
+# #5: подключаемся под orch (владеет /opt/anti-ms-mp), а не под root — компрометация
+# Vultr больше не даёт root на VDSina. Логи перенесены в /opt/anti-ms-mp (orch-writable).
+SSH_VDSINA="ssh -o UserKnownHostsFile=$HERE/known_hosts -o StrictHostKeyChecking=yes -o ConnectTimeout=15 -i $VDSINA_KEY orch@94.103.89.251"
 TS=$(date -Iseconds)
 TODAY=$(TZ=Europe/Moscow date +%F)
 QUERY_DEFAULT="Microsoft Office 2021 ключ"
@@ -58,10 +60,10 @@ if [ -n "$INCOMPLETE_PLS" ]; then
     RERUN_LOG="VDSina недоступна по SSH — авто-перезапуск [$INCOMPLETE_PLS] невозможен, нужна ручная проверка."
     python3 "$HERE/logmem.py" orchestrator NEEDS-CHECK "VDSina недоступна по SSH — авто-перезапуск $INCOMPLETE_PLS невозможен." 2>/dev/null || true
   else
-    $SSH_VDSINA "cd /opt/anti-ms-mp && rm -f /var/log/rerun.log && nohup .venv/bin/python parser_runner.py --trigger watcher --platforms '$INCOMPLETE_PLS' --no-notify > /var/log/rerun.log 2>&1 & echo started" 2>/dev/null || true
+    $SSH_VDSINA "cd /opt/anti-ms-mp && rm -f /opt/anti-ms-mp/rerun.log && nohup .venv/bin/python parser_runner.py --trigger watcher --platforms '$INCOMPLETE_PLS' --no-notify > /opt/anti-ms-mp/rerun.log 2>&1 & echo started" 2>/dev/null || true
     for _i in $(seq 1 48); do
       sleep 15
-      $SSH_VDSINA 'grep -qiE "run end|Traceback" /var/log/rerun.log 2>/dev/null' && break
+      $SSH_VDSINA 'grep -qiE "run end|Traceback" /opt/anti-ms-mp/rerun.log 2>/dev/null' && break
     done
     HEALTH=$(python3 "$HERE/healthcheck.py" 2>/dev/null) || true
     STILL=$(echo "$HEALTH" | python3 -c "import json,sys
