@@ -232,7 +232,11 @@ function flags(r){const d=r._disc,tl=(r.title||'').toLowerCase(),tm=TM.some(k=>t
 function flagPills(f){let p=[];if(f.F2)p.push('<span class="fp fp-r">🔴F2</span>');else if(f.F1)p.push('<span class="fp fp-r">🔴F1</span>');p.push('<span class="fp fp-y">🟡F5</span>');if(f.F6)p.push('<span class="fp fp-o">🟠F6</span>');return p.join('');}
 let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false,gran:'day',preset:'default',sortCol:'disc',sortDir:-1,page:0,size:50},FILT=[];
 let editMode=false, markedQ=new Set();  // режим управления запросами: пометка на удаление
-async function fetchAll(path){let all=[],from=0;while(true){const r=await fetch(`${SUPABASE_URL}${path}`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Range-Unit':'items',Range:`${from}-${from+999}`}});const b=await r.json();all=all.concat(b);if(b.length<1000)break;from+=1000;}return all;}
+// Экранирование данных из БД перед вставкой в innerHTML — защита от XSS через title/query/url,
+// которые продавец на маркетплейсе контролирует и которые парсер пишет сырыми.
+function htmlEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function safeUrl(u){try{const p=new URL(u||'');if(p.protocol==='https:'||p.protocol==='http:')return u;}catch(e){}return '#';}
+async function fetchAll(path){let all=[],from=0;while(true){const r=await fetch(`${SUPABASE_URL}${path}`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Range-Unit':'items',Range:`${from}-${from+999}`}});if(!r.ok)break;const b=await r.json();if(!Array.isArray(b))break;all=all.concat(b);if(b.length<1000)break;from+=1000;}return all;}
 let DAILY=[];
 async function load(){
   const rows=await fetchAll(`/rest/v1/listings?select=pl,product_id,title,price,op,query,first_seen,last_seen,url,avito_pay&order=last_seen.desc`);
@@ -263,7 +267,7 @@ function showScanStatus(lr){
 // Кеш: мгновенный показ последнего снимка из localStorage, пока грузится свежее из Supabase
 const CACHE_KEY='proto_a_cache_v1';
 function saveCache(){try{localStorage.setItem(CACHE_KEY,JSON.stringify({RAW,DAILY,QUERIES,savedAt:Date.now()}));}catch(e){}}
-function tryCache(){try{const c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');if(c&&c.RAW&&c.RAW.length){RAW=c.RAW;DAILY=c.DAILY||[];QUERIES=c.QUERIES||[];buildQueryFilters();renderCharts();apply();return true;}}catch(e){}return false;}
+function tryCache(){try{const c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');if(c&&c.RAW&&c.RAW.length&&(Date.now()-(c.savedAt||0)<43200000)){RAW=c.RAW;DAILY=c.DAILY||[];QUERIES=c.QUERIES||[];buildQueryFilters();renderCharts();apply();return true;}}catch(e){}return false;}
 // ── RPC с ключевой фразой (как в index_new.html) ──
 function getKeyPhrase(force){let p=force?null:sessionStorage.getItem('mon_secret');if(!p){p=prompt('Введите ключевую фразу для запуска парсинга / добавления запроса:');if(p)sessionStorage.setItem('mon_secret',p);}return p;}
 async function requestParse(secret,query){const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/request_parse',{method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_secret:secret,p_query:query||null})});if(!r.ok)return{ok:false,error:'HTTP '+r.status};return await r.json();}
@@ -288,7 +292,7 @@ async function deleteMarkedQueries(){
   const res=await removeQueries(s,qs,delCards);
   if(res&&res.ok){
     alert('Удалено запросов: '+res.queries_removed+(delCards?(', карточек: '+res.cards_removed):''));
-    markedQ.clear();editMode=false;document.getElementById('addQForm').style.display='none';updateDelBar();
+    markedQ.clear();editMode=false;document.getElementById('addQForm').style.display='none';buildQueryFilters();updateDelBar();
     if(state.q&&qs.includes(state.q))state.q='';
     load();  // перезагрузка списка запросов и данных
   }else{if((res.error||'').includes('фраз'))sessionStorage.removeItem('mon_secret');alert('Не удалось удалить: '+(res.error||'ошибка'));}}
@@ -420,8 +424,8 @@ function renderTable(){
     return `<tr>
       <td style="white-space:nowrap;color:var(--muted)" title="Дата первого обнаружения">${((r.first_seen||r.last_seen)||'').slice(5).split('-').reverse().join('.')}</td>
       <td><span class="plbadge" style="background:${PL[r.pl].c}22;color:${PL[r.pl].c}">${PL[r.pl].n}</span> ${r.apay?'<span class="apay" title="Оплата через Avito"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>':''}</td>
-      <td style="max-width:280px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${(r.title||'').replace(/"/g,'&quot;')}">${(r.title||'').slice(0,55)}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">🔎 ${r.query||''}</div></td>
-      <td><a class="lnk" href="${r.url}" target="_blank" rel="noopener">Открыть ↗</a></td>
+      <td style="max-width:280px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${htmlEsc(r.title||'')}">${htmlEsc((r.title||'').slice(0,55))}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">🔎 ${htmlEsc(r.query||'')}</div></td>
+      <td><a class="lnk" href="${htmlEsc(safeUrl(r.url))}" target="_blank" rel="noopener">Открыть ↗</a></td>
       <td style="font-weight:700">${(r.price||0).toLocaleString('ru')} ₽</td>
       <td style="color:var(--muted)">${r._op.toLocaleString('ru')} ₽</td>
       <td class="disc" style="color:${dc}">${r._disc}%</td>

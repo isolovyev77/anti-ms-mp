@@ -24,6 +24,7 @@ import random
 import subprocess
 import sys
 import time
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -156,7 +157,7 @@ def main() -> int:
         if result is not None:
             try:
                 sb_patch(
-                    f"/rest/v1/listings?pl=eq.avito&product_id=eq.{pid}",
+                    f"/rest/v1/listings?pl=eq.avito&product_id=eq.{urllib.parse.quote(str(pid), safe='')}",
                     {"avito_pay": result,
                      "avito_pay_checked_at": dt.datetime.now(dt.timezone.utc).isoformat()},
                 )

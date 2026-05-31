@@ -472,6 +472,7 @@ def scrape_one_platform(page, platform: str, run_log) -> tuple[list[dict], list[
             # Retry стр.1 один раз при ExecCtx ошибке — частый паттерн avito antibot
             if not page_ok and p == 1 and errors and "extract:" in (errors[-1].get("message") or ""):
                 run_log(f"    стр.1 retry после extract-ошибки")
+                errors.pop()  # убрать запись о первой попытке: при успешном retry не раздуваем errors→partial; при повторном сбое _scrape_one_page добавит свежую
                 time.sleep(3)
                 page_ok, should_break = _scrape_one_page(page, platform, q, p, run_log, items, errors)
             if should_break:

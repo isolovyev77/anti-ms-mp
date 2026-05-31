@@ -38,6 +38,9 @@ else
   SUMMARY=$(echo "$RUNS_JSON" | python3 -c "
 import json, sys
 runs = json.load(sys.stdin)
+if not isinstance(runs, list):
+    print('⚠️ Ошибка API Supabase:', runs)
+    sys.exit(0)
 print(f'Всего прогонов: {len(runs)}')
 by_status = {}
 for r in runs:
@@ -77,14 +80,14 @@ echo "$REPORT"
 # Отправляем в Telegram только если есть ⚠️/❌ или явный алерт
 SHOULD_NOTIFY=0
 case "$REPORT" in
-  *⚠️*|*❌*|*"FATAL"*|*"deg"*|*"проблем"*|*"оширб"*) SHOULD_NOTIFY=1 ;;
+  *⚠️*|*❌*|*"FATAL"*|*"деград"*|*"проблем"*|*"ошибк"*) SHOULD_NOTIFY=1 ;;
 esac
 
 # В первом запуске — всегда уведомить (чтобы протестировать)
 [ -n "$WATCHER_FORCE_NOTIFY" ] && SHOULD_NOTIFY=1
 
 if [ "$SHOULD_NOTIFY" = "1" ] && [ -n "$N8N_WEBHOOK_PARSER_DONE" ] && [ -n "$TG_CHAT_ID" ]; then
-  curl -sS --max-time 15 -X POST "$N8N_WEBHOOK_PARSER_DONE" \
+  curl -sS --max-time 15 --resolve is77.duckdns.org:443:127.0.0.1 -X POST "https://is77.duckdns.org/webhook/antimsmp-parser-done" \
     -H 'Content-Type: application/json' \
     -d "$(python3 -c "
 import json, os
