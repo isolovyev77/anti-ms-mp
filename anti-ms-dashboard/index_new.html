@@ -226,6 +226,9 @@ function op(t){t=(t||'').toLowerCase();if(t.includes('pro plus')||t.includes('pr
 function isHW(t){t=(t||'');const brand=/vivobook|ideapad|thinkbook|thinkpad|magicbook|matebook|aspire\s+go|ozon-?book|ninkear|super-?book/i.test(t);
   const gen=/\bноутбук\b|\bnotebook\b|\blaptop\b|моноблок|неттоп|системный блок/i.test(t)&&!/для\s+(ноутбук|notebook|laptop|macbook|план|пк|компьютер|устройств)/i.test(t);
   return brand||gen;}
+// Игровые/консольные ключи: «office» в названии ИГРЫ (The Office Quest и т.п.) для
+// Xbox/PlayStation/Nintendo — это игра, а не MS Office. Не контрафакт ПО.
+function isGameKey(t){return /\bxbox\b|playstation|\bps[2345]\b|nintendo|game ?pass|gamepass/i.test(t||'');}
 const TM=['microsoft','office','windows'];
 function flags(r){const d=r._disc,tl=(r.title||'').toLowerCase(),tm=TM.some(k=>tl.includes(k)),cmp=tl.includes('совместимо')||tl.includes('compat');
   return{F1:d>=50,F2:d>=80,F5:true,F6:tm&&!cmp,disc:d};}
@@ -240,7 +243,7 @@ async function fetchAll(path){let all=[],from=0;while(true){const r=await fetch(
 let DAILY=[];
 async function load(){
   const rows=await fetchAll(`/rest/v1/listings?select=pl,product_id,title,price,op,query,first_seen,last_seen,url,avito_pay&order=last_seen.desc`);
-  RAW=rows.map(r=>{const o=r.op||op(r.title);return{...r,_op:o,_disc:Math.round((1-r.price/o)*100),_cf:r.price>0&&r.price<0.5*o&&!isHW(r.title),apay:r.avito_pay===true};});
+  RAW=rows.map(r=>{const o=r.op||op(r.title);return{...r,_op:o,_disc:Math.round((1-r.price/o)*100),_cf:r.price>0&&r.price<0.5*o&&!isHW(r.title)&&!isGameKey(r.title),apay:r.avito_pay===true};});
   try{QUERIES=(await fetchAll(`/rest/v1/monitor_queries?select=query&active=eq.true&order=id`)).map(x=>x.query);}catch(e){QUERIES=[...new Set(RAW.map(r=>r.query).filter(Boolean))];}
   // Дневная статистика для графика динамики (не зависит от схлопывания last_seen)
   try{DAILY=await fetchAll(`/rest/v1/daily_stats?select=day,pl,total,counterfeit&order=day`);}catch(e){DAILY=[];}

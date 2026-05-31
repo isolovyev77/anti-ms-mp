@@ -108,6 +108,12 @@ def title_ok(title: str) -> bool:
                             "libreoffice", "astra linux", "базальт", "rosa",
                             "кит офис", "обычный офис")):
         return False
+    # Игровые/консольные ключи: «office» в названии ИГРЫ (The Office Quest;
+    # There's a Gun in the Office; Pets Hidden In The Office) для Xbox/PlayStation/
+    # Nintendo — это игра, а не MS Office. MS Office не продаётся как консольный ключ,
+    # поэтому платформа-консоль в названии = заведомо не наш контрафакт.
+    if _re.search(r"\bxbox\b|playstation|\bps[2345]\b|nintendo|game\s?pass|gamepass", s):
+        return False
     if _re.search(r"\bкнига\b|\bруководство\b|учебник|учебн[ао]е|пособи[ея]|\bсамоучитель\b|шаг за шагом|методичк|методическ|монограф|\bлекци[ия]\b|power bi", s):
         return False
     if _re.match(r"^код windows|^ключ windows|^windows\s+\d|^лицензия windows", s):
