@@ -165,10 +165,12 @@ fx=os.environ.get('FIXLOG','').strip()
 if fx: L.append('🔧 Авто-починка:'+fx)
 print(chr(10).join(L))")
 fi
-# Ссылка на боевой дашборд в конце отчёта (детерминированно, не через Claude)
-REPORT="$REPORT
+# n8n шлёт text_override в Telegram с parse_mode=HTML. Экранируем спецсимволы тела
+# (на случай «<»/«&» в тексте), затем добавляем кликабельную ссылку как HTML <a>
+# (видна как подпись «Открыть дашборд», без голого URL).
+REPORT="$(printf '%s' "$REPORT" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
 
-📊 Открыть дашборд: https://anti-ms-mp.vercel.app/anti-ms-dashboard/index_new.html"
+📊 <a href=\"https://anti-ms-mp.vercel.app/anti-ms-dashboard/index_new.html\">Открыть дашборд</a>"
 echo "[$TS] report:"; echo "$REPORT"
 
 # 4) Отправка в Telegram
