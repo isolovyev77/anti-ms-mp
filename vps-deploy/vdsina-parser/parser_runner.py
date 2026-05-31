@@ -273,6 +273,9 @@ def n8n_notify(payload: dict) -> None:
         log("n8n notify failed (продолжаю)", err=str(e)[:200])
 
 # === Извлечение карточек ===
+# ⚠️ СИНХРОНИЗАЦИЯ: EXTRACT_JS (и PLATFORMS/title_ok/official_price выше)
+# продублированы в extractors.py — их использует запасной движок Camoufox
+# (camoufox_scrape.py). При смене вёрстки маркетплейса менять В ОБОИХ файлах.
 EXTRACT_JS = {
     "ozon": r"""
     () => {
@@ -718,6 +721,43 @@ def platform_daily_stat(plat: str, items_d: list[dict]) -> dict:
             "updated_at": dt.datetime.now(dt.timezone.utc).isoformat()}
 
 
+# === Запасной движок Camoufox (Firefox) ============================================
+# При блокировке площадки CloakBrowser'ом (DataDome/SmartCaptcha) добираем её через
+# Camoufox ОТДЕЛЬНЫМ процессом: изоляция зависимостей (свой playwright 1.51) и RAM
+# (освобождается по выходу). Управление через ENV: CAMOUFOX_FALLBACK=0 — выключить.
+CAMOUFOX_PY = os.environ.get("CAMOUFOX_PY", "/opt/camoufox-test/.venv/bin/python")
+CAMOUFOX_SCRIPT = str(Path(__file__).parent / "camoufox_scrape.py")
+CAMOUFOX_FALLBACK = os.environ.get("CAMOUFOX_FALLBACK", "1") != "0"
+CAMOUFOX_MAX_PAGES = int(os.environ.get("CAMOUFOX_MAX_PAGES", "2"))
+
+
+def camoufox_fallback(platform: str, queries: list, run_log) -> tuple[list[dict], dict]:
+    """Добор площадки запасным движком (Firefox) отдельным процессом.
+
+    Возвращает (items, stats). items — в том же формате, что scrape_one_platform
+    (id/title/price/url/platform/query), готовы к dedup+upsert. Best-effort: любая
+    ошибка подавляется, возвращаем что есть (основной путь уже отработал)."""
+    import subprocess
+    if not os.path.exists(CAMOUFOX_PY) or not os.path.exists(CAMOUFOX_SCRIPT):
+        run_log(f"  [{platform}] camoufox-fallback недоступен (нет venv/скрипта)")
+        return [], {}
+    cmd = [CAMOUFOX_PY, CAMOUFOX_SCRIPT, platform, *queries, "--max-pages", str(CAMOUFOX_MAX_PAGES)]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    except Exception as e:
+        run_log(f"  [{platform}] camoufox-fallback упал: {str(e)[:150]}")
+        return [], {}
+    if r.returncode != 0 or not (r.stdout or "").strip():
+        run_log(f"  [{platform}] camoufox-fallback без результата (rc={r.returncode}): {(r.stderr or '')[:150]}")
+        return [], {}
+    try:
+        out = json.loads(r.stdout.strip().splitlines()[-1])
+    except Exception as e:
+        run_log(f"  [{platform}] camoufox-fallback: JSON не распарсен: {str(e)[:120]}")
+        return [], {}
+    return out.get("items", []), out.get("stats", {})
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--platforms", default=",".join(PLATFORMS), help="ozon,wildberries,yandex,avito")
@@ -788,9 +828,27 @@ def main() -> int:
         for plat in platforms:
             try:
                 items, errors = scrape_one_platform(page, plat, log)
+                # Camoufox-fallback: если CloakBrowser упёрся в антибот (метки BLOCKED
+                # в errors) — добираем эту площадку запасным движком (Firefox) и мёржим.
+                # Статистика движков копится в totals → за N прогонов видно, как часто
+                # CloakBrowser блокируется и сколько из этого спасает Camoufox.
+                blocked_cloak = sum(1 for e in errors if "BLOCKED" in (e.get("message") or ""))
+                engine = "cloak"
+                recovered = 0
+                if blocked_cloak and CAMOUFOX_FALLBACK:
+                    log(f"  [{plat}] CloakBrowser заблокирован ({blocked_cloak}) → Camoufox-fallback")
+                    cf_items, cf_stats = camoufox_fallback(plat, QUERIES, log)
+                    if cf_items:
+                        before = len(items)
+                        items.extend(cf_items)
+                        recovered = len(cf_items)
+                        engine = "camoufox" if before == 0 else "cloak+camoufox"
+                        log(f"  [{plat}] Camoufox добрал {recovered} карточек", **(cf_stats or {}))
                 items_d = dedup(items)
                 ok = upsert_listings(items_d)
-                totals[plat] = {"found": len(items), "unique": len(items_d), "upserted": ok}
+                totals[plat] = {"found": len(items), "unique": len(items_d), "upserted": ok,
+                                "engine": engine, "blocked_cloak": blocked_cloak,
+                                "recovered_camoufox": recovered}
                 ds = platform_daily_stat(plat, items_d)
                 daily_rows.append(ds)
                 # daily_stats пишем СРАЗУ по площадке (а не в конце прогона) — иначе
