@@ -69,6 +69,23 @@ ssh-keygen -t ed25519 -f vdsina_orch -N "" && chmod 600 vdsina_orch
 # #13: зафиксировать host-key VDSina (иначе StrictHostKeyChecking=yes не пустит):
 ssh-keyscan 94.103.89.251 > known_hosts
 # установить Claude Code CLI (claudeclaw) и авторизовать; модель sonnet
+# #32 Слой2: autofix-агент изолируется в отдельного OS-юзера autofix (нет доступа к
+# секретам linuxuser — при перехвате через инъекцию в названии товара ключи не утекут):
+sudo useradd -m -s /bin/bash autofix
+sudo mkdir -p /home/autofix/.ssh && sudo chmod 700 /home/autofix/.ssh
+sudo cp vdsina_orch known_hosts /home/autofix/.ssh/        # тот же restricted-ключ к orch@VDSina
+sudo chown -R autofix:autofix /home/autofix/.ssh && sudo chmod 600 /home/autofix/.ssh/vdsina_orch
+sudo cp -r ~/.local/share/claude /home/autofix/.local/share/claude   # свой claude-рантайм
+sudo ln -sf /home/autofix/.local/share/claude/versions/<VER> /home/autofix/.local/bin/claude
+sudo mkdir -p /home/autofix/.claude
+sudo cp ~/.claude/.credentials.json ~/.claude.json /home/autofix/.claude/  # авторизация (или `claude` login под autofix даёт ссылку)
+echo '{"model":"sonnet"}' | sudo tee /home/autofix/.claude/settings.json   # минимум: без mempalace-хуков/MCP
+sudo chown -R autofix:autofix /home/autofix/.local /home/autofix/.claude /home/autofix/.claude.json
+sudo chmod 600 /home/autofix/.claude/.credentials.json
+echo 'linuxuser ALL=(autofix) NOPASSWD: /home/autofix/.local/bin/claude' | sudo tee /etc/sudoers.d/autofix-claude
+sudo chmod 440 /etc/sudoers.d/autofix-claude && sudo visudo -c
+chmod 750 /home/linuxuser   # закрыть home от autofix (иначе читается ~/.bashrc с ключами)
+# orchestrator.sh запускает авто-починку как: sudo -H -u autofix .../claude --print --dangerously-skip-permissions
 crontab backup/vultr/crontab.txt   # 0 1 * * * orchestrator.sh (04:00 МСК)
 ```
 Проверка: `DRYRUN=1 ./orchestrator.sh`
