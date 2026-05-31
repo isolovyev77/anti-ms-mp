@@ -67,6 +67,27 @@ def sb_patch(path, payload):
     urllib.request.urlopen(req, timeout=15).read()
 
 
+def sb_patch_claim(jid) -> bool:
+    """Атомарный захват задачи: pending→running по id ТОЛЬКО если ещё pending.
+    Возвращает True, если строка досталась нам (PostgREST вернул её в ответе).
+    Закрывает TOCTOU между pgrep-проверкой и запуском: два поллера не запустят
+    два параллельных cloakbrowser, даже если оба прошли parser_running()."""
+    req = urllib.request.Request(
+        f"{SUPABASE_URL}/rest/v1/parse_queue?id=eq.{jid}&status=eq.pending",
+        data=json.dumps({"status": "running"}).encode(),
+        method="PATCH",
+        headers={
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "application/json",
+            "Prefer": "return=representation",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=15) as r:
+        body = r.read()
+    return bool(json.loads(body) if body else [])
+
+
 def parser_running() -> bool:
     """Проверяем, не запущен ли уже parser_runner (любой процесс)."""
     try:
@@ -82,6 +103,22 @@ def main() -> int:
         log("config missing")
         return 1
 
+    # Dead-letter recovery: задачи, застрявшие в 'running' дольше 60 мин (поллер
+    # был убит до записи статуса — SIGKILL/OOM/рестарт), помечаем failed, чтобы
+    # дашборд не «крутился» вечно и очередь не засорялась. Порог 60 мин > макс.
+    # прогона (~40 мин), поэтому ещё живой прогон не трогаем.
+    try:
+        cutoff = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=60)).isoformat()
+        for s in sb_get(f"/rest/v1/parse_queue?status=eq.running&requested_at=lt.{cutoff}&select=id"):
+            sb_patch(f"/rest/v1/parse_queue?id=eq.{s['id']}", {
+                "status": "failed",
+                "processed_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+                "note": "dead-letter: завис в running >60 мин (поллер прерван до записи статуса)",
+            })
+            log("dead-letter: сброс зависшей задачи", queue_id=s["id"])
+    except Exception as e:
+        log("dead-letter recovery fail", err=str(e)[:150])
+
     pending = sb_get("/rest/v1/parse_queue?status=eq.pending&order=requested_at.asc&limit=1")
     if not pending:
         return 0  # тихо: очередь пуста (cron каждую минуту, не засоряем лог)
@@ -94,9 +131,13 @@ def main() -> int:
         log("parser уже работает, откладываю", queue_id=jid)
         return 0
 
+    # Атомарный захват: если другой экземпляр поллера уже взял задачу (пустой
+    # ответ PostgREST), выходим — иначе TOCTOU между pgrep и запуском мог бы
+    # стартовать второй параллельный cloakbrowser.
+    if not sb_patch_claim(jid):
+        log("задачу уже взял другой экземпляр поллера", queue_id=jid)
+        return 0
     log("беру задачу", queue_id=jid, query=query or "(полный прогон)")
-    now = dt.datetime.now(dt.timezone.utc).isoformat()
-    sb_patch(f"/rest/v1/parse_queue?id=eq.{jid}", {"status": "running"})
 
     cmd = [PYTHON, PARSER, "--trigger", "dashboard"]
     if query:
@@ -119,6 +160,19 @@ def main() -> int:
             "note": "timeout 2400s",
         })
         log("задача timeout", queue_id=jid)
+    except BaseException as e:
+        # любое иное прерывание (кроме жёсткого SIGKILL — его подберёт dead-letter
+        # recovery при следующем тике): помечаем failed, чтобы задача не зависла
+        try:
+            sb_patch(f"/rest/v1/parse_queue?id=eq.{jid}", {
+                "status": "failed",
+                "processed_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+                "note": f"прервано: {type(e).__name__}: {str(e)[:150]}",
+            })
+        except Exception:
+            pass
+        log("задача прервана", queue_id=jid, err=str(e)[:150])
+        raise
     return 0
 
 

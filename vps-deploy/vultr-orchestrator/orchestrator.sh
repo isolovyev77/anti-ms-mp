@@ -48,21 +48,29 @@ RERUN_LOG=""
 if [ -n "$INCOMPLETE_PLS" ]; then
   echo "[$TS] RERUN недошедших площадок: $INCOMPLETE_PLS"
   python3 "$HERE/logmem.py" orchestrator WARN "Незавершённый ночной прогон — не обновились: $INCOMPLETE_PLS. Авто-перезапуск." 2>/dev/null || true
-  $SSH_VDSINA "cd /opt/anti-ms-mp && rm -f /var/log/rerun.log && nohup .venv/bin/python parser_runner.py --trigger watcher --platforms '$INCOMPLETE_PLS' --no-notify > /var/log/rerun.log 2>&1 & echo started" 2>/dev/null || true
-  for _i in $(seq 1 48); do
-    sleep 15
-    $SSH_VDSINA 'grep -qiE "run end|Traceback" /var/log/rerun.log 2>/dev/null' && break
-  done
-  HEALTH=$(python3 "$HERE/healthcheck.py" 2>/dev/null) || true
-  STILL=$(echo "$HEALTH" | python3 -c "import json,sys
+  if ! $SSH_VDSINA 'true' 2>/dev/null; then
+    # VDSina недоступна по SSH — не висим 48×(sleep15+ConnectTimeout15)=~24 мин
+    # впустую: это съело бы бюджет cron (timeout 2700) до отправки отчёта.
+    echo "[$TS] VDSina недоступна по SSH — пропускаю авто-перезапуск"
+    RERUN_LOG="VDSina недоступна по SSH — авто-перезапуск [$INCOMPLETE_PLS] невозможен, нужна ручная проверка."
+    python3 "$HERE/logmem.py" orchestrator NEEDS-CHECK "VDSina недоступна по SSH — авто-перезапуск $INCOMPLETE_PLS невозможен." 2>/dev/null || true
+  else
+    $SSH_VDSINA "cd /opt/anti-ms-mp && rm -f /var/log/rerun.log && nohup .venv/bin/python parser_runner.py --trigger watcher --platforms '$INCOMPLETE_PLS' --no-notify > /var/log/rerun.log 2>&1 & echo started" 2>/dev/null || true
+    for _i in $(seq 1 48); do
+      sleep 15
+      $SSH_VDSINA 'grep -qiE "run end|Traceback" /var/log/rerun.log 2>/dev/null' && break
+    done
+    HEALTH=$(python3 "$HERE/healthcheck.py" 2>/dev/null) || true
+    STILL=$(echo "$HEALTH" | python3 -c "import json,sys
 try: print(','.join(a['pl'] for a in json.load(sys.stdin).get('anomalies',[]) if a.get('kind')=='run_incomplete'))
 except: pass" 2>/dev/null)
-  if [ -z "$STILL" ]; then
-    RERUN_LOG="перезапуск [$INCOMPLETE_PLS] — данные восстановлены."
-    python3 "$HERE/logmem.py" orchestrator RESOLVED "Авто-перезапуск [$INCOMPLETE_PLS] успешен — данные восстановлены." 2>/dev/null || true
-  else
-    RERUN_LOG="перезапуск [$INCOMPLETE_PLS] выполнен, но не всё восстановилось (осталось: $STILL) — нужна ручная проверка."
-    python3 "$HERE/logmem.py" orchestrator NEEDS-CHECK "Авто-перезапуск не восстановил всё. Осталось: $STILL. Нужна ручная проверка." 2>/dev/null || true
+    if [ -z "$STILL" ]; then
+      RERUN_LOG="перезапуск [$INCOMPLETE_PLS] — данные восстановлены."
+      python3 "$HERE/logmem.py" orchestrator RESOLVED "Авто-перезапуск [$INCOMPLETE_PLS] успешен — данные восстановлены." 2>/dev/null || true
+    else
+      RERUN_LOG="перезапуск [$INCOMPLETE_PLS] выполнен, но не всё восстановилось (осталось: $STILL) — нужна ручная проверка."
+      python3 "$HERE/logmem.py" orchestrator NEEDS-CHECK "Авто-перезапуск не восстановил всё. Осталось: $STILL. Нужна ручная проверка." 2>/dev/null || true
+    fi
   fi
   # пересчёт экстрактор-аномалий на обновлённом HEALTH
   ANOMALY_PLS=$(echo "$HEALTH" | python3 -c "import json,sys

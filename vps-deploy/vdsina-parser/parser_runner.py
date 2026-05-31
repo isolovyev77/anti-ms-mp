@@ -548,7 +548,7 @@ def cleanup_old_parser_runs(retention_days: int = 90) -> int:
 def upsert_listings(rows: list[dict]) -> int:
     if not rows:
         return 0
-    today = dt.date.today().isoformat()
+    today = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=3)).date().isoformat()  # МСК-дата (согласовано с daily_stats и healthcheck)
     payload = [
         {
             "date": today,
@@ -683,7 +683,7 @@ def upsert_daily_stats(rows: list[dict]) -> None:
 
 def platform_daily_stat(plat: str, items_d: list[dict]) -> dict:
     """Считает дневной срез по платформе: всего, контрафакт, средний дисконт."""
-    today = dt.datetime.now(dt.timezone.utc).date().isoformat()
+    today = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=3)).date().isoformat()  # МСК-дата (как last_seen в upsert_listings и healthcheck)
     cf = []
     for c in items_d:
         price = c.get("price") or 0
@@ -722,7 +722,22 @@ def main() -> int:
     log("queries загружены", count=len(QUERIES))
 
     log("=== run start ===", platforms=",".join(platforms), proxy=SCRAPER_PROXY or "direct")
-    run_id = insert_parser_run(args.trigger)
+    # Ретраим создание parser_runs: при кратком сбое Supabase в 00:00 прогон иначе
+    # падал бы без единой записи (watchdog/healthcheck/оркестратор слепы). Если все
+    # попытки провалились — выходим; отсутствие данных за сегодня поймает оркестратор
+    # (аномалия zero_written) в 04:00.
+    run_id = None
+    for _att in range(3):
+        try:
+            run_id = insert_parser_run(args.trigger)
+            break
+        except Exception as e:
+            log("insert_parser_run FAILED — Supabase недоступен?", attempt=_att + 1, err=str(e)[:200])
+            if _att < 2:
+                time.sleep(10)
+    if run_id is None:
+        log("=== run aborted: parser_runs не создан за 3 попытки, прогон не выполнен ===")
+        sys.exit(1)
     log("run id", id=run_id, pid=os.getpid())
 
     # Heartbeat-поток: каждые 30 сек обновляет parser_runs.last_heartbeat.
@@ -796,8 +811,28 @@ def main() -> int:
         for q in QUERIES:
             mark_query_parsed(q)
 
-    heartbeat_stop.set()  # стоп heartbeat-потока перед финализацией
-    finalize_parser_run(run_id, totals, all_errors, status)
+    # Финализация с одним ретраем. heartbeat НЕ останавливаем до финализации —
+    # держим живым во время ретраев (иначе при сетевом сбое прогон завис бы в
+    # 'running' с замороженным heartbeat → ложный hung от watchdog). Останавливаем
+    # в finally. Если финализация так и не прошла — данные в listings/daily_stats
+    # уже записаны инкрементально, watchdog пометит прогон hung.
+    finalized = False
+    try:
+        for _att in range(2):
+            try:
+                finalize_parser_run(run_id, totals, all_errors, status)
+                finalized = True
+                break
+            except Exception as e:
+                log("finalize_parser_run FAILED", attempt=_att + 1, err=str(e)[:200])
+                if _att == 0:
+                    time.sleep(5)
+    finally:
+        heartbeat_stop.set()  # стоп heartbeat-потока
+    if not finalized:
+        log("=== finalize не удался — прогон останется 'running', watchdog пометит hung ===")
+        sys.stdout.flush(); sys.stderr.flush()
+        os._exit(1)
     log("=== run end ===", status=status, totals=totals, errors=len(all_errors))
     if not args.no_notify:
         n8n_notify({"run_id": run_id, "status": status, "totals": totals, "errors_count": len(all_errors)})
