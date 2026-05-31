@@ -503,6 +503,20 @@ def dedup(items: list[dict]) -> list[dict]:
     return out
 
 
+def _count_from_content_range(resp) -> int:
+    """Число затронутых строк из заголовка Content-Range PostgREST (count=exact).
+
+    Формат «0-9/25» или «*/25» → 25. Если заголовка нет — 0 (удаление всё равно
+    прошло, счётчик нужен лишь для лога).
+    """
+    cr = resp.headers.get("Content-Range", "") or ""
+    if "/" in cr:
+        tail = cr.rsplit("/", 1)[-1].strip()
+        if tail.isdigit():
+            return int(tail)
+    return 0
+
+
 def cleanup_old_listings(retention_days: int = 14) -> int:
     """Удалить «исчезнувшие» с маркетплейсов карточки (last_seen старше N дней).
 
@@ -521,13 +535,12 @@ def cleanup_old_listings(retention_days: int = 14) -> int:
             headers={
                 "apikey": SUPABASE_SERVICE_ROLE_KEY,
                 "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
-                "Prefer": "return=representation",  # вернёт удалённые строки
+                "Prefer": "return=minimal,count=exact",  # #34: счётчик в заголовке, без тела
             },
         )
         with urllib.request.urlopen(req, timeout=30) as r:
-            body = r.read()
-            deleted = json.loads(body) if body else []
-            return len(deleted)
+            r.read()  # тело пустое (return=minimal) — дренируем соединение
+            return _count_from_content_range(r)
     except Exception as e:
         log("cleanup failed (не критично)", err=str(e)[:200])
         return -1
@@ -543,13 +556,12 @@ def cleanup_old_parser_runs(retention_days: int = 90) -> int:
             headers={
                 "apikey": SUPABASE_SERVICE_ROLE_KEY,
                 "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
-                "Prefer": "return=representation",
+                "Prefer": "return=minimal,count=exact",  # #34
             },
         )
         with urllib.request.urlopen(req, timeout=20) as r:
-            body = r.read()
-            deleted = json.loads(body) if body else []
-            return len(deleted)
+            r.read()
+            return _count_from_content_range(r)
     except Exception as e:
         log("cleanup parser_runs failed (не критично)", err=str(e)[:200])
         return -1

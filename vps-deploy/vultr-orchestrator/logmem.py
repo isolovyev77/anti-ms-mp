@@ -12,7 +12,7 @@ Vultr: /opt/anti-ms-mp-watcher/memory.md. Читают/пишут: оркест�
     level:  INFO | FIX | WARN | ERROR | NEEDS-CHECK | RESOLVED
 Чтение: просто cat / tail файла memory.md.
 """
-import sys, os, datetime as dt
+import sys, os, datetime as dt, fcntl
 
 LOG = os.environ.get("ANTIMS_MEMORY", os.path.join(os.path.dirname(os.path.abspath(__file__)), "memory.md"))
 KEEP = int(os.environ.get("ANTIMS_MEMORY_KEEP", "200"))
@@ -44,22 +44,32 @@ def main() -> int:
     ts = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     line = f"[{ts}] [{source}] [{level}] {msg}"
 
-    body = []
-    if os.path.exists(LOG):
-        txt = open(LOG, encoding="utf-8").read()
-        body = (txt.split("---\n", 1)[1] if "---\n" in txt else txt).splitlines()
-    body = [l for l in body if l.strip()]
+    # #23: конкурентные писатели (оркестратор 04:00, рутина 09:13, сессии Claude)
+    # могут пересечься на read-modify-write и затереть чужую запись. Берём
+    # эксклюзивный flock на отдельный .lock — сериализует всю секцию ниже.
+    lock = open(LOG + ".lock", "w")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX)
 
-    if body and _core(body[-1]) == _core(line):  # дедуп подряд идущих
+        body = []
+        if os.path.exists(LOG):
+            txt = open(LOG, encoding="utf-8").read()
+            body = (txt.split("---\n", 1)[1] if "---\n" in txt else txt).splitlines()
+        body = [l for l in body if l.strip()]
+
+        if body and _core(body[-1]) == _core(line):  # дедуп подряд идущих
+            return 0
+        body.append(line)
+        body = body[-KEEP:]  # ротация
+
+        tmp = LOG + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write(HEADER + "\n".join(body) + "\n")
+        os.replace(tmp, LOG)  # атомарная запись
         return 0
-    body.append(line)
-    body = body[-KEEP:]  # ротация
-
-    tmp = LOG + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        f.write(HEADER + "\n".join(body) + "\n")
-    os.replace(tmp, LOG)  # атомарная запись
-    return 0
+    finally:
+        fcntl.flock(lock, fcntl.LOCK_UN)
+        lock.close()
 
 
 if __name__ == "__main__":
