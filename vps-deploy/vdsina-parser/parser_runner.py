@@ -314,8 +314,12 @@ EXTRACT_JS = {
         const priceEl = card.querySelector('[data-marker="item-price"]') || card.querySelector('[itemprop="price"]');
         let price = 0;
         if (priceEl) {
-          const t = priceEl.textContent || priceEl.getAttribute('content') || '';
-          const n = parseInt(t.replace(/\D/g, ''), 10);
+          const raw = (priceEl.textContent || '').trim();
+          // Если textContent пуст — это <meta itemprop="price" content="299.00">:
+          // парсим как ДРОБНОЕ (parseFloat), иначе replace(/\D/g,'') срезал бы точку
+          // и «299.00» превратилось бы в 29900 (цена ×100, мимо counterfeit-детекции).
+          const n = raw ? parseInt(raw.replace(/\D/g, ''), 10)
+                        : Math.round(parseFloat(priceEl.getAttribute('content') || '0'));
           if (n) price = n;
         }
         const url = href.startsWith('http') ? href : 'https://www.avito.ru' + href;
