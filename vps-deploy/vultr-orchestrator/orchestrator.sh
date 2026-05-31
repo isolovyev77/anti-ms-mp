@@ -21,7 +21,10 @@ cd "$HERE"
 [ -f "$HERE/.env" ] && set -a && . "$HERE/.env" && set +a
 CLAUDE=/home/linuxuser/.local/bin/claude
 VDSINA_KEY="$HERE/vdsina_key"
-SSH_VDSINA="ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 -i $VDSINA_KEY root@94.103.89.251"
+# #13: проверяем host-key VDSina по зафиксированному known_hosts (ssh-keyscan снят
+# 2026-05-31), вместо слепого StrictHostKeyChecking=no. Защита от MITM/подмены хоста.
+# При плановой смене host-key VDSina обновить: ssh-keyscan 94.103.89.251 > $HERE/known_hosts
+SSH_VDSINA="ssh -o UserKnownHostsFile=$HERE/known_hosts -o StrictHostKeyChecking=yes -o ConnectTimeout=15 -i $VDSINA_KEY root@94.103.89.251"
 TS=$(date -Iseconds)
 TODAY=$(TZ=Europe/Moscow date +%F)
 QUERY_DEFAULT="Microsoft Office 2021 ключ"
