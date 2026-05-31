@@ -27,6 +27,12 @@ VDSINA_KEY="$HERE/vdsina_orch"   # #5: выделенный restricted-ключ 
 # #5: подключаемся под orch (владеет /opt/anti-ms-mp), а не под root — компрометация
 # Vultr больше не даёт root на VDSina. Логи перенесены в /opt/anti-ms-mp (orch-writable).
 SSH_VDSINA="ssh -o UserKnownHostsFile=$HERE/known_hosts -o StrictHostKeyChecking=yes -o ConnectTimeout=15 -i $VDSINA_KEY orch@94.103.89.251"
+# #32 (Слой 2): autofix-агент изолирован в непривилегированного OS-юзера autofix —
+# у него НЕТ файлового доступа к секретам linuxuser (~/.bashrc OpenAI-ключ, .env
+# оркестратора с service_role). Запуск через sudo -H -u autofix (sudoers
+# /etc/sudoers.d/autofix-claude → NOPASSWD на claude). На VDSina ходит СВОИМ ключом.
+AUTOFIX_CLAUDE="/home/autofix/.local/bin/claude"
+SSH_VDSINA_AUTOFIX="ssh -o UserKnownHostsFile=/home/autofix/.ssh/known_hosts -o StrictHostKeyChecking=yes -o ConnectTimeout=15 -i /home/autofix/.ssh/vdsina_orch orch@94.103.89.251"
 TS=$(date -Iseconds)
 TODAY=$(TZ=Europe/Moscow date +%F)
 QUERY_DEFAULT="Microsoft Office 2021 ключ"
@@ -101,7 +107,7 @@ EXTRACT_JS[\"$PL\"] (JS, выполняется на странице выдач
 извлекается» обычно значит, что маркетплейс сменил вёрстку и CSS-селекторы устарели.
 
 Команды на VDSina выполняй через Bash, префикс:
-  SSH=\"$SSH_VDSINA\"
+  SSH=\"$SSH_VDSINA_AUTOFIX\"
 
 СТРОГАЯ МЕТОДИКА:
 1) ДИАГНОЗ. Запусти готовую диагностику (свою НЕ пиши):
@@ -119,7 +125,7 @@ EXTRACT_JS[\"$PL\"] (JS, выполняется на странице выдач
    \$SSH 'cd /opt/anti-ms-mp && nohup timeout 300 .venv/bin/python parser_runner.py --platforms $PL --no-notify > /tmp/autofix_$PL.log 2>&1 &'
    Опрашивай \$SSH 'grep -c \"run end\" /tmp/autofix_$PL.log' пока не появится (макс ~5 мин).
    Покрытие ценой через Supabase:
-   curl -s \"\$SUPABASE_URL/rest/v1/listings?select=price&pl=eq.$PL&last_seen=eq.$TODAY&price=gt.0\" -H \"apikey: \$SUPABASE_ANON_KEY\" -H \"Authorization: Bearer \$SUPABASE_ANON_KEY\" -H \"Prefer: count=exact\" -I | grep -i content-range
+   curl -s \"$SUPABASE_URL/rest/v1/listings?select=price&pl=eq.$PL&last_seen=eq.$TODAY&price=gt.0\" -H \"apikey: $SUPABASE_ANON_KEY\" -H \"Authorization: Bearer $SUPABASE_ANON_KEY\" -H \"Prefer: count=exact\" -I | grep -i content-range
 4) РЕШЕНИЕ. Если карточек с ценой стало заметно больше (десятки+) — ОСТАВЬ правку. Если нет —
    ОТКАТИ: \$SSH 'cp /opt/anti-ms-mp/parser_runner.py.autofix.bak /opt/anti-ms-mp/parser_runner.py'
 5) Если current_extractor_output УЖЕ содержит нормальные цены — значит экстрактор работает,
@@ -134,11 +140,13 @@ EXTRACT_JS[\"$PL\"] (JS, выполняется на странице выдач
 ОТВЕТ: верни ОДИН короткий абзац на русском (≤400 символов) — что было сломано, что изменил
 (или «правка не требуется»), результат проверки (цены до/после), оставил или откатил. Без markdown."
 
-    # #32 (Слой 1): агент читает недоверенный DOM маркетплейсов с
-    # --dangerously-skip-permissions. Убираем секреты из его окружения (ему нужны
-    # только SUPABASE_URL/ANON для curl-проверки покрытия) — чтобы перехват через
-    # инъекцию в названии товара не вытащил service_role/секреты прямо из env.
-    FIXOUT=$(cd "$HERE" && timeout 1000 env -u SUPABASE_SERVICE_ROLE_KEY -u DASHBOARD_REFRESH_SECRET -u SCRAPER_PROXY "$CLAUDE" --print --dangerously-skip-permissions --model sonnet 2>/dev/null <<<"$FIX_PROMPT" || echo "авто-починка не завершилась за отведённое время — нужна ручная проверка")
+    # #32 (Слой 2): autofix-агент запускается под изолированным OS-юзером autofix
+    # (sudo -H -u autofix). У него НЕТ файлового доступа к секретам linuxuser, а sudo
+    # env_reset обнуляет окружение → service_role/OpenAI-ключ не утекают даже при
+    # перехвате через инъекцию в названии товара (недоверенный DOM). SUPABASE_URL/ANON
+    # (публичные) подставлены прямо в текст промпта. trust-проверка cwd снята флагом
+    # --dangerously-skip-permissions, поэтому cd не нужен.
+    FIXOUT=$(timeout 1000 sudo -H -u autofix "$AUTOFIX_CLAUDE" --print --dangerously-skip-permissions --model sonnet 2>/dev/null <<<"$FIX_PROMPT" || echo "авто-починка не завершилась за отведённое время — нужна ручная проверка")
     echo "[$TS] AUTOFIX итог $PL: $FIXOUT"
     FIXLOG="$FIXLOG
 • $PL: $FIXOUT"
