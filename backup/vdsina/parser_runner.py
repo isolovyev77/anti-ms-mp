@@ -358,20 +358,22 @@ EXTRACT_JS = {
         // ярлык Yandex Pay). Требуем, чтобы текст НАЧИНАЛСЯ с числа перед ₽ —
         // якорь ^ отсекает "от 72 ₽" (рассрочка), "+5 ₽" (кешбэк), рейтинги без валюты.
         // Низкие цены (14₽, 22₽) НЕ отсекаем — это РЕАЛЬНЫЙ контрафакт.
+        // [\d\s] (а не [\d ]) — чтобы ловить разделитель тысяч в "11 602 ₽" (там спец-
+        // пробел  / , а не обычный): без этого цены ≥1000₽ не извлекались.
         const norm = s => (s || '').replace(/[  ]/g, ' ');
         let price = 0;
         // 1) старые data-auto (вдруг для части карточек ещё живы)
         for (const sel of ['[data-auto="snippet-price"]', '[data-auto="price-value"]', '[data-auto="mainPrice"]']) {
           const el = card.querySelector(sel);
           if (!el) continue;
-          const m = norm(el.textContent).match(/(\d[\d ]{0,8})\s*₽/);
+          const m = norm(el.textContent).match(/(\d[\d\s]{0,12})\s*₽/);
           if (m) { const n = parseInt(m[1].replace(/\D/g, ''), 10); if (n > 0) { price = n; break; } }
         }
         // 2) первый листовой элемент, чей текст начинается с "<число> ₽"
         if (!price) {
           for (const el of card.querySelectorAll('*')) {
             if (el.children.length > 1) continue;
-            const m = norm(el.textContent).trim().match(/^(\d[\d ]{0,8})\s*₽/);
+            const m = norm(el.textContent).trim().match(/^(\d[\d\s]{0,12})\s*₽/);
             if (m) { const n = parseInt(m[1].replace(/\D/g, ''), 10); if (n > 0) { price = n; break; } }
           }
         }
