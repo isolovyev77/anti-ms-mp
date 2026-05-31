@@ -85,7 +85,10 @@ CREATE INDEX listings_last_seen_idx ON public.listings USING btree (last_seen DE
 CREATE UNIQUE INDEX listings_pkey ON public.listings USING btree (id);
 CREATE INDEX listings_pl_idx ON public.listings USING btree (pl);
 CREATE UNIQUE INDEX listings_pl_product_id_uniq ON public.listings USING btree (pl, product_id);
-CREATE UNIQUE INDEX listings_product_id_key ON public.listings USING btree (product_id);
+-- listings_product_id_key (одиночный UNIQUE по product_id) УДАЛЁН 2026-05-31
+-- (migr. drop_redundant_listings_product_id_unique_constraint): требовал ГЛОБАЛЬНОЙ
+-- уникальности product_id по всем площадкам и ронял upsert при совпадении числового
+-- ID между разными маркетплейсами. Верный ключ — составной (pl, product_id) выше.
 CREATE UNIQUE INDEX monitor_queries_pkey ON public.monitor_queries USING btree (id);
 CREATE UNIQUE INDEX monitor_queries_query_key ON public.monitor_queries USING btree (query);
 CREATE INDEX parse_queue_pending_idx ON public.parse_queue USING btree (status, requested_at) WHERE (status = 'pending'::text);
@@ -102,7 +105,7 @@ ALTER TABLE monitor_queries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE parse_queue     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_stats     ENABLE ROW LEVEL SECURITY;
 -- Запись идёт только через service_role (парсер) и SECURITY DEFINER RPC.
-CREATE POLICY daily_stats_read ON daily_stats FOR SELECT TO public USING (true);
+CREATE POLICY daily_stats_read ON daily_stats FOR SELECT TO anon,authenticated USING (true);
 CREATE POLICY listings_select_all ON listings FOR SELECT TO anon,authenticated USING (true);
 CREATE POLICY monitor_queries_read ON monitor_queries FOR SELECT TO anon,authenticated USING (true);
 CREATE POLICY parse_queue_read ON parse_queue FOR SELECT TO anon,authenticated USING (true);
@@ -120,6 +123,7 @@ DECLARE
   v_norm    text;
 BEGIN
   IF p_secret IS DISTINCT FROM v_secret THEN
+    PERFORM pg_sleep(0.5);  -- #30 анти-перебор: задержка только на неверной фразе
     RETURN jsonb_build_object('ok', false, 'error', 'Неверная ключевая фраза');
   END IF;
   v_norm := nullif(btrim(coalesce(p_query, '')), '');
@@ -145,10 +149,11 @@ DECLARE
   v_secret text := '<<PARSE_KEY_PHRASE>>';  -- реальное значение в ~/anti-ms-mp-secrets
 BEGIN
   IF p_secret IS DISTINCT FROM v_secret THEN
+    PERFORM pg_sleep(0.5);  -- #30 анти-перебор: задержка только на неверной фразе
     RETURN jsonb_build_object('ok', false, 'error', 'Неверная ключевая фраза');
   END IF;
   UPDATE monitor_queries SET active = false WHERE query = p_query;
-  RETURN jsonb_build_object('ok', true);
+  RETURN jsonb_build_object('ok', FOUND, 'note', CASE WHEN FOUND THEN 'деактивирован' ELSE 'запрос не найден' END);  -- #29
 END;
 $function$;
 
@@ -166,7 +171,11 @@ DECLARE
   v_qdel int := 0; v_cdel int := 0;
 BEGIN
   IF p_secret IS DISTINCT FROM v_secret THEN
+    PERFORM pg_sleep(0.5);  -- #30 анти-перебор: задержка только на неверной фразе
     RETURN jsonb_build_object('ok', false, 'error', 'Неверная ключевая фраза');
+  END IF;
+  IF array_length(p_queries, 1) > 20 THEN  -- #11 анти-массовое-удаление
+    RETURN jsonb_build_object('ok', false, 'error', 'Слишком много запросов за раз (макс 20)');
   END IF;
   IF p_queries IS NULL OR array_length(p_queries, 1) IS NULL THEN
     RETURN jsonb_build_object('ok', false, 'error', 'Список запросов пуст');
@@ -181,3 +190,5 @@ BEGIN
 END;
 $function$;
 GRANT EXECUTE ON FUNCTION public.remove_queries(text, text[], boolean) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.request_parse(text, text) TO anon, authenticated;       -- #12
+GRANT EXECUTE ON FUNCTION public.deactivate_query(text, text) TO anon, authenticated;     -- #12
