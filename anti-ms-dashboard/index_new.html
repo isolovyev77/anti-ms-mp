@@ -42,6 +42,8 @@
   .qrow{display:flex;gap:4px;align-items:stretch}
   .qf .qdel{flex:0 0 30px;text-align:center;color:#ff5470;font-size:16px;font-weight:700;padding:0}
   .qf .qbtn.marked{text-decoration:line-through;color:#ff5470;border-color:#ff5470;opacity:.85}
+  .qf .qbtn.parsing{border-color:var(--accent);animation:qpulse 1.1s ease-in-out infinite}
+  @keyframes qpulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,0,0,0)}50%{opacity:.5;box-shadow:0 0 7px 1px var(--accent)}}
   .main{padding:22px 26px}
   .top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;gap:14px;flex-wrap:wrap}
   .top h1{font-size:21px;font-weight:700}.top p{color:var(--muted);font-size:13px;margin-top:3px}
@@ -235,6 +237,7 @@ function flags(r){const d=r._disc,tl=(r.title||'').toLowerCase(),tm=TM.some(k=>t
 function flagPills(f){let p=[];if(f.F2)p.push('<span class="fp fp-r">🔴F2</span>');else if(f.F1)p.push('<span class="fp fp-r">🔴F1</span>');p.push('<span class="fp fp-y">🟡F5</span>');if(f.F6)p.push('<span class="fp fp-o">🟠F6</span>');return p.join('');}
 let RAW=[],QUERIES=[],state={pl:new Set(Object.keys(PL)),q:'',disc:50,apay:false,gran:'day',preset:'default',sortCol:'disc',sortDir:-1,page:0,size:50},FILT=[];
 let editMode=false, markedQ=new Set();  // режим управления запросами: пометка на удаление
+let parsingQ=new Map(), pollTimer=null;  // query→queue_id: мерцание новой кнопки + поллинг статуса парсинга
 // Экранирование данных из БД перед вставкой в innerHTML — защита от XSS через title/query/url,
 // которые продавец на маркетплейсе контролирует и которые парсер пишет сырыми.
 function htmlEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -281,7 +284,13 @@ async function runScan(){const s=getKeyPhrase();if(!s)return;const btn=document.
 async function addQuery(){const inp=document.getElementById('newQ');const q=(inp.value||'').trim();if(!q){inp.focus();return;}
   const s=getKeyPhrase();if(!s)return;
   const res=await requestParse(s,q);
-  if(res&&res.ok){inp.value='';document.getElementById('addQForm').style.display='none';alert('Запрос «'+q+'» добавлен. Парсинг по нему запущен (~3 мин).');}
+  if(res&&res.ok){inp.value='';
+    if(!QUERIES.includes(q))QUERIES.push(q);          // показать кнопку запроса сразу
+    if(res.queue_id)parsingQ.set(q,res.queue_id);     // мерцание + поллинг статуса
+    exitEditMode();                                    // закрыть форму И режим удаления, перерисовать список
+    saveCache();                                       // чтобы при перезагрузке запрос уже был
+    startQueuePolling();
+    alert('Запрос «'+q+'» добавлен. Парсинг запущен (~3 мин) — кнопка мерцает, результат подтянется сам.');}
   else{if((res.error||'').includes('фраз'))sessionStorage.removeItem('mon_secret');alert('Не удалось добавить: '+(res.error||'ошибка'));}}
 // Удаление запросов из мониторинга (RPC remove_queries, под ключевой фразой)
 async function removeQueries(secret,queries,deleteCards){
@@ -295,10 +304,29 @@ async function deleteMarkedQueries(){
   const res=await removeQueries(s,qs,delCards);
   if(res&&res.ok){
     alert('Удалено запросов: '+res.queries_removed+(delCards?(', карточек: '+res.cards_removed):''));
+    qs.forEach(q=>parsingQ.delete(q));  // снять мерцание/поллинг с удалённых запросов
     markedQ.clear();editMode=false;document.getElementById('addQForm').style.display='none';buildQueryFilters();updateDelBar();
     if(state.q&&qs.includes(state.q))state.q='';
     load();  // перезагрузка списка запросов и данных
   }else{if((res.error||'').includes('фраз'))sessionStorage.removeItem('mon_secret');alert('Не удалось удалить: '+(res.error||'ошибка'));}}
+// Поллинг статуса парсинга добавленных запросов: пока есть мерцающие (parsingQ), раз в ~15с
+// опрашиваем parse_queue по queue_id; по завершении снимаем мерцание и (при done) подтягиваем карточки.
+function startQueuePolling(){
+  if(pollTimer)return;
+  pollTimer=setInterval(async()=>{
+    if(!parsingQ.size){clearInterval(pollTimer);pollTimer=null;return;}
+    let done=false;
+    for(const [q,qid] of [...parsingQ]){
+      try{const r=await fetch(`${SUPABASE_URL}/rest/v1/parse_queue?id=eq.${qid}&select=status`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY}});
+        const row=(await r.json())[0];
+        if(row&&['done','failed','cancelled'].includes(row.status)){parsingQ.delete(q);if(row.status==='done')done=true;}
+      }catch(e){}
+    }
+    buildQueryFilters();          // снять мерцание с завершённых
+    if(done)load();               // подтянуть найденные карточки
+    if(!parsingQ.size){clearInterval(pollTimer);pollTimer=null;}
+  },15000);
+}
 function maxDay(){return [...new Set(RAW.filter(r=>r._cf).map(r=>r.last_seen))].sort().pop();}
 // Последняя дата ПО КАЖДОЙ площадке отдельно. Если прогон не обновил площадку
 // (зависание/сбой), показываем её ПОСЛЕДНИЕ данные со старой датой, а не пустоту —
@@ -348,8 +376,11 @@ function renderCharts(){
     if(!rs.length)return 0;
     return Math.round(rs.reduce((s,r)=>s+(r.counterfeit??r.total??0),0)/rs.length);
   }),backgroundColor:PL[p].c+'cc',borderColor:PL[p].c,fill:true,tension:.4,pointRadius:2,borderWidth:2}));
-  if(dynChartObj)dynChartObj.destroy();
-  dynChartObj=new Chart(document.getElementById('dynChart'),{type:'line',data:{labels:buckets.map(b=>bucketLabel(b,g)),datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:GRID},ticks:{color:TICK}},y:{stacked:true,grid:{color:GRID},ticks:{color:TICK}}}}});
+  const dynData={labels:buckets.map(b=>bucketLabel(b,g)),datasets:ds};
+  const dynOpts={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:GRID},ticks:{color:TICK}},y:{stacked:true,grid:{color:GRID},ticks:{color:TICK}}}};
+  // update() вместо destroy()+new → нет мигания главного графика при двойном рендере (кеш → свежее)
+  if(dynChartObj){dynChartObj.data=dynData;dynChartObj.options=dynOpts;dynChartObj.update();}
+  else dynChartObj=new Chart(document.getElementById('dynChart'),{type:'line',data:dynData,options:dynOpts});
 }
 function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()||'#888';}
 // Внешняя HTML-подсказка для круговой диаграммы — рисуется поверх страницы (position:fixed),
@@ -375,8 +406,8 @@ function updateSortInd(){
 function buildQueryFilters(){const c=document.getElementById('queryFilters');
   const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
   c.innerHTML=`<button class="qbtn${state.q===''?' on':''}" data-q="">Все запросы</button>`+QUERIES.map(q=>{
-    const on=state.q===q?' on':'', mk=markedQ.has(q)?' marked':'';
-    const filt=`<button class="qbtn${on}${mk}" data-q="${esc(q)}" style="flex:1">${esc(q)}</button>`;
+    const on=state.q===q?' on':'', mk=markedQ.has(q)?' marked':'', pr=parsingQ.has(q)?' parsing':'';
+    const filt=`<button class="qbtn${on}${mk}${pr}" data-q="${esc(q)}" style="flex:1">${esc(q)}</button>`;
     const del=editMode?`<button class="qdel" data-q="${esc(q)}" title="Пометить/снять на удаление">−</button>`:'';
     return `<div class="qrow">${filt}${del}</div>`;
   }).join('');
