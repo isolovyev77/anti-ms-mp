@@ -238,6 +238,26 @@ def load_queries() -> list[str]:
     return list(QUERIES_FALLBACK)
 
 
+def is_query_active(q: str) -> bool:
+    """Активен ли запрос в monitor_queries СЕЙЧАС. Запрос мог быть удалён с дашборда
+    (remove_queries) за время прогона — тогда писать его карточки нельзя (осиротеют).
+    Fail-open: при ошибке проверки считаем активным, чтобы сбой Supabase не терял данные."""
+    try:
+        from urllib.parse import quote as _q
+        req = urllib.request.Request(
+            f"{SUPABASE_URL}/rest/v1/monitor_queries?query=eq.{_q(q, safe='')}&active=eq.true&select=query&limit=1",
+            headers={
+                "apikey": SUPABASE_SERVICE_ROLE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return len(json.loads(r.read() or "[]")) > 0
+    except Exception as e:
+        log("is_query_active FAIL — считаем активным (fail-open)", err=str(e)[:150])
+        return True
+
+
 def mark_query_parsed(query: str) -> None:
     """Обновляет last_parsed_at для запроса. Best-effort."""
     try:
@@ -573,6 +593,30 @@ def cleanup_old_parser_runs(retention_days: int = 90) -> int:
         return -1
 
 
+def cleanup_orphan_listings_rpc(days: int = 7) -> int:
+    """Удалить карточки «осиротевших» запросов (которых больше нет среди активных
+    monitor_queries) старше `days` дней — через RPC cleanup_orphan_listings (PostgREST
+    не умеет DELETE с подзапросом). Защита от разрастания БД, когда запрос удалили без
+    галочки «удалить карточки». Best-effort."""
+    try:
+        req = urllib.request.Request(
+            f"{SUPABASE_URL}/rest/v1/rpc/cleanup_orphan_listings",
+            data=json.dumps({"p_days": days}).encode(),
+            method="POST",
+            headers={
+                "apikey": SUPABASE_SERVICE_ROLE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+                "Content-Type": "application/json",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=30) as r:
+            body = r.read()
+            return int(json.loads(body)) if body else 0
+    except Exception as e:
+        log("cleanup_orphan failed (не критично)", err=str(e)[:200])
+        return -1
+
+
 def upsert_listings(rows: list[dict]) -> int:
     if not rows:
         return 0
@@ -847,6 +891,12 @@ def main() -> int:
                         recovered = len(cf_items)
                         engine = "camoufox" if before == 0 else "cloak+camoufox"
                         log(f"  [{plat}] Camoufox добрал {recovered} карточек", **(cf_stats or {}))
+                # Guard (UI): запрос мог быть удалён с дашборда за время прогона
+                # (remove_queries отменяет parse_queue + удаляет monitor_queries). Тогда
+                # карточки удалённого запроса НЕ пишем — иначе они осиротеют в БД.
+                if args.only_query and not is_query_active(args.only_query):
+                    log(f"  [{plat}] запрос '{args.only_query}' удалён за время прогона — карточки не пишем, прерываю прогон")
+                    break
                 items_d = dedup(items)
                 ok = upsert_listings(items_d)
                 totals[plat] = {"found": len(items), "unique": len(items_d), "upserted": ok,
@@ -879,6 +929,10 @@ def main() -> int:
         deleted = cleanup_old_listings(retention_days=14)
         log("retention: удалено карточек старше 14 дней", deleted=deleted)
         totals["_retention"] = {"listings_deleted": deleted}
+        orphan_deleted = cleanup_orphan_listings_rpc(days=7)
+        if orphan_deleted and orphan_deleted > 0:
+            log("retention: удалено осиротевших карточек (удалённые запросы >7д)", deleted=orphan_deleted)
+        totals["_retention"]["orphan_deleted"] = orphan_deleted
         runs_deleted = cleanup_old_parser_runs(retention_days=90)
         if runs_deleted > 0:
             log("retention: удалено parser_runs старше 90 дней", deleted=runs_deleted)

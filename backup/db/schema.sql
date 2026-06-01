@@ -184,6 +184,11 @@ BEGIN
     DELETE FROM listings WHERE query = ANY(p_queries);
     GET DIAGNOSTICS v_cdel = ROW_COUNT;
   END IF;
+  -- UI: при удалении запроса отменяем его задачи в очереди (остановить парсинг по нему).
+  -- Поллер берёт только status=pending → отменённые pending не запустятся; running добивает
+  -- guard в парсере (is_query_active перед upsert). #UI-stop
+  UPDATE parse_queue SET status='cancelled', processed_at=now(), note='запрос удалён с дашборда'
+    WHERE query = ANY(p_queries) AND status IN ('pending','running');
   DELETE FROM monitor_queries WHERE query = ANY(p_queries);
   GET DIAGNOSTICS v_qdel = ROW_COUNT;
   RETURN jsonb_build_object('ok', true, 'queries_removed', v_qdel, 'cards_removed', v_cdel);
@@ -192,6 +197,26 @@ $function$;
 GRANT EXECUTE ON FUNCTION public.remove_queries(text, text[], boolean) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.request_parse(text, text) TO anon, authenticated;       -- #12
 GRANT EXECUTE ON FUNCTION public.deactivate_query(text, text) TO anon, authenticated;     -- #12
+
+-- Уборка «осиротевших» карточек: удалить listings, чьи query больше не среди активных
+-- monitor_queries и не обновлялись > p_days дней (защита от разрастания БД при удалении
+-- запросов без галочки «удалить карточки»). Вызывает парсер (service_role) после прогона.
+-- PostgREST не умеет DELETE ... WHERE query NOT IN (SELECT ...), поэтому отдельный RPC. #UI-orphan
+CREATE OR REPLACE FUNCTION public.cleanup_orphan_listings(p_days int DEFAULT 7)
+ RETURNS integer LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'
+AS $function$
+DECLARE v_del int := 0;
+BEGIN
+  DELETE FROM listings
+   WHERE query IS NOT NULL
+     AND query NOT IN (SELECT query FROM monitor_queries WHERE active = true)
+     AND last_seen < (current_date - p_days);
+  GET DIAGNOSTICS v_del = ROW_COUNT;
+  RETURN v_del;
+END;
+$function$;
+REVOKE ALL ON FUNCTION public.cleanup_orphan_listings(int) FROM anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.cleanup_orphan_listings(int) TO service_role;  -- обслуживание, не из браузера
 
 -- #18: отметки живости (dead-man's switch). Независимый сторож на Oracle (clawbot)
 -- читает таблицу (anon, read-only) и алертит в Telegram напрямую, если оркестратор/
