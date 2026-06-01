@@ -173,6 +173,11 @@ def title_ok(title: str) -> bool:
         return False
     if _re.search(r"\bкнига\b|\bруководство\b|учебник|учебн[ао]е|пособи[ея]|\bсамоучитель\b|шаг за шагом|методичк|методическ|монограф|\bлекци[ия]\b|power bi", s):
         return False
+    # Услуги ПК-ремонта (установка Windows/драйверов, лечение вирусов, восстановление,
+    # очистка) и антивирусы — это не продажа MS Office, даже если «office» в названии.
+    # «Установка Office» с ценой остаётся — этих сервис-маркеров в ней нет.
+    if _re.search(r"драйвер|вирус|лечени|восстановлени|очистк[аи]|\bремонт", s):
+        return False
     if _re.match(r"^код windows|^ключ windows|^windows\s+\d|^лицензия windows", s):
         return False
     if _re.match(r"^office suite|^офисный пакет(?! microsoft)", s):
