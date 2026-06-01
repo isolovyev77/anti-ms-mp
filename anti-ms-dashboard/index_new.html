@@ -165,18 +165,18 @@
     <div id="staleBanner" style="display:none;margin:-4px 0 16px;padding:9px 14px;border-radius:10px;background:rgba(255,159,67,.12);border:1px solid rgba(255,159,67,.35);color:#ff9f43;font-size:13px"></div>
 
     <div class="card" style="margin-bottom:14px">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px">
         <div><h3>Динамика обнаружения контрафакта</h3><div class="cap">Уникальные карточки по дням, цвета площадок</div></div>
+        <div class="legend" style="margin:0"><span><i style="background:var(--ozon)"></i>Ozon</span><span><i style="background:var(--wb)"></i>Wildberries</span><span><i style="background:var(--yandex)"></i>Яндекс.Маркет</span><span><i style="background:var(--avito)"></i>Avito</span></div>
         <div class="seg" style="width:auto;margin:0;gap:6px" id="granSeg"><button class="on" data-gran="day">Дни</button><button data-gran="week">Нед</button><button data-gran="month">Мес</button><button data-gran="year">Год</button></div>
       </div>
-      <div class="legend"><span><i style="background:var(--ozon)"></i>Ozon</span><span><i style="background:var(--wb)"></i>Wildberries</span><span><i style="background:var(--yandex)"></i>Яндекс.Маркет</span><span><i style="background:var(--avito)"></i>Avito</span></div>
       <div style="height:230px"><canvas id="dynChart"></canvas></div>
     </div>
 
-    <!-- Легенда флажков -->
-    <details class="card" style="margin-bottom:14px">
-      <summary style="cursor:pointer;font-weight:700;font-size:14px;list-style:none">🚩 Легенда красных флажков <span style="font-weight:400;font-size:12px;color:var(--muted)">— п.2.2 Модельных практик ФАС/МСАП СНГ 2025</span></summary>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:9px;margin-top:12px;font-size:12px">
+    <!-- Легенда флажков: скрыта по умолчанию, показывается кнопкой 🚩 Флажки в ряду пресетов -->
+    <div id="flagLegend" class="card" style="margin-bottom:14px;display:none">
+      <div style="font-weight:700;font-size:14px;margin-bottom:10px">🚩 Красные флажки <span style="font-weight:400;font-size:12px;color:var(--muted)">— п.2.2 Модельных практик ФАС/МСАП СНГ 2025</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:9px;font-size:12px">
         <div style="padding:9px;background:#3a1622;border-radius:7px"><b style="color:#ff6b8a">🔴 F1 — Аномальная цена:</b> ниже официальной на ≥50%</div>
         <div style="padding:9px;background:#3a1622;border-radius:7px"><b style="color:#ff6b8a">🔴 F2 — Критический дисконт:</b> ниже на ≥80%</div>
         <div style="padding:9px;background:#3a3415;border-radius:7px"><b style="color:#ffd43b">🟡 F3 — Новый продавец:</b> зарегистрирован &lt;30 дней</div>
@@ -184,7 +184,7 @@
         <div style="padding:9px;background:#3a3415;border-radius:7px"><b style="color:#ffd43b">🟡 F5 — Ключ неактивируемый:</b> телефонная активация в РФ отключена</div>
         <div style="padding:9px;background:#3a2615;border-radius:7px"><b style="color:#ff9f43">🟠 F6 — ТЗ без «совместимо»:</b> нарушение СИП №С01-1261/2024</div>
       </div>
-    </details>
+    </div>
 
     <!-- Полная таблица карточек -->
     <div class="card">
@@ -196,6 +196,7 @@
             <button data-preset="score" title="Индекс подозрительности: дисконт + флажки + аномально низкая цена">🔥 Самые подозрительные</button>
             <button data-preset="recent" title="Сначала самые свежие (по дате обнаружения)">🆕 Свежие</button>
           </div>
+          <div class="presets" style="margin:0;display:inline-flex"><button id="flagLegendBtn" title="Показать/скрыть легенду красных флажков">🚩 Флажки</button></div>
         </div>
         <div style="display:flex;align-items:center;gap:14px">
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)">На странице: <span class="seg" style="margin:0;display:inline-flex"><button class="ps" data-ps="10">10</button><button class="ps on" data-ps="50">50</button><button class="ps" data-ps="100">100</button></span></div>
@@ -468,6 +469,7 @@ function renderTable(){
 }
 function sortBy(c){state.preset=null;document.querySelectorAll('#presetBtns button').forEach(x=>x.classList.remove('on'));if(state.sortCol===c)state.sortDir*=-1;else{state.sortCol=c;state.sortDir=(c==='title'||c==='pl')?1:-1;}apply();}
 function setPreset(p,btn){state.preset=p;state.page=0;document.querySelectorAll('#presetBtns button').forEach(x=>x.classList.remove('on'));btn.classList.add('on');apply();}
+function toggleFlagLegend(){const el=document.getElementById('flagLegend'),b=document.getElementById('flagLegendBtn');const show=el.style.display==='none';el.style.display=show?'':'none';if(b)b.classList.toggle('on',show);}
 function pg(d){const mx=Math.ceil(FILT.length/state.size);state.page=Math.max(0,Math.min(mx-1,state.page+d));renderTable();}
 function exportCSV(){const h=['Дата','Площадка','Название','URL','Цена','Офиц','Дисконт%','Оплата Avito','Запрос'];const esc=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
   const lines=[h.join(',')].concat(FILT.map(r=>[r.last_seen,PL[r.pl].n,r.title,r.url,r.price,r._op,r._disc,r.apay?'да':'',r.query].map(esc).join(',')));
@@ -507,6 +509,7 @@ document.getElementById('addQBtn').onclick=()=>{
 // Переключатель гранулярности графика: дни/месяцы/годы (с прицелом на накопление истории)
 document.querySelectorAll('#granSeg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#granSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');state.gran=b.dataset.gran;renderCharts();});
 document.querySelectorAll('#presetBtns button').forEach(b=>b.onclick=()=>setPreset(b.dataset.preset,b));
+document.getElementById('flagLegendBtn').onclick=toggleFlagLegend;
 document.getElementById('themeToggle').onclick=()=>applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');
 applyTheme(localStorage.getItem('mon_theme')||'dark');
 buildPlat();tryCache();load();
