@@ -76,8 +76,15 @@ if [ -n "$INCOMPLETE_PLS" ]; then
 try: print(','.join(a['pl'] for a in json.load(sys.stdin).get('anomalies',[]) if a.get('kind')=='run_incomplete'))
 except: pass" 2>/dev/null)
     if [ -z "$STILL" ]; then
-      RERUN_LOG="перезапуск [$INCOMPLETE_PLS] — данные восстановлены."
-      python3 "$HERE/logmem.py" orchestrator RESOLVED "Авто-перезапуск [$INCOMPLETE_PLS] успешен — данные восстановлены." 2>/dev/null || true
+      # Числа после перезапуска (для отчёта №2: «было 0 → стало N»). Берём seen/counterfeit
+      # восстановленных площадок из свежего HEALTH.
+      RERUN_NUMS=$(echo "$HEALTH" | INC="$INCOMPLETE_PLS" python3 -c "import json,sys,os
+ru={'ozon':'Озон','wildberries':'Wildberries','yandex':'Яндекс.Маркет','avito':'Авито'}
+inc=os.environ.get('INC','').replace(',',' ').split()
+d=json.load(sys.stdin); pm={p['pl']:p for p in d.get('platforms',[])}
+print('; '.join(f\"{ru.get(p,p)}: было 0 → собрано {pm[p]['seen']}, контрафакта {pm[p]['counterfeit']}\" for p in inc if p in pm))" 2>/dev/null)
+      RERUN_LOG="перезапуск [$INCOMPLETE_PLS] — данные восстановлены (${RERUN_NUMS:-данные на месте})."
+      python3 "$HERE/logmem.py" orchestrator RESOLVED "Авто-перезапуск [$INCOMPLETE_PLS] успешен — ${RERUN_NUMS:-данные восстановлены}." 2>/dev/null || true
     else
       RERUN_LOG="перезапуск [$INCOMPLETE_PLS] выполнен, но не всё восстановилось (осталось: $STILL) — нужна ручная проверка."
       python3 "$HERE/logmem.py" orchestrator NEEDS-CHECK "Авто-перезапуск не восстановил всё. Осталось: $STILL. Нужна ручная проверка." 2>/dev/null || true
@@ -158,22 +165,33 @@ fi
 
 # 3) Claude пишет утренний отчёт (прогон + здоровье + что чинил)
 PROMPT="Ты — утренний дежурный мониторинга признаков контрафакта ПО на маркетплейсах.
-Результат ночной проверки (JSON: found — сколько нашли, counterfeit — сколько видно контрафакта):
+Результат ночной проверки в JSON. По каждой площадке поля единого окна «за сегодня»
+(карточки, видимые на дашборде сегодня):
+  • seen — всего карточек видно за сутки;
+  • counterfeit — из них с признаками контрафакта (цена заметно ниже официальной);
+  • new_today — впервые замечены сегодня (приток);
+  • with_price — у скольких удалось снять цену.
+(Поле found — служебное, из последнего полного прогона; в отчёт его НЕ выноси, оно путает,
+т.к. меряет другой прогон/период, а не сегодняшнюю витрину.)
 $HEALTH
 
 Что делала авто-починка этой ночью (пусто = аномалий не было):${FIXLOG:- нет}
 
 Напиши ОДИН отчёт на русском для Telegram (до 900 символов, без markdown-таблиц):
-- По площадкам ОДИНАКОВЫМИ строками: «Площадка: N контрафакта (нашли M)». НЕ добавляй
-  комментарий про цену только одной площадке — формат строк должен быть единым.
-  Если площадка показала старые данные (прогон не обновил) — пометь «данные от ПРОШЛОГО прогона».
+- По площадкам ОДИНАКОВЫМИ строками строго в формате:
+  «Площадка: C контрафакта из S за сутки, +N новых»
+  где C=counterfeit, S=seen, N=new_today. Все три числа — из одного окна «за сегодня»,
+  поэтому они не противоречат друг другу. НЕ пиши «нашли M» и не добавляй комментарий про
+  цену только одной площадке — формат строк единый.
+  Если по площадке seen=0 (за сегодня данных нет) — так и напиши «нет данных за сегодня».
 - Если у части карточек не считана цена (with_price заметно меньше seen) — добавь ОДНУ
   общую строку в конце: «ℹ️ Цена не считана у части карточек: <площадка — сколько>».
 - Если всё хорошо — заверши «✅ Все площадки в норме».
 - Если оркестратор что-то делал (перезапуск зависших площадок и/или авто-починка
   экстрактора) — отдельным блоком «🔧 Что предпринято:» простыми словами: что было не так
-  и чем закончилось (восстановлено / откачено / нужна ручная проверка). Не пиши «всё плохо» —
-  пиши, что именно сделано и что осталось проверить.
+  и ОБЯЗАТЕЛЬНО с цифрами, чем закончилось. Для перезапущенной площадки укажи числа
+  «было 0 → собрано S, контрафакта C» (они есть в строке перезапуска ниже). Не пиши «всё
+  плохо» — пиши, что именно сделано и что осталось проверить.
 Деловой русский, без англицизмов (upserted/coverage), без воды."
 REPORT=$(cd "$HERE" && env -u SUPABASE_SERVICE_ROLE_KEY -u DASHBOARD_REFRESH_SECRET -u SCRAPER_PROXY "$CLAUDE" --print --output-format text 2>/dev/null <<<"$PROMPT" || true)
 
@@ -183,10 +201,14 @@ if [ -z "$REPORT" ]; then
 import json,sys,os
 try: d=json.load(sys.stdin)
 except: print('Не удалось получить данные ночной проверки.'); sys.exit()
-ru={'ozon':'Ozon','wildberries':'Wildberries','yandex':'Яндекс.Маркет','avito':'Avito'}
+ru={'ozon':'Озон','wildberries':'Wildberries','yandex':'Яндекс.Маркет','avito':'Авито'}
 L=['Утренний отчёт мониторинга:']
 for p in d.get('platforms',[]):
-    L.append(f\"{ru.get(p['pl'],p['pl'])}: {p['counterfeit']} контрафакта (нашли {p['found']})\")
+    nm=ru.get(p['pl'],p['pl'])
+    if p.get('seen',0)==0:
+        L.append(f\"{nm}: нет данных за сегодня\")
+    else:
+        L.append(f\"{nm}: {p['counterfeit']} контрафакта из {p['seen']} за сутки, +{p.get('new_today',0)} новых\")
 an=d.get('anomalies') or []
 L.append('✅ Все площадки в норме' if not an else '⚠️ Аномалии: '+'; '.join(a['detail'] for a in an))
 fx=os.environ.get('FIXLOG','').strip()
@@ -198,7 +220,7 @@ fi
 # (видна как подпись «Открыть дашборд», без голого URL).
 REPORT="$(printf '%s' "$REPORT" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
 
-📊 <a href=\"https://anti-ms-mp.vercel.app/anti-ms-dashboard/index_new.html\">Открыть дашборд</a>"
+📊 <a href=\"https://anti-ms-mp.vercel.app/anti-ms-dashboard/\">Открыть дашборд</a>"
 echo "[$TS] report:"; echo "$REPORT"
 
 # 4) Отправка в Telegram

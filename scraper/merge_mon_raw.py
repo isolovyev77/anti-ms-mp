@@ -16,7 +16,7 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DASHBOARD = ROOT / 'anti-ms-dashboard' / 'index.html'
+DASHBOARD = ROOT / 'anti-ms-dashboard' / 'index_old.html'
 MON_DATA = ROOT / 'scraper' / 'mon_data.json'
 MON_DATA_CAPTCHA = ROOT / 'scraper' / 'mon_data_captcha.json'
 

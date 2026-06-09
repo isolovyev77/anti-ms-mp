@@ -12,7 +12,7 @@ VPS, GitHub/Gitverse или Supabase. **Секреты лежат в папке 
 | Парсер | VDSina `94.103.89.251` `/opt/anti-ms-mp/` | cron 00:00 МСК, скрейпит Ozon/WB/Яндекс/Avito → Supabase |
 | Оркестратор | Vultr `65.20.114.101` `/opt/anti-ms-mp-watcher/` | cron 04:00 МСК, health-check + авто-починка + утренний отчёт |
 | База | Supabase проект `yqfdbuiyfkzhkhpiknob` (eu-west-1) | таблицы listings/parser_runs/monitor_queries/parse_queue/daily_stats |
-| Дашборд | Vercel `anti-ms-mp.vercel.app` ← репозиторий (корень → каталог) | `anti-ms-dashboard/index_new.html` (тёмный командный центр) |
+| Дашборд | Vercel `anti-ms-mp.vercel.app` ← репозиторий (корень → каталог) | `anti-ms-dashboard/index.html` (тёмный командный центр) |
 | Уведомления | n8n на `is77.duckdns.org` (Vultr) | webhook `/webhook/antimsmp-parser-done` → Telegram (chat_id 18182975) |
 | RU-IP / прокси | VDSina | резидентный РФ-IP для скрейпинга |
 | Сторож (dead-man) | Oracle `158.180.14.236` `~/anti-ms-watch/` (clawbot) | cron ежечасно, алерт в Telegram напрямую если оркестратор/парсер замолчали (#18) |
@@ -92,7 +92,7 @@ crontab backup/vultr/crontab.txt   # 0 1 * * * orchestrator.sh (04:00 МСК)
 
 ### 4. Дашборд (Vercel)
 - Репозиторий деплоится как есть (корневой `index.html` = каталог, ссылки на
-  `anti-ms-dashboard/`). Боевой дашборд — `anti-ms-dashboard/index_new.html`.
+  `anti-ms-dashboard/`). Боевой дашборд — `anti-ms-dashboard/index.html`.
 - Подставить актуальные `SUPABASE_URL` + publishable-ключ в начале `<script>` дашборда.
 
 ### 5. n8n (уведомления) — опционально

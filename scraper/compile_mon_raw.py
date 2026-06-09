@@ -34,7 +34,7 @@ SOURCES = [
     ('aliexpress',  os.path.join(SCRIPT_DIR, 'ale_raw.txt')),
 ]
 
-DASHBOARD_HTML = os.path.join(PROJECT_DIR, 'anti-ms-dashboard', 'index.html')
+DASHBOARD_HTML = os.path.join(PROJECT_DIR, 'anti-ms-dashboard', 'index_old.html')
 SNIPPET_OUT    = os.path.join(SCRIPT_DIR, 'mon_raw_snippet.js')
 
 PRICE_MIN = 50

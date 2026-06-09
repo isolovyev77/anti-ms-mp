@@ -21,7 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / 'cloakbrowser-lab' / 'avito_cloak_vdsina.json'
 DST = ROOT / 'scraper' / 'mon_data_captcha.json'
-DASHBOARD = ROOT / 'anti-ms-dashboard' / 'index.html'
+DASHBOARD = ROOT / 'anti-ms-dashboard' / 'index_old.html'
 
 # Старые avito-карточки из дашборда (от 19.03) подтягиваем сюда, чтобы merge_mon_raw.py
 # не стёр их при перезаписи MON_RAW. Свежие 30 добавляются ПОВЕРХ — суммарный набор

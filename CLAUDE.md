@@ -39,7 +39,7 @@ ssh -i ~/.ssh/Vultr linuxuser@65.20.114.101 \
 | VDSina `94.103.89.251` | `ssh -i ~/.ssh/VDSina root@…` | парсер `/opt/anti-ms-mp/`, cron 00:00 МСК |
 | Vultr `65.20.114.101` | `ssh -i ~/.ssh/Vultr linuxuser@…` | оркестратор `/opt/anti-ms-mp-watcher/`, cron 04:00 МСК; n8n |
 | Supabase | проект `yqfdbuiyfkzhkhpiknob` | таблицы listings/parser_runs/monitor_queries/parse_queue/daily_stats |
-| Vercel | `anti-ms-mp.vercel.app/anti-ms-dashboard/index_new.html` | боевой дашборд (из этого репо) |
+| Vercel | `anti-ms-mp.vercel.app/anti-ms-dashboard/index.html` | боевой дашборд (из этого репо) |
 
 Секреты — НЕ в git: `backup/secrets/*.env` (gitignored) + `~/anti-ms-mp-secrets/`.
 Восстановление с нуля: `backup/RESTORE.md`. Схема БД: `backup/db/schema.sql`.
