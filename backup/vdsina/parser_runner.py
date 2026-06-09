@@ -108,7 +108,19 @@ def title_ok(title: str) -> bool:
                             "libreoffice", "astra linux", "базальт", "rosa",
                             "кит офис", "обычный офис")):
         return False
+    # Игровые/консольные ключи: «office» в названии ИГРЫ (The Office Quest;
+    # There's a Gun in the Office; Pets Hidden In The Office) для Xbox/PlayStation/
+    # Nintendo — это игра, а не MS Office. MS Office не продаётся как консольный ключ,
+    # поэтому платформа-консоль в названии = заведомо не наш контрафакт.
+    if _re.search(r"\bxbox\b|playstation|\bps[2345]\b|nintendo|game\s?pass|gamepass", s):
+        return False
     if _re.search(r"\bкнига\b|\bруководство\b|учебник|учебн[ао]е|пособи[ея]|\bсамоучитель\b|шаг за шагом|методичк|методическ|монограф|\bлекци[ия]\b|power bi", s):
+        return False
+    # Услуги ПК-ремонта (установка Windows/драйверов, лечение вирусов, восстановление,
+    # очистка) и антивирусы — это не продажа MS Office, даже если «office» в названии.
+    # «Установка Office» с ценой остаётся — этих сервис-маркеров в ней нет. Проверено на
+    # базе: ловит 22 услуги/антивируса, реальные Office-продукты не задевает (risk=0).
+    if _re.search(r"драйвер|вирус|лечени|восстановлени|очистк[аи]|\bремонт", s):
         return False
     if _re.match(r"^код windows|^ключ windows|^windows\s+\d|^лицензия windows", s):
         return False
@@ -175,6 +187,21 @@ SUPABASE_SERVICE_ROLE_KEY = env("SUPABASE_SERVICE_ROLE_KEY", required=True)
 SCRAPER_PROXY = env("SCRAPER_PROXY", "").strip() or None
 N8N_WEBHOOK = env("N8N_WEBHOOK_PARSER_DONE", "").strip() or None
 
+# Поведение при антибот-блоке (DataDome). Подобрано под паттерн Ozon: CloakBrowser
+# метится по velocity после ~1 запроса с дата-центрового IP, дальше всё летит в блок.
+QUERY_DELAY_LO   = float(env("QUERY_DELAY_LO", "2.0"))   # пауза между запросами, сек (низ)
+QUERY_DELAY_HI   = float(env("QUERY_DELAY_HI", "5.0"))   # пауза между запросами, сек (верх); 0 = выкл
+BLOCK_BACKOFF_S  = float(env("BLOCK_BACKOFF_S", "60"))   # однократный cooldown при первом блоке площадки; 0 = выкл
+BLOCK_BAIL_AFTER = int(env("BLOCK_BAIL_AFTER", "2"))     # после N заблокированных запросов подряд — стоп CloakBrowser (добёрет Camoufox); 0 = выкл
+
+# Прокси-ступень каскада: при блоке площадки на ПРЯМОМ IP VDSina — повторный проход
+# CloakBrowser через РФ-прокси (свежий IP, напр. RuVDS-туннель) ДО Camoufox. Другой
+# РФ-IP с низким velocity часто проходит там, где прямой флагнут DataDome. Per-platform.
+OZON_PROXY            = env("OZON_PROXY", "").strip() or None   # socks5://127.0.0.1:1081 (RuVDS); пусто = ступень выкл
+CLOAK_PROXY_FALLBACK  = os.environ.get("CLOAK_PROXY_FALLBACK", "1") != "0"
+CLOAK_PROXY_MAX_PAGES = int(os.environ.get("CLOAK_PROXY_MAX_PAGES", "3"))
+PLATFORM_PROXY        = {"ozon": OZON_PROXY}                     # площадка → прокси для ступени (None = выкл)
+
 # === Утилиты ===
 # Время последнего лог-события = реальный прогресс скрейпа. heartbeat шлёт ЕГО,
 # а не now(), чтобы watchdog ловил зависания по остановке прогресса (за ~5 мин),
@@ -232,6 +259,26 @@ def load_queries() -> list[str]:
     return list(QUERIES_FALLBACK)
 
 
+def is_query_active(q: str) -> bool:
+    """Активен ли запрос в monitor_queries СЕЙЧАС. Запрос мог быть удалён с дашборда
+    (remove_queries) за время прогона — тогда писать его карточки нельзя (осиротеют).
+    Fail-open: при ошибке проверки считаем активным, чтобы сбой Supabase не терял данные."""
+    try:
+        from urllib.parse import quote as _q
+        req = urllib.request.Request(
+            f"{SUPABASE_URL}/rest/v1/monitor_queries?query=eq.{_q(q, safe='')}&active=eq.true&select=query&limit=1",
+            headers={
+                "apikey": SUPABASE_SERVICE_ROLE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return len(json.loads(r.read() or "[]")) > 0
+    except Exception as e:
+        log("is_query_active FAIL — считаем активным (fail-open)", err=str(e)[:150])
+        return True
+
+
 def mark_query_parsed(query: str) -> None:
     """Обновляет last_parsed_at для запроса. Best-effort."""
     try:
@@ -267,6 +314,9 @@ def n8n_notify(payload: dict) -> None:
         log("n8n notify failed (продолжаю)", err=str(e)[:200])
 
 # === Извлечение карточек ===
+# ⚠️ СИНХРОНИЗАЦИЯ: EXTRACT_JS (и PLATFORMS/title_ok/official_price выше)
+# продублированы в extractors.py — их использует запасной движок Camoufox
+# (camoufox_scrape.py). При смене вёрстки маркетплейса менять В ОБОИХ файлах.
 EXTRACT_JS = {
     "ozon": r"""
     () => {
@@ -308,8 +358,12 @@ EXTRACT_JS = {
         const priceEl = card.querySelector('[data-marker="item-price"]') || card.querySelector('[itemprop="price"]');
         let price = 0;
         if (priceEl) {
-          const t = priceEl.textContent || priceEl.getAttribute('content') || '';
-          const n = parseInt(t.replace(/\D/g, ''), 10);
+          const raw = (priceEl.textContent || '').trim();
+          // Если textContent пуст — это <meta itemprop="price" content="299.00">:
+          // парсим как ДРОБНОЕ (parseFloat), иначе replace(/\D/g,'') срезал бы точку
+          // и «299.00» превратилось бы в 29900 (цена ×100, мимо counterfeit-детекции).
+          const n = raw ? parseInt(raw.replace(/\D/g, ''), 10)
+                        : Math.round(parseFloat(priceEl.getAttribute('content') || '0'));
           if (n) price = n;
         }
         const url = href.startsWith('http') ? href : 'https://www.avito.ru' + href;
@@ -465,18 +519,44 @@ def scrape_one_platform(page, platform: str, run_log) -> tuple[list[dict], list[
     cfg = PLATFORMS[platform]
     items: list[dict] = []
     errors: list[dict] = []
-    for q in QUERIES:
+    consecutive_blocks = 0     # запросов подряд, упёршихся в антибот
+    did_backoff = False        # cooldown — один раз на площадку
+    queries = list(QUERIES)
+    for qi, q in enumerate(queries):
         run_log(f"  [{platform}] query='{q}'")
+        errs_before = len(errors)
         for p in range(1, cfg["max_pages"] + 1):
             page_ok, should_break = _scrape_one_page(page, platform, q, p, run_log, items, errors)
             # Retry стр.1 один раз при ExecCtx ошибке — частый паттерн avito antibot
             if not page_ok and p == 1 and errors and "extract:" in (errors[-1].get("message") or ""):
                 run_log(f"    стр.1 retry после extract-ошибки")
+                errors.pop()  # убрать запись о первой попытке: при успешном retry не раздуваем errors→partial; при повторном сбое _scrape_one_page добавит свежую
                 time.sleep(3)
                 page_ok, should_break = _scrape_one_page(page, platform, q, p, run_log, items, errors)
             if should_break:
                 break
             jitter()
+        # Был ли этот запрос заблокирован антиботом?
+        blocked_this_query = any("BLOCKED" in (e.get("message") or "") for e in errors[errs_before:])
+        if blocked_this_query:
+            consecutive_blocks += 1
+            # Однократный cooldown — дать velocity-счётчику антибота остыть.
+            # (heartbeat шлёт отдельный таймер-поток каждые 30с → watchdog не сработает.)
+            if not did_backoff and BLOCK_BACKOFF_S > 0:
+                run_log(f"    [{platform}] антибот-блок → пауза {int(BLOCK_BACKOFF_S)}с")
+                time.sleep(BLOCK_BACKOFF_S)
+                did_backoff = True
+            # IP помечен — дальше CloakBrowser бесполезен и лишь держит метку.
+            # Camoufox-fallback (триггер: BLOCKED в errors) проходит ВСЕ запросы сам,
+            # поэтому оставшиеся после раннего выхода запросы не теряются.
+            if CAMOUFOX_FALLBACK and BLOCK_BAIL_AFTER > 0 and consecutive_blocks >= BLOCK_BAIL_AFTER:
+                run_log(f"    [{platform}] {consecutive_blocks} запросов подряд блок → стоп CloakBrowser, добор Camoufox")
+                break
+        else:
+            consecutive_blocks = 0
+        # Профилактика: пауза между запросами, чтобы не триггерить velocity-эвристику.
+        if qi < len(queries) - 1 and QUERY_DELAY_HI > 0:
+            time.sleep(random.uniform(QUERY_DELAY_LO, QUERY_DELAY_HI))
     return items, errors
 
 
@@ -490,6 +570,20 @@ def dedup(items: list[dict]) -> list[dict]:
         seen.add(k)
         out.append(it)
     return out
+
+
+def _count_from_content_range(resp) -> int:
+    """Число затронутых строк из заголовка Content-Range PostgREST (count=exact).
+
+    Формат «0-9/25» или «*/25» → 25. Если заголовка нет — 0 (удаление всё равно
+    прошло, счётчик нужен лишь для лога).
+    """
+    cr = resp.headers.get("Content-Range", "") or ""
+    if "/" in cr:
+        tail = cr.rsplit("/", 1)[-1].strip()
+        if tail.isdigit():
+            return int(tail)
+    return 0
 
 
 def cleanup_old_listings(retention_days: int = 14) -> int:
@@ -510,13 +604,12 @@ def cleanup_old_listings(retention_days: int = 14) -> int:
             headers={
                 "apikey": SUPABASE_SERVICE_ROLE_KEY,
                 "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
-                "Prefer": "return=representation",  # вернёт удалённые строки
+                "Prefer": "return=minimal,count=exact",  # #34: счётчик в заголовке, без тела
             },
         )
         with urllib.request.urlopen(req, timeout=30) as r:
-            body = r.read()
-            deleted = json.loads(body) if body else []
-            return len(deleted)
+            r.read()  # тело пустое (return=minimal) — дренируем соединение
+            return _count_from_content_range(r)
     except Exception as e:
         log("cleanup failed (не критично)", err=str(e)[:200])
         return -1
@@ -524,7 +617,10 @@ def cleanup_old_listings(retention_days: int = 14) -> int:
 
 def cleanup_old_parser_runs(retention_days: int = 90) -> int:
     """Удалить parser_runs старше N дней. Тоже не блокирующая."""
-    cutoff_dt = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=retention_days)).isoformat()
+    # strftime без таймзоны: .isoformat() даёт "...+00:00", а '+' в URL читается
+    # как пробел → PostgREST 400 (фильтр невалиден). Из-за этого чистка parser_runs
+    # раньше молча падала и таблица росла. Naive-timestamp PostgREST принимает.
+    cutoff_dt = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=retention_days)).strftime("%Y-%m-%dT%H:%M:%S")
     try:
         req = urllib.request.Request(
             f"{SUPABASE_URL}/rest/v1/parser_runs?started_at=lt.{cutoff_dt}",
@@ -532,22 +628,45 @@ def cleanup_old_parser_runs(retention_days: int = 90) -> int:
             headers={
                 "apikey": SUPABASE_SERVICE_ROLE_KEY,
                 "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
-                "Prefer": "return=representation",
+                "Prefer": "return=minimal,count=exact",  # #34
             },
         )
         with urllib.request.urlopen(req, timeout=20) as r:
-            body = r.read()
-            deleted = json.loads(body) if body else []
-            return len(deleted)
+            r.read()
+            return _count_from_content_range(r)
     except Exception as e:
         log("cleanup parser_runs failed (не критично)", err=str(e)[:200])
+        return -1
+
+
+def cleanup_orphan_listings_rpc(days: int = 7) -> int:
+    """Удалить карточки «осиротевших» запросов (которых больше нет среди активных
+    monitor_queries) старше `days` дней — через RPC cleanup_orphan_listings (PostgREST
+    не умеет DELETE с подзапросом). Защита от разрастания БД, когда запрос удалили без
+    галочки «удалить карточки». Best-effort."""
+    try:
+        req = urllib.request.Request(
+            f"{SUPABASE_URL}/rest/v1/rpc/cleanup_orphan_listings",
+            data=json.dumps({"p_days": days}).encode(),
+            method="POST",
+            headers={
+                "apikey": SUPABASE_SERVICE_ROLE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+                "Content-Type": "application/json",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=30) as r:
+            body = r.read()
+            return int(json.loads(body)) if body else 0
+    except Exception as e:
+        log("cleanup_orphan failed (не критично)", err=str(e)[:200])
         return -1
 
 
 def upsert_listings(rows: list[dict]) -> int:
     if not rows:
         return 0
-    today = dt.date.today().isoformat()
+    today = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=3)).date().isoformat()  # МСК-дата (согласовано с daily_stats и healthcheck)
     payload = [
         {
             "date": today,
@@ -682,7 +801,7 @@ def upsert_daily_stats(rows: list[dict]) -> None:
 
 def platform_daily_stat(plat: str, items_d: list[dict]) -> dict:
     """Считает дневной срез по платформе: всего, контрафакт, средний дисконт."""
-    today = dt.datetime.now(dt.timezone.utc).date().isoformat()
+    today = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=3)).date().isoformat()  # МСК-дата (как last_seen в upsert_listings и healthcheck)
     cf = []
     for c in items_d:
         price = c.get("price") or 0
@@ -693,6 +812,92 @@ def platform_daily_stat(plat: str, items_d: list[dict]) -> dict:
     return {"day": today, "pl": plat, "total": len(items_d),
             "counterfeit": len(cf), "avg_disc": avg_disc,
             "updated_at": dt.datetime.now(dt.timezone.utc).isoformat()}
+
+
+# === Запасной движок Camoufox (Firefox) ============================================
+# При блокировке площадки CloakBrowser'ом (DataDome/SmartCaptcha) добираем её через
+# Camoufox ОТДЕЛЬНЫМ процессом: изоляция зависимостей (свой playwright 1.51) и RAM
+# (освобождается по выходу). Управление через ENV: CAMOUFOX_FALLBACK=0 — выключить.
+CAMOUFOX_PY = os.environ.get("CAMOUFOX_PY", "/opt/camoufox-test/.venv/bin/python")
+CAMOUFOX_SCRIPT = str(Path(__file__).parent / "camoufox_scrape.py")
+CAMOUFOX_FALLBACK = os.environ.get("CAMOUFOX_FALLBACK", "1") != "0"
+CAMOUFOX_MAX_PAGES = int(os.environ.get("CAMOUFOX_MAX_PAGES", "2"))
+
+
+def camoufox_fallback(platform: str, queries: list, run_log) -> tuple[list[dict], dict]:
+    """Добор площадки запасным движком (Firefox) отдельным процессом.
+
+    Возвращает (items, stats). items — в том же формате, что scrape_one_platform
+    (id/title/price/url/platform/query), готовы к dedup+upsert. Best-effort: любая
+    ошибка подавляется, возвращаем что есть (основной путь уже отработал)."""
+    import subprocess
+    if not os.path.exists(CAMOUFOX_PY) or not os.path.exists(CAMOUFOX_SCRIPT):
+        run_log(f"  [{platform}] camoufox-fallback недоступен (нет venv/скрипта)")
+        return [], {}
+    cmd = [CAMOUFOX_PY, CAMOUFOX_SCRIPT, platform, *queries, "--max-pages", str(CAMOUFOX_MAX_PAGES)]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    except Exception as e:
+        run_log(f"  [{platform}] camoufox-fallback упал: {str(e)[:150]}")
+        return [], {}
+    if r.returncode != 0 or not (r.stdout or "").strip():
+        run_log(f"  [{platform}] camoufox-fallback без результата (rc={r.returncode}): {(r.stderr or '')[:150]}")
+        return [], {}
+    try:
+        out = json.loads(r.stdout.strip().splitlines()[-1])
+    except Exception as e:
+        run_log(f"  [{platform}] camoufox-fallback: JSON не распарсен: {str(e)[:120]}")
+        return [], {}
+    return out.get("items", []), out.get("stats", {})
+
+
+# === Прокси-ступень каскада: CloakBrowser через РФ-прокси (свежий IP) ===============
+# Тот же venv, что у основного парсера (cloakbrowser), запускается ОТДЕЛЬНЫМ процессом
+# (RAM освобождается по выходу, как camoufox). Идёт ДО Camoufox: другой РФ-IP часто
+# проходит там, где прямой флагнут DataDome по velocity.
+CLOAK_PROXY_PY = os.environ.get("CLOAK_PROXY_PY", sys.executable)
+CLOAK_PROXY_SCRIPT = str(Path(__file__).parent / "cloak_proxy_scrape.py")
+
+
+def _tunnel_alive(proxy: str) -> bool:
+    """Быстрый чек живости SOCKS-туннеля: слушает ли локальный порт. socks5://host:port."""
+    import socket
+    try:
+        hp = proxy.split("://", 1)[-1]
+        host, port = hp.rsplit(":", 1)
+        with socket.create_connection((host, int(port)), timeout=4):
+            return True
+    except Exception:
+        return False
+
+
+def cloak_proxy_fallback(platform: str, queries: list, proxy: str, run_log) -> tuple[list[dict], dict, bool]:
+    """Повторный проход CloakBrowser через РФ-прокси (свежий IP) отдельным процессом.
+    Возвращает (items, stats, blocked). Best-effort: при недоступности туннеля/ошибке
+    возвращает ([], {}, False) — каскад идёт дальше к Camoufox."""
+    import subprocess
+    if not os.path.exists(CLOAK_PROXY_SCRIPT):
+        run_log(f"  [{platform}] cloak-proxy недоступен (нет скрипта)")
+        return [], {}, False
+    if not _tunnel_alive(proxy):
+        run_log(f"  [{platform}] cloak-proxy: туннель {proxy} мёртв — пропускаю ступень")
+        return [], {}, False
+    cmd = [CLOAK_PROXY_PY, CLOAK_PROXY_SCRIPT, platform, *queries,
+           "--proxy", proxy, "--max-pages", str(CLOAK_PROXY_MAX_PAGES)]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    except Exception as e:
+        run_log(f"  [{platform}] cloak-proxy упал: {str(e)[:150]}")
+        return [], {}, False
+    if r.returncode != 0 or not (r.stdout or "").strip():
+        run_log(f"  [{platform}] cloak-proxy без результата (rc={r.returncode}): {(r.stderr or '')[:150]}")
+        return [], {}, False
+    try:
+        out = json.loads(r.stdout.strip().splitlines()[-1])
+    except Exception as e:
+        run_log(f"  [{platform}] cloak-proxy: JSON не распарсен: {str(e)[:120]}")
+        return [], {}, False
+    return out.get("items", []), out.get("stats", {}), bool(out.get("blocked", False))
 
 
 def main() -> int:
@@ -721,7 +926,22 @@ def main() -> int:
     log("queries загружены", count=len(QUERIES))
 
     log("=== run start ===", platforms=",".join(platforms), proxy=SCRAPER_PROXY or "direct")
-    run_id = insert_parser_run(args.trigger)
+    # Ретраим создание parser_runs: при кратком сбое Supabase в 00:00 прогон иначе
+    # падал бы без единой записи (watchdog/healthcheck/оркестратор слепы). Если все
+    # попытки провалились — выходим; отсутствие данных за сегодня поймает оркестратор
+    # (аномалия zero_written) в 04:00.
+    run_id = None
+    for _att in range(3):
+        try:
+            run_id = insert_parser_run(args.trigger)
+            break
+        except Exception as e:
+            log("insert_parser_run FAILED — Supabase недоступен?", attempt=_att + 1, err=str(e)[:200])
+            if _att < 2:
+                time.sleep(10)
+    if run_id is None:
+        log("=== run aborted: parser_runs не создан за 3 попытки, прогон не выполнен ===")
+        sys.exit(1)
     log("run id", id=run_id, pid=os.getpid())
 
     # Heartbeat-поток: каждые 30 сек обновляет parser_runs.last_heartbeat.
@@ -750,9 +970,51 @@ def main() -> int:
         for plat in platforms:
             try:
                 items, errors = scrape_one_platform(page, plat, log)
+                # Camoufox-fallback: если CloakBrowser упёрся в антибот (метки BLOCKED
+                # в errors) — добираем эту площадку запасным движком (Firefox) и мёржим.
+                # Статистика движков копится в totals → за N прогонов видно, как часто
+                # CloakBrowser блокируется и сколько из этого спасает Camoufox.
+                blocked_cloak = sum(1 for e in errors if "BLOCKED" in (e.get("message") or ""))
+                direct_count = len(items)        # карточки прямого прохода (до fallback)
+                recovered_proxy = 0
+                recovered_cam = 0
+                # Ступень 1 каскада: при блоке прямого IP — проход CloakBrowser через
+                # РФ-прокси (свежий IP). Только если для площадки задан прокси и ступень вкл.
+                plat_proxy = PLATFORM_PROXY.get(plat)
+                proxy_blocked = False
+                if blocked_cloak and CLOAK_PROXY_FALLBACK and plat_proxy:
+                    log(f"  [{plat}] CloakBrowser заблокирован ({blocked_cloak}) → проход через прокси {plat_proxy}")
+                    px_items, px_stats, proxy_blocked = cloak_proxy_fallback(plat, QUERIES, plat_proxy, log)
+                    if px_items:
+                        items.extend(px_items)
+                        recovered_proxy = len(px_items)
+                        log(f"  [{plat}] прокси-проход добрал {recovered_proxy} карточек", **(px_stats or {}))
+                # Ступень 2 (финал): Camoufox — если прямой блок и прокси не закрыл вопрос
+                # (прокси не задан / тоже заблокирован / ничего не добрал).
+                if blocked_cloak and CAMOUFOX_FALLBACK and (not plat_proxy or proxy_blocked or recovered_proxy == 0):
+                    log(f"  [{plat}] CloakBrowser заблокирован ({blocked_cloak}) → Camoufox-fallback")
+                    cf_items, cf_stats = camoufox_fallback(plat, QUERIES, log)
+                    if cf_items:
+                        items.extend(cf_items)
+                        recovered_cam = len(cf_items)
+                        log(f"  [{plat}] Camoufox добрал {recovered_cam} карточек", **(cf_stats or {}))
+                # Метка движков, реально давших карточки: cloak / cloak+proxy / proxy+camoufox …
+                _parts = (["cloak"] if direct_count else []) + \
+                         (["proxy"] if recovered_proxy else []) + \
+                         (["camoufox"] if recovered_cam else [])
+                engine = "+".join(_parts) or "cloak"
+                # Guard (UI): запрос мог быть удалён с дашборда за время прогона
+                # (remove_queries отменяет parse_queue + удаляет monitor_queries). Тогда
+                # карточки удалённого запроса НЕ пишем — иначе они осиротеют в БД.
+                if args.only_query and not is_query_active(args.only_query):
+                    log(f"  [{plat}] запрос '{args.only_query}' удалён за время прогона — карточки не пишем, прерываю прогон")
+                    break
                 items_d = dedup(items)
                 ok = upsert_listings(items_d)
-                totals[plat] = {"found": len(items), "unique": len(items_d), "upserted": ok}
+                totals[plat] = {"found": len(items), "unique": len(items_d), "upserted": ok,
+                                "engine": engine, "blocked_cloak": blocked_cloak,
+                                "recovered_proxy": recovered_proxy,
+                                "recovered_camoufox": recovered_cam}
                 ds = platform_daily_stat(plat, items_d)
                 daily_rows.append(ds)
                 # daily_stats пишем СРАЗУ по площадке (а не в конце прогона) — иначе
@@ -762,6 +1024,10 @@ def main() -> int:
                         upsert_daily_stats([ds])
                     except Exception as e:
                         log("daily_stats (инкр.) fail", err=str(e)[:150])
+                # Camoufox восстановил площадку → снимаем отметки BLOCKED, чтобы
+                # успешно спасённый прогон не помечался partial из-за погашенной блокировки.
+                if recovered_proxy or recovered_cam:
+                    errors = [e for e in errors if "BLOCKED" not in (e.get("message") or "")]
                 all_errors.extend(errors)
                 log(f"  [{plat}] done", **totals[plat])
             except Exception as e:
@@ -780,6 +1046,10 @@ def main() -> int:
         deleted = cleanup_old_listings(retention_days=14)
         log("retention: удалено карточек старше 14 дней", deleted=deleted)
         totals["_retention"] = {"listings_deleted": deleted}
+        orphan_deleted = cleanup_orphan_listings_rpc(days=7)
+        if orphan_deleted and orphan_deleted > 0:
+            log("retention: удалено осиротевших карточек (удалённые запросы >7д)", deleted=orphan_deleted)
+        totals["_retention"]["orphan_deleted"] = orphan_deleted
         runs_deleted = cleanup_old_parser_runs(retention_days=90)
         if runs_deleted > 0:
             log("retention: удалено parser_runs старше 90 дней", deleted=runs_deleted)
@@ -795,8 +1065,28 @@ def main() -> int:
         for q in QUERIES:
             mark_query_parsed(q)
 
-    heartbeat_stop.set()  # стоп heartbeat-потока перед финализацией
-    finalize_parser_run(run_id, totals, all_errors, status)
+    # Финализация с одним ретраем. heartbeat НЕ останавливаем до финализации —
+    # держим живым во время ретраев (иначе при сетевом сбое прогон завис бы в
+    # 'running' с замороженным heartbeat → ложный hung от watchdog). Останавливаем
+    # в finally. Если финализация так и не прошла — данные в listings/daily_stats
+    # уже записаны инкрементально, watchdog пометит прогон hung.
+    finalized = False
+    try:
+        for _att in range(2):
+            try:
+                finalize_parser_run(run_id, totals, all_errors, status)
+                finalized = True
+                break
+            except Exception as e:
+                log("finalize_parser_run FAILED", attempt=_att + 1, err=str(e)[:200])
+                if _att == 0:
+                    time.sleep(5)
+    finally:
+        heartbeat_stop.set()  # стоп heartbeat-потока
+    if not finalized:
+        log("=== finalize не удался — прогон останется 'running', watchdog пометит hung ===")
+        sys.stdout.flush(); sys.stderr.flush()
+        os._exit(1)
     log("=== run end ===", status=status, totals=totals, errors=len(all_errors))
     if not args.no_notify:
         n8n_notify({"run_id": run_id, "status": status, "totals": totals, "errors_count": len(all_errors)})

@@ -187,6 +187,21 @@ SUPABASE_SERVICE_ROLE_KEY = env("SUPABASE_SERVICE_ROLE_KEY", required=True)
 SCRAPER_PROXY = env("SCRAPER_PROXY", "").strip() or None
 N8N_WEBHOOK = env("N8N_WEBHOOK_PARSER_DONE", "").strip() or None
 
+# Поведение при антибот-блоке (DataDome). Подобрано под паттерн Ozon: CloakBrowser
+# метится по velocity после ~1 запроса с дата-центрового IP, дальше всё летит в блок.
+QUERY_DELAY_LO   = float(env("QUERY_DELAY_LO", "2.0"))   # пауза между запросами, сек (низ)
+QUERY_DELAY_HI   = float(env("QUERY_DELAY_HI", "5.0"))   # пауза между запросами, сек (верх); 0 = выкл
+BLOCK_BACKOFF_S  = float(env("BLOCK_BACKOFF_S", "60"))   # однократный cooldown при первом блоке площадки; 0 = выкл
+BLOCK_BAIL_AFTER = int(env("BLOCK_BAIL_AFTER", "2"))     # после N заблокированных запросов подряд — стоп CloakBrowser (добёрет Camoufox); 0 = выкл
+
+# Прокси-ступень каскада: при блоке площадки на ПРЯМОМ IP VDSina — повторный проход
+# CloakBrowser через РФ-прокси (свежий IP, напр. RuVDS-туннель) ДО Camoufox. Другой
+# РФ-IP с низким velocity часто проходит там, где прямой флагнут DataDome. Per-platform.
+OZON_PROXY            = env("OZON_PROXY", "").strip() or None   # socks5://127.0.0.1:1081 (RuVDS); пусто = ступень выкл
+CLOAK_PROXY_FALLBACK  = os.environ.get("CLOAK_PROXY_FALLBACK", "1") != "0"
+CLOAK_PROXY_MAX_PAGES = int(os.environ.get("CLOAK_PROXY_MAX_PAGES", "3"))
+PLATFORM_PROXY        = {"ozon": OZON_PROXY}                     # площадка → прокси для ступени (None = выкл)
+
 # === Утилиты ===
 # Время последнего лог-события = реальный прогресс скрейпа. heartbeat шлёт ЕГО,
 # а не now(), чтобы watchdog ловил зависания по остановке прогресса (за ~5 мин),
@@ -504,8 +519,12 @@ def scrape_one_platform(page, platform: str, run_log) -> tuple[list[dict], list[
     cfg = PLATFORMS[platform]
     items: list[dict] = []
     errors: list[dict] = []
-    for q in QUERIES:
+    consecutive_blocks = 0     # запросов подряд, упёршихся в антибот
+    did_backoff = False        # cooldown — один раз на площадку
+    queries = list(QUERIES)
+    for qi, q in enumerate(queries):
         run_log(f"  [{platform}] query='{q}'")
+        errs_before = len(errors)
         for p in range(1, cfg["max_pages"] + 1):
             page_ok, should_break = _scrape_one_page(page, platform, q, p, run_log, items, errors)
             # Retry стр.1 один раз при ExecCtx ошибке — частый паттерн avito antibot
@@ -517,6 +536,27 @@ def scrape_one_platform(page, platform: str, run_log) -> tuple[list[dict], list[
             if should_break:
                 break
             jitter()
+        # Был ли этот запрос заблокирован антиботом?
+        blocked_this_query = any("BLOCKED" in (e.get("message") or "") for e in errors[errs_before:])
+        if blocked_this_query:
+            consecutive_blocks += 1
+            # Однократный cooldown — дать velocity-счётчику антибота остыть.
+            # (heartbeat шлёт отдельный таймер-поток каждые 30с → watchdog не сработает.)
+            if not did_backoff and BLOCK_BACKOFF_S > 0:
+                run_log(f"    [{platform}] антибот-блок → пауза {int(BLOCK_BACKOFF_S)}с")
+                time.sleep(BLOCK_BACKOFF_S)
+                did_backoff = True
+            # IP помечен — дальше CloakBrowser бесполезен и лишь держит метку.
+            # Camoufox-fallback (триггер: BLOCKED в errors) проходит ВСЕ запросы сам,
+            # поэтому оставшиеся после раннего выхода запросы не теряются.
+            if CAMOUFOX_FALLBACK and BLOCK_BAIL_AFTER > 0 and consecutive_blocks >= BLOCK_BAIL_AFTER:
+                run_log(f"    [{platform}] {consecutive_blocks} запросов подряд блок → стоп CloakBrowser, добор Camoufox")
+                break
+        else:
+            consecutive_blocks = 0
+        # Профилактика: пауза между запросами, чтобы не триггерить velocity-эвристику.
+        if qi < len(queries) - 1 and QUERY_DELAY_HI > 0:
+            time.sleep(random.uniform(QUERY_DELAY_LO, QUERY_DELAY_HI))
     return items, errors
 
 
@@ -811,6 +851,55 @@ def camoufox_fallback(platform: str, queries: list, run_log) -> tuple[list[dict]
     return out.get("items", []), out.get("stats", {})
 
 
+# === Прокси-ступень каскада: CloakBrowser через РФ-прокси (свежий IP) ===============
+# Тот же venv, что у основного парсера (cloakbrowser), запускается ОТДЕЛЬНЫМ процессом
+# (RAM освобождается по выходу, как camoufox). Идёт ДО Camoufox: другой РФ-IP часто
+# проходит там, где прямой флагнут DataDome по velocity.
+CLOAK_PROXY_PY = os.environ.get("CLOAK_PROXY_PY", sys.executable)
+CLOAK_PROXY_SCRIPT = str(Path(__file__).parent / "cloak_proxy_scrape.py")
+
+
+def _tunnel_alive(proxy: str) -> bool:
+    """Быстрый чек живости SOCKS-туннеля: слушает ли локальный порт. socks5://host:port."""
+    import socket
+    try:
+        hp = proxy.split("://", 1)[-1]
+        host, port = hp.rsplit(":", 1)
+        with socket.create_connection((host, int(port)), timeout=4):
+            return True
+    except Exception:
+        return False
+
+
+def cloak_proxy_fallback(platform: str, queries: list, proxy: str, run_log) -> tuple[list[dict], dict, bool]:
+    """Повторный проход CloakBrowser через РФ-прокси (свежий IP) отдельным процессом.
+    Возвращает (items, stats, blocked). Best-effort: при недоступности туннеля/ошибке
+    возвращает ([], {}, False) — каскад идёт дальше к Camoufox."""
+    import subprocess
+    if not os.path.exists(CLOAK_PROXY_SCRIPT):
+        run_log(f"  [{platform}] cloak-proxy недоступен (нет скрипта)")
+        return [], {}, False
+    if not _tunnel_alive(proxy):
+        run_log(f"  [{platform}] cloak-proxy: туннель {proxy} мёртв — пропускаю ступень")
+        return [], {}, False
+    cmd = [CLOAK_PROXY_PY, CLOAK_PROXY_SCRIPT, platform, *queries,
+           "--proxy", proxy, "--max-pages", str(CLOAK_PROXY_MAX_PAGES)]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    except Exception as e:
+        run_log(f"  [{platform}] cloak-proxy упал: {str(e)[:150]}")
+        return [], {}, False
+    if r.returncode != 0 or not (r.stdout or "").strip():
+        run_log(f"  [{platform}] cloak-proxy без результата (rc={r.returncode}): {(r.stderr or '')[:150]}")
+        return [], {}, False
+    try:
+        out = json.loads(r.stdout.strip().splitlines()[-1])
+    except Exception as e:
+        run_log(f"  [{platform}] cloak-proxy: JSON не распарсен: {str(e)[:120]}")
+        return [], {}, False
+    return out.get("items", []), out.get("stats", {}), bool(out.get("blocked", False))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--platforms", default=",".join(PLATFORMS), help="ozon,wildberries,yandex,avito")
@@ -886,17 +975,34 @@ def main() -> int:
                 # Статистика движков копится в totals → за N прогонов видно, как часто
                 # CloakBrowser блокируется и сколько из этого спасает Camoufox.
                 blocked_cloak = sum(1 for e in errors if "BLOCKED" in (e.get("message") or ""))
-                engine = "cloak"
-                recovered = 0
-                if blocked_cloak and CAMOUFOX_FALLBACK:
+                direct_count = len(items)        # карточки прямого прохода (до fallback)
+                recovered_proxy = 0
+                recovered_cam = 0
+                # Ступень 1 каскада: при блоке прямого IP — проход CloakBrowser через
+                # РФ-прокси (свежий IP). Только если для площадки задан прокси и ступень вкл.
+                plat_proxy = PLATFORM_PROXY.get(plat)
+                proxy_blocked = False
+                if blocked_cloak and CLOAK_PROXY_FALLBACK and plat_proxy:
+                    log(f"  [{plat}] CloakBrowser заблокирован ({blocked_cloak}) → проход через прокси {plat_proxy}")
+                    px_items, px_stats, proxy_blocked = cloak_proxy_fallback(plat, QUERIES, plat_proxy, log)
+                    if px_items:
+                        items.extend(px_items)
+                        recovered_proxy = len(px_items)
+                        log(f"  [{plat}] прокси-проход добрал {recovered_proxy} карточек", **(px_stats or {}))
+                # Ступень 2 (финал): Camoufox — если прямой блок и прокси не закрыл вопрос
+                # (прокси не задан / тоже заблокирован / ничего не добрал).
+                if blocked_cloak and CAMOUFOX_FALLBACK and (not plat_proxy or proxy_blocked or recovered_proxy == 0):
                     log(f"  [{plat}] CloakBrowser заблокирован ({blocked_cloak}) → Camoufox-fallback")
                     cf_items, cf_stats = camoufox_fallback(plat, QUERIES, log)
                     if cf_items:
-                        before = len(items)
                         items.extend(cf_items)
-                        recovered = len(cf_items)
-                        engine = "camoufox" if before == 0 else "cloak+camoufox"
-                        log(f"  [{plat}] Camoufox добрал {recovered} карточек", **(cf_stats or {}))
+                        recovered_cam = len(cf_items)
+                        log(f"  [{plat}] Camoufox добрал {recovered_cam} карточек", **(cf_stats or {}))
+                # Метка движков, реально давших карточки: cloak / cloak+proxy / proxy+camoufox …
+                _parts = (["cloak"] if direct_count else []) + \
+                         (["proxy"] if recovered_proxy else []) + \
+                         (["camoufox"] if recovered_cam else [])
+                engine = "+".join(_parts) or "cloak"
                 # Guard (UI): запрос мог быть удалён с дашборда за время прогона
                 # (remove_queries отменяет parse_queue + удаляет monitor_queries). Тогда
                 # карточки удалённого запроса НЕ пишем — иначе они осиротеют в БД.
@@ -907,7 +1013,8 @@ def main() -> int:
                 ok = upsert_listings(items_d)
                 totals[plat] = {"found": len(items), "unique": len(items_d), "upserted": ok,
                                 "engine": engine, "blocked_cloak": blocked_cloak,
-                                "recovered_camoufox": recovered}
+                                "recovered_proxy": recovered_proxy,
+                                "recovered_camoufox": recovered_cam}
                 ds = platform_daily_stat(plat, items_d)
                 daily_rows.append(ds)
                 # daily_stats пишем СРАЗУ по площадке (а не в конце прогона) — иначе
@@ -917,6 +1024,10 @@ def main() -> int:
                         upsert_daily_stats([ds])
                     except Exception as e:
                         log("daily_stats (инкр.) fail", err=str(e)[:150])
+                # Camoufox восстановил площадку → снимаем отметки BLOCKED, чтобы
+                # успешно спасённый прогон не помечался partial из-за погашенной блокировки.
+                if recovered_proxy or recovered_cam:
+                    errors = [e for e in errors if "BLOCKED" not in (e.get("message") or "")]
                 all_errors.extend(errors)
                 log(f"  [{plat}] done", **totals[plat])
             except Exception as e:

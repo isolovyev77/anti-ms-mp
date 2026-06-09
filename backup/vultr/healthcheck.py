@@ -76,8 +76,9 @@ def main():
     latest_status = (latest or {}).get("status")
     run_incomplete = latest_status in ("hung", "failed", "running")
 
-    # Карточки за сегодня (только нужные поля)
-    rows = _get_all(f"listings?select=pl,price,op&last_seen=eq.{msk_today}")
+    # Карточки за сегодня (только нужные поля). first_seen нужен, чтобы отличить
+    # «впервые замечена сегодня» (new_today) от «висит с прошлых дней, обновлена».
+    rows = _get_all(f"listings?select=pl,price,op,first_seen&last_seen=eq.{msk_today}")
 
     platforms, anomalies = [], []
     for p in PLATFORMS:
@@ -87,10 +88,14 @@ def main():
         cf = sum(1 for x in prs if (x.get("price") or 0) > 0
                  and (x.get("op") or 0) > 0 and x["price"] < 0.5 * x["op"])
         cov = round(withp / seen, 3) if seen else 0.0
+        # Впервые замечены сегодня (first_seen в МСК-дате == сегодня). Честный «приток»
+        # за сутки — в отличие от found из totals, который привязан к конкретному прогону.
+        new_today = sum(1 for x in prs if str(x.get("first_seen") or "")[:10] == msk_today)
         found = int((run_totals.get(p) or {}).get("upserted")
                     or (run_totals.get(p) or {}).get("unique") or 0)
         platforms.append({"pl": p, "found": found, "seen": seen,
-                          "with_price": withp, "counterfeit": cf, "coverage": cov})
+                          "with_price": withp, "counterfeit": cf, "coverage": cov,
+                          "new_today": new_today})
 
         # Аномалия 0: площадка без данных за сегодня + последний прогон не завершился
         # штатно → причина в зависании/сбое прогона, НЕ в экстракторе (не чинить код,
@@ -102,6 +107,16 @@ def main():
                            f"#{(latest or {}).get('id')} завершился со статусом "
                            f"'{latest_status}' и не дошёл до этой площадки. "
                            f"Экстрактор в порядке — нужен перезапуск парсера.")
+            })
+        # Аномалия 0b: прогон завершился ШТАТНО, но за сегодня по площадке 0 карточек.
+        # Мёртвая зона прежней логики: не run_incomplete, found мог быть 0 → ни одно
+        # из условий ниже не срабатывало, и площадка тихо пропадала с дашборда.
+        elif seen == 0 and not run_incomplete:
+            anomalies.append({
+                "pl": p, "kind": "zero_written",
+                "detail": (f"{PL_RU[p]}: последний прогон завершился штатно, но карточек "
+                           f"за сегодня нет (0). Возможен тихий сбой записи (upsert) либо "
+                           f"площадка не попала в прогон — пропала с дашборда без явной ошибки.")
             })
         # Аномалия 1: нашли много, но контрафакт не виден вообще
         elif found >= MIN_FOUND and cf == 0:

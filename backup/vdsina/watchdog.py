@@ -75,6 +75,19 @@ def alert_telegram(run_id: int, pid: int, stale_seconds: int, started_at: str) -
     if not N8N_WEBHOOK:
         log("no N8N_WEBHOOK configured, skip alert")
         return
+    # text_override: человеческий текст вместо собранного n8n «Карточек залито: 0».
+    # При зависании итог прогона (totals) не финализируется — ноль означает «итог не
+    # подведён», а НЕ «ничего не собрано» (по ходу карточки писались). Чтобы ночное
+    # сообщение не пугало нулём, явно поясняем и переадресуем к утреннему отчёту 04:00,
+    # где будут актуальные цифры. n8n на этом webhook уважает text_override (как у оркестратора).
+    text = (
+        f"\U0001F4E6 Парсер anti-ms-mp\n"
+        f"Прогон #{run_id} не завершился — завис и был остановлен сторожем "
+        f"(после {stale_seconds//60} мин без отклика).\n"
+        f"Это не значит, что данные потеряны: карточки писались по ходу, "
+        f"но итог прогона не подведён.\n"
+        f"Актуальные цифры и, при необходимости, перезапуск — в утреннем отчёте в 04:00."
+    )
     payload = {
         "run_id": run_id,
         "status": "hung",
@@ -83,6 +96,7 @@ def alert_telegram(run_id: int, pid: int, stale_seconds: int, started_at: str) -
         "alert": True,
         "alert_kind": "watchdog_killed",
         "details": f"PID {pid} убит после {stale_seconds//60} мин без heartbeat (started {started_at})",
+        "text_override": text,
     }
     req = urllib.request.Request(
         N8N_WEBHOOK,
@@ -100,8 +114,7 @@ def alert_telegram(run_id: int, pid: int, stale_seconds: int, started_at: str) -
 def kill_if_alive(pid: int) -> bool:
     """SIGKILL процесс. Возвращает True если процесс жив был."""
     try:
-        os.kill(pid, 0)  # signal 0 = проверка существования
-        os.kill(pid, signal.SIGKILL)
+        os.kill(pid, signal.SIGKILL)  # единый kill: ProcessLookupError покрывает несуществующий PID без TOCTOU-окна между проверкой и убийством
         return True
     except (ProcessLookupError, PermissionError):
         return False
@@ -115,12 +128,17 @@ def main() -> int:
     # Берём все running прогоны: на этом хосте ИЛИ с hostname=null (zombie до v2).
     # PostgREST: or=(hostname.eq.X,hostname.is.null)
     now = dt.datetime.now(dt.timezone.utc)
-    runs = supabase_get(
-        f"/rest/v1/parser_runs?status=eq.running"
-        f"&or=(hostname.eq.{HOSTNAME},hostname.is.null)"
-        f"&select=id,started_at,last_heartbeat,pid,hostname"
-    )
-    log("scan", total_running=len(runs), host=HOSTNAME)
+    try:
+        runs = supabase_get(
+            f"/rest/v1/parser_runs?status=eq.running"
+            f"&or=(hostname.eq.{HOSTNAME},hostname.is.null)"
+            f"&select=id,started_at,last_heartbeat,pid,hostname"
+        )
+        log("scan", total_running=len(runs), host=HOSTNAME)
+    except Exception as e:
+        # Supabase недоступен — не роняем процесс, иначе страховка №2 (ps-скан по возрасту) не выполнится
+        log("supabase_get FAILED — пропускаю heartbeat-проверку, только ps-fallback", err=str(e)[:200])
+        runs = []
 
     killed = 0
     for r in runs:
