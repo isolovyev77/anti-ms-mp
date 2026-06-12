@@ -95,40 +95,81 @@ OFFICIAL_PRICES = {
 import re as _re
 
 
-def title_ok(title: str) -> bool:
-    """Фильтр контрафакта — точная копия из scraper/import_cloak_full.py.
+def title_ok(title: str, url: str = "") -> bool:
+    """Фильтр контрафакта MS Office.
 
-    Карточка проходит только если описывает Microsoft Office, и не относится
-    к конкурентам / книгам / Windows-only продуктам.
+    Книжные и «никогда-не-Office» мерч-маркеры (учебник/cookbook/календарь/кружка…) —
+    по заголовку+слагу, безопасны на всех площадках. Агрессивная anti-bleed защита
+    (Ozon кладёт в один div[data-index] чужие span'ы, заголовок «налипает» с соседа) —
+    ТОЛЬКО для Ozon: его слаг = имя товара, поэтому если Ozon-слаг не про Office
+    (флешка/photoshop/очки) — карточка bled/чужая. К WB (числовой слаг) и Avito/Яндекс
+    Ozon-анкор НЕ применяем, чтобы не рубить легит («Office на флешке», «Office+Visio
+    ключи», «Office 365 Copilot»). Позитив — по заголовку.
     """
     s = (title or "").lower()
+    url_l = (url or "").lower()
+    path = url_l.split("?")[0]   # без query: в трекинг-токенах Яндекса бывают «knig/guide»
+    is_ozon = "ozon.ru" in url_l or "/product/" in path
+    slug = path.replace("-", " ").replace("_", " ")
+    blob = s + " " + slug
     if "officesuite" in s:
         return False
     if any(x in s for x in ("р7-", "р7 офис", "мойофис", "redos", "ред ос",
                             "libreoffice", "astra linux", "базальт", "rosa",
                             "кит офис", "обычный офис")):
         return False
-    # Игровые/консольные ключи: «office» в названии ИГРЫ (The Office Quest;
-    # There's a Gun in the Office; Pets Hidden In The Office) для Xbox/PlayStation/
-    # Nintendo — это игра, а не MS Office. MS Office не продаётся как консольный ключ,
-    # поэтому платформа-консоль в названии = заведомо не наш контрафакт.
     if _re.search(r"\bxbox\b|playstation|\bps[2345]\b|nintendo|game\s?pass|gamepass", s):
         return False
-    if _re.search(r"\bкнига\b|\bруководство\b|учебник|учебн[ао]е|пособи[ея]|\bсамоучитель\b|шаг за шагом|методичк|методическ|монограф|\bлекци[ия]\b|power bi", s):
+    # КНИГИ — однозначные книжные маркеры (рус+транслит+англ) + автор «Фамилия И.[О.]».
+    # Безопасны на всех площадках: легит MS Office не бывает «guide/учебник/энциклопедия».
+    if _re.search(
+        r"книг|knig|руководств|rukovodstv|учебн|uchebn|пособи|posobi|самоучит|samouchit|"
+        r"справочник|spravochnik|шаг за шагом|shag za shagom|мастер[ -]?класс|master klass|"
+        r"методич|монограф|monograf|лекци|для чайников|dlya chaynikov|в школе|v shkole|"
+        r"быстрый старт|bystryy start|краткое|kratkoe|за 24 часа|24 chasa|24 hours|"
+        r"иллюстрированн|illustrated series|свод(ные|ная)|svodn|практическое|prakticheskoe|"
+        r"программировани|programmirovani|просто как|prosto kak|энциклопеди|entsiklopedi|"
+        r"новые горизонты|novye gorizonty|наглядно|naglyadno|мастерская|masterskaya|"
+        r"самостоятельно|samostoyatelno|использование microsoft|ispolzovanie microsoft|"
+        r"специальное издани|spetsialnoe izdani|patent rolls|embracing|calendar of|"
+        r"bibliothek|библиотек|\blearn |\bbeginner\b|express office|office tab|passfab|складск|skladsk|"
+        r"ресурсы microsoft|resursy microsoft|для тех|dlya teh|все о работе|vse o rabote|"
+        r"проблемы и решени|problemy i resheni|работа на компьютере|rabota na kompyutere|"
+        r"в целом|v tselom|для бухгалтер|dlya buhgalter|inside out|hands[ -]?on|introductory|"
+        r"intermediate|shelly|dashboards|vba and macros|financial modeling|web components|"
+        r"guide|manual|cookbook|handbook|\bbible\b|bibliya|step[\s-]?by[\s-]?step|mastering|"
+        r"implementing|administrating|fundamentals|for beginners|for dummies|the complete|"
+        r"\bexam\b|textbook|workbook|\(20\d\d\)",
+        blob) or _re.search(r"[а-яё]{3,}\s[а-яё]\.(\s*[а-яё]\.)?", s):
         return False
-    # Услуги ПК-ремонта (установка Windows/драйверов, лечение вирусов, восстановление,
-    # очистка) и антивирусы — это не продажа MS Office, даже если «office» в названии.
-    # «Установка Office» с ценой остаётся — этих сервис-маркеров в ней нет. Проверено на
-    # базе: ловит 22 услуги/антивируса, реальные Office-продукты не задевает (risk=0).
-    if _re.search(r"драйвер|вирус|лечени|восстановлени|очистк[аи]|\bремонт", s):
+    # «Никогда-не-Office» физ.мерч: Office не продаётся как календарь/кружка/духи/брелок.
+    # USB/флешку СЮДА НЕ включаем — легитимный носитель («Office Pro Plus на флешке»).
+    if _re.search(r"календар|kalendar|журнал|zhurnal|плакат|plakat|наклейк|nakleyk|"
+                  r"кружк|kruzhk|футболк|futbolk|чехол|chehol|коврик|kovrik|очки|ochki|сумк|sumk|"
+                  r"officespace|ежедневник|ezhednevnik|планинг|planing|записная книжк|zapisnaya knizh|"
+                  r"туалетная вода|tualetnaya voda|парфюм|parfyum|косметик|kosmetik|консилер|konsiler|"
+                  r"гирлянда|girlyanda|растяжк|rastyazhk|бейсболк|beysbolk|кепк|kepk|"
+                  r"брелок|brelok|значок|znachok", blob):
         return False
-    if _re.match(r"^код windows|^ключ windows|^windows\s+\d|^лицензия windows", s):
+    # Услуги ПК-ремонта (драйверы, лечение вирусов, восстановление, очистка) и
+    # антивирусы — не продажа MS Office. «Установка Office» с ценой остаётся.
+    if _re.search(r"драйвер|вирус|antivir|лечени|восстановлени|очистк[аи]|\bремонт", s):
+        return False
+    # OZON anti-bleed: слаг Ozon = имя товара (/product/<имя>-<id>). Если имя НЕ про Office —
+    # карточка либо bled (украла чужой заголовок «Office BOX»), либо чужой товар
+    # (photoshop/флешка/очки/Dynamics). У WB/Avito/Яндекс анкор не применяем.
+    if is_ozon:
+        m = _re.search(r"/product/(.+?)-\d{6,}", path)
+        name = m.group(1) if m else ""
+        if name and not ("office" in name or "ofis" in name
+                         or ("microsoft" in name and "365" in name)):
+            return False
+    # Windows-only лицензии — но НЕ бандл «Windows + Office» (в нём есть Office, оставляем).
+    if _re.match(r"^код windows|^ключ windows|^windows\s+\d|^лицензия windows", s) \
+            and "office" not in s and "офис" not in s:
         return False
     if _re.match(r"^office suite|^офисный пакет(?! microsoft)", s):
         return False
-    # Железо с предустановленным Office (ноутбуки/моноблоки/ПК) — это устройство,
-    # а не контрафактный ключ. ВАЖНО: «ключ для ноутбука/macbook/планшета» — это
-    # валидный КЛЮЧ (предлог «для»), его НЕ исключаем.
     brand_hw = _re.search(r"vivobook|ideapad|thinkbook|thinkpad|magicbook|matebook|"
                           r"aspire\s+go|ozon-?book|ninkear|super-?book", s)
     generic_hw = (_re.search(r"\bноутбук\b|\bnotebook\b|\blaptop\b|моноблок|неттоп|системный блок", s)
@@ -502,7 +543,7 @@ def _scrape_one_page(page, platform: str, q: str, p: int, run_log, items: list[d
     kept = 0
     for c in cards:
         title = (c.get("title") or "").strip()
-        if not title or not title_ok(title):
+        if not title or not title_ok(title, c.get("url") or ""):
             continue
         c["platform"] = platform
         c["query"] = q

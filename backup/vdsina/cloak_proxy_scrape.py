@@ -85,7 +85,7 @@ def scrape_platform(platform: str, queries: list, max_pages: int, proxy: str):
                 kept = 0
                 for c in cards:
                     t = (c.get("title") or "").strip()
-                    if not t or not title_ok(t):
+                    if not t or not title_ok(t, c.get("url") or ""):
                         continue
                     c["platform"] = platform
                     c["query"] = q
