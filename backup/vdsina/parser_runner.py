@@ -120,6 +120,12 @@ def title_ok(title: str, url: str = "") -> bool:
         return False
     if _re.search(r"\bxbox\b|playstation|\bps[2345]\b|nintendo|game\s?pass|gamepass", s):
         return False
+    # Не-Office продукты Microsoft (Dynamics/SharePoint/Exchange/Azure/Power BI/Defender/
+    # Business Central) + Polaris — НИКОГДА не контрафактный MS Office (обычно книги/корп-ПО).
+    # Visio/Project НЕ берём: бывают в легит Avito-связках «ключи Office + Visio + Project».
+    if _re.search(r"dynamics|sharepoint|exchange online|exchange server|\bazure\b|"
+                  r"business central|power\s?bi|\bdefender\b|polaris", blob):
+        return False
     # КНИГИ — однозначные книжные маркеры (рус+транслит+англ) + автор «Фамилия И.[О.]».
     # Безопасны на всех площадках: легит MS Office не бывает «guide/учебник/энциклопедия».
     if _re.search(
@@ -127,8 +133,10 @@ def title_ok(title: str, url: str = "") -> bool:
         r"справочник|spravochnik|шаг за шагом|shag za shagom|мастер[ -]?класс|master klass|"
         r"методич|монограф|monograf|лекци|для чайников|dlya chaynikov|в школе|v shkole|"
         r"быстрый старт|bystryy start|краткое|kratkoe|за 24 часа|24 chasa|24 hours|"
-        r"иллюстрированн|illustrated series|свод(ные|ная)|svodn|практическое|prakticheskoe|"
-        r"программировани|programmirovani|просто как|prosto kak|энциклопеди|entsiklopedi|"
+        r"иллюстрированн|illustrated series|свод(ные|ная)|svodn|практическ|prakticheskoe|"
+        r"программировани|programmirovani|programming|implementation|implementac|migration|"
+        r"раскрыти|raskryti|automated testing|коллектив|kollektiv|просто как|prosto kak|"
+        r"энциклопеди|entsiklopedi|"
         r"новые горизонты|novye gorizonty|наглядно|naglyadno|мастерская|masterskaya|"
         r"самостоятельно|samostoyatelno|использование microsoft|ispolzovanie microsoft|"
         r"специальное издани|spetsialnoe izdani|patent rolls|embracing|calendar of|"
@@ -161,8 +169,10 @@ def title_ok(title: str, url: str = "") -> bool:
     if is_ozon:
         m = _re.search(r"/product/(.+?)-\d{6,}", path)
         name = m.group(1) if m else ""
-        if name and not ("office" in name or "ofis" in name
-                         or ("microsoft" in name and "365" in name)):
+        if name and not ("office" in name or "ofis" in name):
+            return False
+        # Книжный паттерн Ozon: «… | Автор» (на Ozon легит-разделитель — буква «l», не «|»).
+        if _re.search(r"\|\s*[a-zа-яё]", s):
             return False
     # Windows-only лицензии — но НЕ бандл «Windows + Office» (в нём есть Office, оставляем).
     if _re.match(r"^код windows|^ключ windows|^windows\s+\d|^лицензия windows", s) \
