@@ -177,7 +177,9 @@ def mark_query_parsed(query: str) -> None:
         payload = json.dumps({"last_parsed_at": dt.datetime.now(dt.timezone.utc).isoformat()}).encode()
         from urllib.parse import quote as _q
         req = urllib.request.Request(
-            f"{SUPABASE_URL}/rest/v1/monitor_queries?query=eq.{_q(query)}",
+            # safe='' — как в is_query_active; иначе '/' в запросе не экранируется и
+            # PostgREST-фильтр query=eq.… не находит строку (тихий промах PATCH).
+            f"{SUPABASE_URL}/rest/v1/monitor_queries?query=eq.{_q(query, safe='')}",
             data=payload, method="PATCH",
             headers={
                 "apikey": SUPABASE_SERVICE_ROLE_KEY,
