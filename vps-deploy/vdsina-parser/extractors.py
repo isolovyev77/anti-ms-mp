@@ -278,6 +278,12 @@ def official_price(title: str) -> int:
     t = (title or "").lower()
     if any(k in t for k in ("pro plus", "professional plus", "pro+", "ltsc")):
         return OFFICIAL_PRICES["office_pro"]
+    # «Professional»/«Pro» без «plus» — это тоже Professional-редакция (39990), а не
+    # дешёвый тариф. Раньше «Office Professional 2021» падал в year-ветку (14990) и op
+    # занижался в ~2.7×. Голое \bpro\b — с исключением железа («Office для MacBook Pro»).
+    if _re.search(r"\bprofessional\b|профессиональн", t) or \
+       (_re.search(r"\bpro\b", t) and not _re.search(r"(macbook|ipad|surface|iphone)\s+pro", t)):
+        return OFFICIAL_PRICES["office_pro"]
     if "family" in t or "семь" in t or "для семьи" in t or "family pack" in t:
         return OFFICIAL_PRICES["m365_family"]
     if "personal" in t or "персональн" in t or ("m365" in t.replace(" ", "")) or "1тб onedrive" in t.replace(" ", ""):
