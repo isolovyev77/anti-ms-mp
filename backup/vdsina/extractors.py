@@ -95,6 +95,9 @@ EXTRACT_JS = {
         let price = 0;
         if (priceEl) {
           const raw = (priceEl.textContent || '').trim();
+          // Если textContent пуст — это <meta itemprop="price" content="299.00">:
+          // парсим как ДРОБНОЕ (parseFloat), иначе replace(/\D/g,'') срезал бы точку
+          // и «299.00» превратилось бы в 29900 (цена ×100, мимо counterfeit-детекции).
           const n = raw ? parseInt(raw.replace(/\D/g, ''), 10)
                         : Math.round(parseFloat(priceEl.getAttribute('content') || '0'));
           if (n) price = n;
@@ -116,8 +119,9 @@ EXTRACT_JS = {
         const id = m[1] || card.getAttribute('data-nm-id');
         if (!id) return;
         const title = (card.querySelector('.product-card__name')?.textContent || link.getAttribute('aria-label') || '').trim();
+        // NBSP-разделитель тысяч на WB: "2 021 ₽" → парсим в 2021 а не 21
         const priceRaw = card.querySelector('.price__lower-price')?.textContent || card.querySelector('ins')?.textContent || '';
-        const priceText = priceRaw.replace(/[  ]/g, ' ');
+        const priceText = priceRaw.replace(/[  ]/g, ' ');
         const price = parseInt(priceText.replace(/\D/g, ''), 10) || 0;
         out.push({ id: String(id), title, price, url: href.startsWith('http') ? href : 'https://www.wildberries.ru' + href });
       });
@@ -127,6 +131,7 @@ EXTRACT_JS = {
     () => {
       const out = [];
       document.querySelectorAll('article[data-auto="searchOrganic"]').forEach(card => {
+        // Skip lazy-load placeholders (карточки содержат JS-код apiary до прокрутки)
         const innerStart = (card.innerText || '').slice(0, 60);
         if (innerStart.startsWith('(window.') || innerStart.startsWith('apiary') || innerStart.startsWith('{"widgets"')) return;
 
@@ -137,14 +142,24 @@ EXTRACT_JS = {
         if (!m) return;
         const title = (card.querySelector('[data-auto="snippet-title"]')?.textContent || link.textContent || '').trim();
 
+        // Цена — берём ту, что показана покупателю. Яндекс сменил вёрстку:
+        // data-auto-селекторы цены мертвы, классы обфусцированы (_26ABJ, ds-text).
+        // Цена теперь в листовом элементе с текстом вида "72 ₽Пэй" (число + ₽ +
+        // ярлык Yandex Pay). Требуем, чтобы текст НАЧИНАЛСЯ с числа перед ₽ —
+        // якорь ^ отсекает "от 72 ₽" (рассрочка), "+5 ₽" (кешбэк), рейтинги без валюты.
+        // Низкие цены (14₽, 22₽) НЕ отсекаем — это РЕАЛЬНЫЙ контрафакт.
+        // [\d\s] (а не [\d ]) — чтобы ловить разделитель тысяч в "11 602 ₽" (там спец-
+        // пробел  / , а не обычный): без этого цены ≥1000₽ не извлекались.
         const norm = s => (s || '').replace(/[  ]/g, ' ');
         let price = 0;
+        // 1) старые data-auto (вдруг для части карточек ещё живы)
         for (const sel of ['[data-auto="snippet-price"]', '[data-auto="price-value"]', '[data-auto="mainPrice"]']) {
           const el = card.querySelector(sel);
           if (!el) continue;
           const m = norm(el.textContent).match(/(\d[\d\s]{0,12})\s*₽/);
           if (m) { const n = parseInt(m[1].replace(/\D/g, ''), 10); if (n > 0) { price = n; break; } }
         }
+        // 2) первый листовой элемент, чей текст начинается с "<число> ₽"
         if (!price) {
           for (const el of card.querySelectorAll('*')) {
             if (el.children.length > 1) continue;
@@ -262,6 +277,12 @@ def official_price(title: str) -> int:
     """Подбор офиц. цены Microsoft по типу продукта (копия из parser_runner.py)."""
     t = (title or "").lower()
     if any(k in t for k in ("pro plus", "professional plus", "pro+", "ltsc")):
+        return OFFICIAL_PRICES["office_pro"]
+    # «Professional»/«Pro» без «plus» — это тоже Professional-редакция (39990), а не
+    # дешёвый тариф. Раньше «Office Professional 2021» падал в year-ветку (14990) и op
+    # занижался в ~2.7×. Голое \bpro\b — с исключением железа («Office для MacBook Pro»).
+    if _re.search(r"\bprofessional\b|профессиональн", t) or \
+       (_re.search(r"\bpro\b", t) and not _re.search(r"(macbook|ipad|surface|iphone)\s+pro", t)):
         return OFFICIAL_PRICES["office_pro"]
     if "family" in t or "семь" in t or "для семьи" in t or "family pack" in t:
         return OFFICIAL_PRICES["m365_family"]

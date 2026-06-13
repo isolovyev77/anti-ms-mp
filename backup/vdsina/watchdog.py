@@ -111,13 +111,30 @@ def alert_telegram(run_id: int, pid: int, stale_seconds: int, started_at: str) -
         log("alert FAILED", err=str(e)[:200])
 
 
-def kill_if_alive(pid: int) -> bool:
-    """SIGKILL процесс. Возвращает True если процесс жив был."""
+def is_our_parser(pid: int) -> bool:
+    """PID всё ещё наш parser_runner? Защита от убийства ПЕРЕИСПОЛЬЗОВАННОГО PID:
+    если прогон умер без финализации, а ОС отдала его PID чужому процессу, слепой
+    SIGKILL прилетел бы постороннему. Читаем /proc/<pid>/cmdline (VDSina=Linux),
+    матч по подстроке parser_runner.py — как ps-скан возрастного капа ниже."""
     try:
-        os.kill(pid, signal.SIGKILL)  # единый kill: ProcessLookupError покрывает несуществующий PID без TOCTOU-окна между проверкой и убийством
-        return True
-    except (ProcessLookupError, PermissionError):
+        with open(f"/proc/{pid}/cmdline", "rb") as f:
+            cmd = f.read().replace(b"\x00", b" ").decode("utf-8", "replace")
+        return "parser_runner.py" in cmd
+    except (FileNotFoundError, ProcessLookupError, PermissionError):
         return False
+
+
+def kill_if_ours(pid: int) -> tuple:
+    """SIGKILL процесс ТОЛЬКО если он всё ещё наш parser_runner. (killed, note).
+    Окно cmdline→kill миллисекундное, вероятность реюза PID в нём пренебрежима —
+    но несравнимо безопаснее прежнего «убиваем по PID из БД вслепую»."""
+    if not is_our_parser(pid):
+        return False, "не убит: pid не наш parser_runner (переиспользован/завершён)"
+    try:
+        os.kill(pid, signal.SIGKILL)
+        return True, "killed"
+    except (ProcessLookupError, PermissionError) as e:
+        return False, f"не убит: {type(e).__name__}"
 
 
 def main() -> int:
@@ -158,25 +175,46 @@ def main() -> int:
             log("OK", run_id=rid, pid=pid, stale_sec=stale)
             continue
 
-        # Прогон протух — убиваем
-        was_alive = kill_if_alive(pid) if pid else False
+        # Прогон протух — убиваем (только если PID всё ещё наш parser_runner)
+        killed_ok, kill_note = kill_if_ours(pid) if pid else (False, "нет pid")
         supabase_patch(
             f"/rest/v1/parser_runs?id=eq.{rid}",
             {
                 "status": "hung",
                 "finished_at": now.isoformat(),
-                "notes": f"watchdog kill: stale {stale}s, pid {pid}, was_alive={was_alive}",
+                "notes": f"watchdog: stale {stale}s, pid {pid}, {kill_note}",
             },
         )
         alert_telegram(rid, pid or 0, stale, r.get("started_at", ""))
-        log("KILLED", run_id=rid, pid=pid, stale_sec=stale, was_alive=was_alive)
+        log("HUNG", run_id=rid, pid=pid, stale_sec=stale, killed=killed_ok, note=kill_note)
         killed += 1
+
+    # Есть ли прямо сейчас ЗДОРОВЫЙ активный прогон (running + свежий heartbeat)?
+    # Если да — возрастной кап не должен его трогать: им управляет heartbeat-детектор
+    # (5 мин). Иначе здоровый, но долгий из-за fallback'ов (Camoufox/прокси-каскад)
+    # прогон срубается на 45-й минуте посреди последней площадки (кейс #52, 11.06).
+    has_healthy_run = False
+    for r in runs:
+        hb = r.get("last_heartbeat") or r.get("started_at")
+        if not hb:
+            continue
+        try:
+            if int((now - dt.datetime.fromisoformat(hb.replace("Z", "+00:00"))).total_seconds()) < STALE_AFTER_SEC:
+                has_healthy_run = True
+                break
+        except Exception:
+            pass
 
     # Страховка №2: убиваем процессы parser_runner старше MAX_PROC_AGE_SEC,
     # даже если их parser_runs уже finalized (status=ok). Был кейс: парсер дошёл
     # до "run end", но cloakbrowser оставил non-daemon потоки/chromium, и процесс
     # висел 17 часов, держа ресурс. Такой зомби не виден через parser_runs.
-    MAX_PROC_AGE_SEC = int(os.environ.get("WATCHDOG_MAX_PROC_AGE_SEC", "2700"))  # 45 мин — запас (здоровый полный прогон ~25-30 мин); основной ловец зависаний — застывший heartbeat (5 мин)
+    MAX_PROC_AGE_SEC = int(os.environ.get("WATCHDOG_MAX_PROC_AGE_SEC", "2700"))  # 45 мин — кап для ЗОМБИ/осиротевших (нет свежего heartbeat); живой прогон им не трогается
+    HARD_CEILING_SEC = int(os.environ.get("WATCHDOG_HARD_CEILING_SEC", "14400"))  # 4 ч — финальный потолок против runaway/livelock (heartbeat жив, но прогон не кончается)
+    # Динамический кап: пока есть здоровый активный прогон — поднимаем порог до
+    # аварийного потолка (heartbeat сам убьёт реальный фриз за 5 мин); зомби без
+    # свежего heartbeat по-прежнему режутся за 45 мин.
+    effective_cap = HARD_CEILING_SEC if has_healthy_run else MAX_PROC_AGE_SEC
     try:
         import subprocess
         out = subprocess.run(
@@ -195,13 +233,16 @@ def main() -> int:
                 continue
             if pid_i == os.getpid():
                 continue
-            if age > MAX_PROC_AGE_SEC:
+            if age > effective_cap:
                 try:
                     os.kill(pid_i, signal.SIGKILL)
-                    log("KILLED stale process (by age)", pid=pid_i, age_sec=age)
+                    log("KILLED stale process (by age)", pid=pid_i, age_sec=age, cap=effective_cap)
                     killed += 1
                 except (ProcessLookupError, PermissionError):
                     pass
+            elif age > MAX_PROC_AGE_SEC and has_healthy_run:
+                # старше 45 мин, но прогон жив (свежий heartbeat) — НЕ трогаем
+                log("skip age-kill: healthy active run", pid=pid_i, age_sec=age, cap=effective_cap)
     except Exception as e:
         log("proc-age scan failed", err=str(e)[:150])
 
